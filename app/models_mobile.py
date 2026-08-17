@@ -33,5 +33,6 @@ class OrderIdempotency(Base):
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
     idempotency_key: Mapped[str] = mapped_column(String(100), index=True)
     request_hash: Mapped[str] = mapped_column(String(64))
-    pesanan_id: Mapped[str] = mapped_column(ForeignKey("pesanan.id"), index=True)
+    # Nullable while a request owns the key but has not completed yet.
+    pesanan_id: Mapped[str | None] = mapped_column(ForeignKey("pesanan.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
