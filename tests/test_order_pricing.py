@@ -1,10 +1,12 @@
 import json
 import unittest
+from datetime import datetime, timedelta
 from types import SimpleNamespace
 
 from fastapi import HTTPException
 
 from app.routers.api_pesanan import (
+    BUSINESS_TIMEZONE,
     _calculate_base_price,
     _calculate_form_price_and_validate,
     _extract_option_price,
@@ -80,8 +82,9 @@ class OrderPricingTests(unittest.TestCase):
             _parse_schedule("2000-01-01", "09:00")
 
     def test_invalid_booking_interval_is_rejected(self):
+        tomorrow = (datetime.now(BUSINESS_TIMEZONE) + timedelta(days=1)).date().isoformat()
         with self.assertRaises(HTTPException):
-            _parse_schedule("2099-01-01", "09:15")
+            _parse_schedule(tomorrow, "09:15")
 
 
 if __name__ == "__main__":
