@@ -12,9 +12,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth import get_user_from_request
 from app.database import get_db
 from app.models import FormField, Layanan, LayananVarian, Pesanan
+from app.notification_service import add_order_notification
 
 router = APIRouter(prefix="/api", tags=["api"])
-
 BUSINESS_TIMEZONE = ZoneInfo("Asia/Makassar")
 
 
@@ -28,8 +28,6 @@ class CreatePesananBody(BaseModel):
     metode_pembayaran: Literal["cod", "transfer"] = "cod"
     catatan: str | None = Field(default=None, max_length=1000)
     form_data: dict[str, Any] = Field(default_factory=dict)
-
-    # Backward compatibility only. This value is never used for pricing.
     addon_total: int | None = Field(default=None, ge=0)
 
     @field_validator("layanan_id", "varian_id", "jadwal", "jam", "alamat")
@@ -66,29 +64,24 @@ def _parse_schedule(jadwal: str, jam: str) -> None:
         order_date = date.fromisoformat(jadwal)
     except ValueError as exc:
         raise HTTPException(400, "Format tanggal harus YYYY-MM-DD") from exc
-
     now_local = datetime.now(BUSINESS_TIMEZONE)
     today = now_local.date()
     if order_date < today:
         raise HTTPException(400, "Tanggal pesanan tidak boleh di masa lalu")
     if order_date > today + timedelta(days=365):
         raise HTTPException(400, "Tanggal pesanan terlalu jauh")
-
     try:
         parsed_time = datetime.strptime(jam, "%H:%M").time()
     except ValueError as exc:
         raise HTTPException(400, "Format jam harus HH:MM") from exc
-
     minutes = parsed_time.hour * 60 + parsed_time.minute
     if minutes < 7 * 60 or minutes > 21 * 60:
         raise HTTPException(400, "Jam layanan harus antara 07:00 dan 21:00")
     if parsed_time.minute not in {0, 30}:
         raise HTTPException(400, "Jam layanan harus menggunakan interval 30 menit")
-
     if order_date == today:
-        selected_minutes = minutes
         current_minutes = now_local.hour * 60 + now_local.minute
-        if selected_minutes <= current_minutes:
+        if minutes <= current_minutes:
             raise HTTPException(400, "Jam layanan hari ini sudah lewat")
 
 
@@ -120,11 +113,9 @@ def _load_options(raw_options: str | None) -> list[str]:
 def _extract_option_price(selected_value: str, valid_options: list[str]) -> int:
     if selected_value not in valid_options:
         raise HTTPException(400, "Pilihan detail layanan tidak valid")
-
     parts = selected_value.split("|", 1)
     if len(parts) == 1 or not parts[1].strip():
         return 0
-
     try:
         extra = int(parts[1].strip())
     except ValueError as exc:
@@ -147,24 +138,16 @@ def _validate_text_value(value: Any, *, required: bool) -> str | None:
     return text or None
 
 
-def _calculate_form_price_and_validate(
-    form_fields: list[FormField],
-    submitted: dict[str, Any],
-    durasi: int,
-) -> tuple[int, dict[str, Any]]:
+def _calculate_form_price_and_validate(form_fields: list[FormField], submitted: dict[str, Any], durasi: int) -> tuple[int, dict[str, Any]]:
     known_keys = {_field_key(field.id) for field in form_fields}
-    unknown_keys = set(submitted) - known_keys
-    if unknown_keys:
+    if set(submitted) - known_keys:
         raise HTTPException(400, "Terdapat field detail layanan yang tidak dikenal")
-
     total_extra = 0
     sanitized: dict[str, Any] = {}
-
     for field in form_fields:
         key = _field_key(field.id)
         value = submitted.get(key)
         field_type = (field.field_type or "text").lower().strip()
-
         if field_type == "checkbox":
             checked = _is_checked(value) if key in submitted else False
             if field.required and not checked:
@@ -173,17 +156,12 @@ def _calculate_form_price_and_validate(
             if checked:
                 total_extra += max(0, int(field.harga_tambahan or 0))
             continue
-
         text = _validate_text_value(value, required=field.required)
         if text is None:
             continue
-
         if field_type == "select":
             options = _load_options(field.options)
-            option_price = _extract_option_price(text, options)
-            total_extra += option_price * durasi
-
-            # Existing final catalog rule for Cuci Tandon Air.
+            total_extra += _extract_option_price(text, options) * durasi
             if field.label.strip().lower() == "lokasi tandon" and "Lantai 2+" in text:
                 total_extra += 50000
         elif field_type == "number":
@@ -196,9 +174,7 @@ def _calculate_form_price_and_validate(
             text = str(number_value)
         elif field_type not in {"text", "textarea"}:
             raise HTTPException(500, "Konfigurasi tipe field layanan tidak didukung")
-
         sanitized[key] = text
-
     return total_extra, sanitized
 
 
@@ -211,17 +187,7 @@ def _calculate_base_price(layanan: Layanan, varian: LayananVarian, durasi: int) 
     raise HTTPException(500, "Konfigurasi perhitungan layanan tidak valid")
 
 
-async def _reject_probable_duplicate(
-    db: AsyncSession,
-    *,
-    user_id: str,
-    layanan_id: str,
-    varian_id: str,
-    jadwal: str,
-    jam: str,
-) -> None:
-    # Protect the current web flow from accidental double-click/retry.
-    # DB-backed idempotency will replace this guard in the migration phase.
+async def _reject_probable_duplicate(db: AsyncSession, *, user_id: str, layanan_id: str, varian_id: str, jadwal: str, jam: str) -> None:
     cutoff = datetime.now(timezone.utc) - timedelta(seconds=20)
     result = await db.execute(
         select(Pesanan.id)
@@ -238,27 +204,19 @@ async def _reject_probable_duplicate(
 
 
 @router.post("/pesanan")
-async def create_pesanan(
-    request: Request,
-    data: CreatePesananBody,
-    db: AsyncSession = Depends(get_db),
-):
+async def create_pesanan(request: Request, data: CreatePesananBody, db: AsyncSession = Depends(get_db)):
     user = get_user_from_request(request)
     if not user:
         raise HTTPException(401, "Silakan login terlebih dahulu")
     if user.get("role") != "CUSTOMER":
         raise HTTPException(403, "Hanya customer yang dapat membuat pesanan")
-
     user_id = user.get("id")
     if not user_id:
         raise HTTPException(401, "Session tidak valid")
-
     _parse_schedule(data.jadwal, data.jam)
-
     layanan = await db.get(Layanan, data.layanan_id)
     if not layanan or not layanan.aktif:
         raise HTTPException(404, "Layanan tidak ditemukan atau sedang tidak aktif")
-
     varian = await db.get(LayananVarian, data.varian_id)
     if not varian:
         raise HTTPException(404, "Varian tidak ditemukan")
@@ -266,69 +224,32 @@ async def create_pesanan(
         raise HTTPException(400, "Varian tidak sesuai dengan layanan yang dipilih")
     if int(varian.harga) < 0:
         raise HTTPException(500, "Konfigurasi harga layanan tidak valid")
-
-    fields_result = await db.execute(
-        select(FormField)
-        .where(FormField.layanan_id == layanan.id)
-        .order_by(FormField.urutan)
-    )
+    fields_result = await db.execute(select(FormField).where(FormField.layanan_id == layanan.id).order_by(FormField.urutan))
     form_fields = list(fields_result.scalars().all())
-
-    extra_total, sanitized_form = _calculate_form_price_and_validate(
-        form_fields,
-        data.form_data,
-        data.durasi,
-    )
-    base_total = _calculate_base_price(layanan, varian, data.durasi)
-    total = base_total + extra_total
-
+    extra_total, sanitized_form = _calculate_form_price_and_validate(form_fields, data.form_data, data.durasi)
+    total = _calculate_base_price(layanan, varian, data.durasi) + extra_total
     if total < 0 or total > 100_000_000:
         raise HTTPException(400, "Total harga pesanan tidak valid")
-
-    await _reject_probable_duplicate(
-        db,
-        user_id=user_id,
-        layanan_id=layanan.id,
-        varian_id=varian.id,
-        jadwal=data.jadwal,
-        jam=data.jam,
-    )
-
+    await _reject_probable_duplicate(db, user_id=user_id, layanan_id=layanan.id, varian_id=varian.id, jadwal=data.jadwal, jam=data.jam)
     kode = f"BD-{uuid.uuid4().hex[:8].upper()}"
-    simpan_form = {
-        "metode_pembayaran": data.metode_pembayaran,
-        **sanitized_form,
-    }
-
     order = Pesanan(
-        user_id=user_id,
-        layanan_id=layanan.id,
-        varian_id=varian.id,
-        kode=kode,
-        status="menunggu",
-        alamat=data.alamat,
-        jadwal=data.jadwal,
-        jam=data.jam,
-        durasi=data.durasi,
-        total_harga=total,
-        catatan=data.catatan,
-        form_data=json.dumps(simpan_form, ensure_ascii=False),
+        user_id=user_id, layanan_id=layanan.id, varian_id=varian.id, kode=kode,
+        status="menunggu", alamat=data.alamat, jadwal=data.jadwal, jam=data.jam,
+        durasi=data.durasi, total_harga=total, catatan=data.catatan,
+        form_data=json.dumps({"metode_pembayaran": data.metode_pembayaran, **sanitized_form}, ensure_ascii=False),
     )
-
     db.add(order)
     try:
+        await db.flush()
+        add_order_notification(
+            db,
+            order=order,
+            title="Pesanan sudah diterima",
+            message=f"Pesanan {order.kode} sudah kami terima. Tim BantuDulu sedang menyiapkan petugas yang sesuai.",
+        )
         await db.commit()
     except Exception:
         await db.rollback()
         raise
     await db.refresh(order)
-
-    return {
-        "success": True,
-        "data": {
-            "id": order.id,
-            "kode": order.kode,
-            "status": order.status,
-            "total_harga": order.total_harga,
-        },
-    }
+    return {"success": True, "data": {"id": order.id, "kode": order.kode, "status": order.status, "total_harga": order.total_harga}}
