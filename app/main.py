@@ -13,8 +13,31 @@ load_dotenv()
 from app.auth import get_user_from_request
 from app.config import APP_ENV, ENABLE_DEV_SEED, SECRET_KEY
 from app.database import async_session, init_db
-from app.models import Pesanan
+from app.models import Pesanan, User
 from app.seed import seed_data
+
+LEGACY_DEMO_EMAILS = {
+    "admin@bantudulu.id",
+    "user@bantudulu.id",
+}
+
+
+async def _assert_no_legacy_demo_accounts():
+    """Refuse production startup while known public demo accounts still exist."""
+    if APP_ENV != "production":
+        return
+
+    async with async_session() as db:
+        result = await db.execute(select(User.email).where(User.email.in_(LEGACY_DEMO_EMAILS)))
+        exposed_accounts = sorted(result.scalars().all())
+
+    if exposed_accounts:
+        accounts = ", ".join(exposed_accounts)
+        raise RuntimeError(
+            "Production diblokir karena database masih memiliki akun demo/default yang "
+            f"credential lamanya pernah dipublikasikan: {accounts}. "
+            "Hapus akun demo tersebut atau reset credential admin secara aman sebelum startup."
+        )
 
 
 @asynccontextmanager
@@ -27,6 +50,7 @@ async def lifespan(app: FastAPI):
     if ENABLE_DEV_SEED:
         await seed_data()
 
+    await _assert_no_legacy_demo_accounts()
     yield
 
 
