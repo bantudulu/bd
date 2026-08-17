@@ -6,7 +6,8 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.models import Assignment, Layanan, LayananVarian, Notifikasi, Pesanan, Petugas, User
+from app.models import Assignment, Layanan, LayananVarian, Pesanan, Petugas, User
+from app.notification_service import add_order_notification, add_status_notification
 
 router = APIRouter(prefix="/api/admin", tags=["admin-assignment"])
 
@@ -59,13 +60,8 @@ STATUS_TRANSITIONS = {
 
 def petugas_payload(p: Petugas) -> dict:
     return {
-        "id": p.id,
-        "nama": p.nama,
-        "no_hp": p.no_hp,
-        "foto": p.foto,
-        "keahlian": p.keahlian,
-        "wilayah": p.wilayah,
-        "aktif": p.aktif,
+        "id": p.id, "nama": p.nama, "no_hp": p.no_hp, "foto": p.foto,
+        "keahlian": p.keahlian, "wilayah": p.wilayah, "aktif": p.aktif,
         "catatan_internal": p.catatan_internal,
         "created_at": p.created_at.isoformat() if p.created_at else None,
         "updated_at": p.updated_at.isoformat() if p.updated_at else None,
@@ -73,9 +69,7 @@ def petugas_payload(p: Petugas) -> dict:
 
 
 async def _find_order(db: AsyncSession, identifier: str) -> Pesanan | None:
-    result = await db.execute(
-        select(Pesanan).where((Pesanan.id == identifier) | (Pesanan.kode == identifier))
-    )
+    result = await db.execute(select(Pesanan).where((Pesanan.id == identifier) | (Pesanan.kode == identifier)))
     return result.scalar_one_or_none()
 
 
@@ -94,8 +88,7 @@ async def create_petugas(body: PetugasCreate, request: Request, db: AsyncSession
     require_admin(request)
     petugas = Petugas(**body.model_dump())
     db.add(petugas)
-    await db.commit()
-    await db.refresh(petugas)
+    await db.commit(); await db.refresh(petugas)
     return petugas_payload(petugas)
 
 
@@ -107,8 +100,7 @@ async def update_petugas(petugas_id: str, body: PetugasUpdate, request: Request,
         raise HTTPException(status_code=404, detail="Petugas tidak ditemukan.")
     for key, value in body.model_dump(exclude_unset=True).items():
         setattr(petugas, key, value)
-    await db.commit()
-    await db.refresh(petugas)
+    await db.commit(); await db.refresh(petugas)
     return petugas_payload(petugas)
 
 
@@ -116,41 +108,24 @@ async def update_petugas(petugas_id: str, body: PetugasUpdate, request: Request,
 async def list_operational_orders(request: Request, db: AsyncSession = Depends(get_db)):
     require_admin(request)
     active_statuses = {"menunggu", "diproses", "ditugaskan", "menuju_lokasi", "dimulai"}
-    result = await db.execute(
-        select(Pesanan).where(Pesanan.status.in_(active_statuses)).order_by(Pesanan.created_at.asc())
-    )
-    orders = result.scalars().all()
+    result = await db.execute(select(Pesanan).where(Pesanan.status.in_(active_statuses)).order_by(Pesanan.created_at.asc()))
     payload = []
-    for order in orders:
+    for order in result.scalars().all():
         customer = await db.get(User, order.user_id)
         layanan = await db.get(Layanan, order.layanan_id)
         varian = await db.get(LayananVarian, order.varian_id)
-        assignment_result = await db.execute(
-            select(Assignment).where(
-                Assignment.pesanan_id == order.id, Assignment.status == "aktif"
-            ).order_by(Assignment.assigned_at.desc()).limit(1)
-        )
-        active_assignment = assignment_result.scalar_one_or_none()
-        active_worker = await db.get(Petugas, active_assignment.petugas_id) if active_assignment else None
-        count_result = await db.execute(
-            select(func.count(Assignment.id)).where(Assignment.pesanan_id == order.id)
-        )
+        ar = await db.execute(select(Assignment).where(Assignment.pesanan_id == order.id, Assignment.status == "aktif").order_by(Assignment.assigned_at.desc()).limit(1))
+        assignment = ar.scalar_one_or_none()
+        worker = await db.get(Petugas, assignment.petugas_id) if assignment else None
+        cr = await db.execute(select(func.count(Assignment.id)).where(Assignment.pesanan_id == order.id))
         payload.append({
-            "id": order.id,
-            "kode": order.kode,
-            "status": order.status,
-            "jadwal": order.jadwal,
-            "jam": order.jam,
-            "durasi": order.durasi,
-            "alamat": order.alamat,
-            "catatan": order.catatan,
-            "total_harga": order.total_harga,
+            "id": order.id, "kode": order.kode, "status": order.status, "jadwal": order.jadwal, "jam": order.jam,
+            "durasi": order.durasi, "alamat": order.alamat, "catatan": order.catatan, "total_harga": order.total_harga,
             "created_at": order.created_at.isoformat() if order.created_at else None,
             "pelanggan": {"nama": customer.nama if customer else "Unknown", "no_hp": customer.no_hp if customer else None},
             "layanan": {"nama": layanan.nama if layanan else "Layanan", "jenis_layanan": layanan.jenis_layanan if layanan else None, "varian": varian.nama if varian else None},
-            "assignment": {"id": active_assignment.id, "assigned_at": active_assignment.assigned_at.isoformat() if active_assignment.assigned_at else None, "petugas": {"id": active_worker.id, "nama": active_worker.nama, "no_hp": active_worker.no_hp, "wilayah": active_worker.wilayah, "keahlian": active_worker.keahlian} if active_worker else None} if active_assignment else None,
-            "assignment_count": int(count_result.scalar() or 0),
-            "needs_worker": active_assignment is None,
+            "assignment": {"id": assignment.id, "assigned_at": assignment.assigned_at.isoformat() if assignment.assigned_at else None, "petugas": {"id": worker.id, "nama": worker.nama, "no_hp": worker.no_hp, "wilayah": worker.wilayah, "keahlian": worker.keahlian} if worker else None} if assignment else None,
+            "assignment_count": int(cr.scalar() or 0), "needs_worker": assignment is None,
         })
     return payload
 
@@ -161,20 +136,20 @@ async def update_operational_status(pesanan_id: str, body: OperationalStatusUpda
     order = await _find_order(db, pesanan_id)
     if not order:
         raise HTTPException(status_code=404, detail="Pesanan tidak ditemukan.")
-    target = body.status.lower().strip()
-    current = (order.status or "").lower().strip()
+    target = body.status.lower().strip(); current = (order.status or "").lower().strip()
     allowed = STATUS_TRANSITIONS.get(current)
     if allowed is None or target not in allowed:
         raise HTTPException(status_code=409, detail=f"Perubahan status {current} -> {target} tidak diizinkan.")
     if target in {"menuju_lokasi", "dimulai", "selesai"}:
-        assignment_result = await db.execute(
-            select(Assignment.id).where(Assignment.pesanan_id == order.id, Assignment.status == "aktif")
-        )
-        if assignment_result.scalar_one_or_none() is None:
+        ar = await db.execute(select(Assignment.id).where(Assignment.pesanan_id == order.id, Assignment.status == "aktif"))
+        if ar.scalar_one_or_none() is None:
             raise HTTPException(status_code=409, detail="Pesanan belum memiliki petugas aktif.")
-    order.status = target
-    await db.commit()
-    await db.refresh(order)
+    try:
+        order.status = target
+        add_status_notification(db, order=order, status=target)
+        await db.commit(); await db.refresh(order)
+    except Exception:
+        await db.rollback(); raise
     return {"success": True, "id": order.id, "kode": order.kode, "status": order.status}
 
 
@@ -184,22 +159,11 @@ async def get_assignment_history(pesanan_id: str, request: Request, db: AsyncSes
     order = await _find_order(db, pesanan_id)
     if not order:
         raise HTTPException(status_code=404, detail="Pesanan tidak ditemukan.")
-    result = await db.execute(
-        select(Assignment).where(Assignment.pesanan_id == order.id).order_by(Assignment.assigned_at.desc())
-    )
+    result = await db.execute(select(Assignment).where(Assignment.pesanan_id == order.id).order_by(Assignment.assigned_at.desc()))
     data = []
-    for assignment in result.scalars().all():
-        petugas = await db.get(Petugas, assignment.petugas_id)
-        admin = await db.get(User, assignment.assigned_by)
-        data.append({
-            "id": assignment.id,
-            "status": assignment.status,
-            "assigned_at": assignment.assigned_at.isoformat() if assignment.assigned_at else None,
-            "replaced_at": assignment.replaced_at.isoformat() if assignment.replaced_at else None,
-            "replaced_reason": assignment.replaced_reason,
-            "assigned_by": admin.nama if admin else None,
-            "petugas": {"id": petugas.id, "nama": petugas.nama, "foto": petugas.foto, "wilayah": petugas.wilayah, "no_hp": petugas.no_hp} if petugas else None,
-        })
+    for a in result.scalars().all():
+        p = await db.get(Petugas, a.petugas_id); admin = await db.get(User, a.assigned_by)
+        data.append({"id": a.id, "status": a.status, "assigned_at": a.assigned_at.isoformat() if a.assigned_at else None, "replaced_at": a.replaced_at.isoformat() if a.replaced_at else None, "replaced_reason": a.replaced_reason, "assigned_by": admin.nama if admin else None, "petugas": {"id": p.id, "nama": p.nama, "foto": p.foto, "wilayah": p.wilayah, "no_hp": p.no_hp} if p else None})
     return {"pesanan_id": order.id, "kode": order.kode, "assignments": data}
 
 
@@ -214,10 +178,8 @@ async def assign_petugas(pesanan_id: str, body: AssignmentCreate, request: Reque
     petugas = await db.get(Petugas, body.petugas_id)
     if not petugas or not petugas.aktif:
         raise HTTPException(status_code=400, detail="Petugas tidak tersedia atau tidak aktif.")
-    current_result = await db.execute(
-        select(Assignment).where(Assignment.pesanan_id == order.id, Assignment.status == "aktif")
-    )
-    current = current_result.scalar_one_or_none()
+    rr = await db.execute(select(Assignment).where(Assignment.pesanan_id == order.id, Assignment.status == "aktif"))
+    current = rr.scalar_one_or_none()
     if current and order.status == "dimulai":
         raise HTTPException(status_code=409, detail="Petugas tidak dapat diganti setelah pekerjaan dimulai.")
     if current and current.petugas_id == petugas.id:
@@ -227,20 +189,14 @@ async def assign_petugas(pesanan_id: str, body: AssignmentCreate, request: Reque
     now = datetime.now(timezone.utc)
     try:
         if current:
-            current.status = "diganti"
-            current.replaced_at = now
-            current.replaced_reason = body.alasan_penggantian
+            current.status = "diganti"; current.replaced_at = now; current.replaced_reason = body.alasan_penggantian
         assignment = Assignment(pesanan_id=order.id, petugas_id=petugas.id, assigned_by=admin.get("id"), status="aktif", assigned_at=now)
-        db.add(assignment)
-        order.status = "ditugaskan"
-        notification_message = (
-            f"Petugas untuk pesanan {order.kode} telah diperbarui. {petugas.nama} akan membantu pesanan Anda."
-            if current else f"{petugas.nama} telah ditugaskan untuk membantu pesanan {order.kode}."
-        )
-        db.add(Notifikasi(user_id=order.user_id, pesanan_id=order.id, judul="Petugas BantuDulu sudah siap", pesan=notification_message))
-        await db.commit()
-        await db.refresh(assignment)
+        db.add(assignment); order.status = "ditugaskan"
+        if current:
+            add_order_notification(db, order=order, title="Petugas diperbarui", message=f"Petugas untuk pesanan {order.kode} telah diperbarui. {petugas.nama} akan membantu pesanan Anda.")
+        else:
+            add_order_notification(db, order=order, title="Petugas BantuDulu sudah siap", message=f"{petugas.nama} telah ditugaskan untuk membantu pesanan {order.kode}.")
+        await db.commit(); await db.refresh(assignment)
     except Exception:
-        await db.rollback()
-        raise
+        await db.rollback(); raise
     return {"success": True, "pesanan": {"id": order.id, "kode": order.kode, "status": order.status}, "assignment": {"id": assignment.id, "petugas_id": petugas.id, "petugas_nama": petugas.nama, "assigned_at": assignment.assigned_at.isoformat(), "status": assignment.status}, "reassigned": current is not None}
