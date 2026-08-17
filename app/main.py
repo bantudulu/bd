@@ -120,13 +120,14 @@ async def security_and_user_context(request: Request, call_next):
 
 
 # Import routes AFTER app creation
-from app.routers import admin, api, api_pesanan, auth, customer
+from app.routers import admin, admin_assignment, api, api_pesanan, auth, customer
 
 app.include_router(auth.router)
 app.include_router(customer.router)
 app.include_router(admin.router)
 app.include_router(api.router)
 app.include_router(api_pesanan.router)
+app.include_router(admin_assignment.router)
 
 
 @app.get("/sw.js")
