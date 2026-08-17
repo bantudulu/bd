@@ -2,6 +2,7 @@ import json
 import uuid
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Literal
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
@@ -13,6 +14,8 @@ from app.database import get_db
 from app.models import FormField, Layanan, LayananVarian, Pesanan
 
 router = APIRouter(prefix="/api", tags=["api"])
+
+BUSINESS_TIMEZONE = ZoneInfo("Asia/Makassar")
 
 
 class CreatePesananBody(BaseModel):
@@ -26,8 +29,7 @@ class CreatePesananBody(BaseModel):
     catatan: str | None = Field(default=None, max_length=1000)
     form_data: dict[str, Any] = Field(default_factory=dict)
 
-    # Kept only for backward compatibility with the current web client.
-    # The server deliberately ignores this value and recalculates all add-ons.
+    # Backward compatibility only. This value is never used for pricing.
     addon_total: int | None = Field(default=None, ge=0)
 
     @field_validator("layanan_id", "varian_id", "jadwal", "jam", "alamat")
@@ -65,7 +67,8 @@ def _parse_schedule(jadwal: str, jam: str) -> None:
     except ValueError as exc:
         raise HTTPException(400, "Format tanggal harus YYYY-MM-DD") from exc
 
-    today = datetime.now(timezone.utc).date()
+    now_local = datetime.now(BUSINESS_TIMEZONE)
+    today = now_local.date()
     if order_date < today:
         raise HTTPException(400, "Tanggal pesanan tidak boleh di masa lalu")
     if order_date > today + timedelta(days=365):
@@ -76,12 +79,17 @@ def _parse_schedule(jadwal: str, jam: str) -> None:
     except ValueError as exc:
         raise HTTPException(400, "Format jam harus HH:MM") from exc
 
-    # Current BantuDulu booking UI operates between 07:00 and 21:00.
     minutes = parsed_time.hour * 60 + parsed_time.minute
     if minutes < 7 * 60 or minutes > 21 * 60:
         raise HTTPException(400, "Jam layanan harus antara 07:00 dan 21:00")
     if parsed_time.minute not in {0, 30}:
         raise HTTPException(400, "Jam layanan harus menggunakan interval 30 menit")
+
+    if order_date == today:
+        selected_minutes = minutes
+        current_minutes = now_local.hour * 60 + now_local.minute
+        if selected_minutes <= current_minutes:
+            raise HTTPException(400, "Jam layanan hari ini sudah lewat")
 
 
 def _field_key(field_id: str) -> str:
@@ -173,8 +181,11 @@ def _calculate_form_price_and_validate(
         if field_type == "select":
             options = _load_options(field.options)
             option_price = _extract_option_price(text, options)
-            # Existing catalog encodes per-duration selectable work prices this way.
             total_extra += option_price * durasi
+
+            # Existing final catalog rule for Cuci Tandon Air.
+            if field.label.strip().lower() == "lokasi tandon" and "Lantai 2+" in text:
+                total_extra += 50000
         elif field_type == "number":
             try:
                 number_value = int(text)
@@ -187,11 +198,6 @@ def _calculate_form_price_and_validate(
             raise HTTPException(500, "Konfigurasi tipe field layanan tidak didukung")
 
         sanitized[key] = text
-
-    # Preserve the existing catalog rule for Cuci Tandon Air, but derive it
-    # from validated server-side form values rather than a client-supplied price.
-    if any(isinstance(v, str) and "Lantai 2+" in v for v in sanitized.values()):
-        total_extra += 50000
 
     return total_extra, sanitized
 
@@ -214,8 +220,8 @@ async def _reject_probable_duplicate(
     jadwal: str,
     jam: str,
 ) -> None:
-    # This protects the current web flow from accidental double-click/retry.
-    # A DB-backed idempotency key will replace this guard in the migration phase.
+    # Protect the current web flow from accidental double-click/retry.
+    # DB-backed idempotency will replace this guard in the migration phase.
     cutoff = datetime.now(timezone.utc) - timedelta(seconds=20)
     result = await db.execute(
         select(Pesanan.id)
