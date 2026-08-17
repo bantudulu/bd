@@ -82,7 +82,6 @@ async def security_and_user_context(request: Request, call_next):
     path = request.url.path
     method = request.method.upper()
 
-    # Sensitive order APIs must never be anonymous.
     if method == "GET" and path == "/api/pesanan":
         if not user or user.get("role") != "ADMIN":
             return JSONResponse(
@@ -90,7 +89,6 @@ async def security_and_user_context(request: Request, call_next):
                 status_code=403 if user else 401,
             )
 
-    # Order detail API: admin may access all, customer only owns their order.
     if method == "GET" and path.startswith("/api/pesanan/") and path != "/api/pesanan/aktif":
         if not user:
             return JSONResponse({"detail": "Silakan login."}, status_code=401)
@@ -103,7 +101,6 @@ async def security_and_user_context(request: Request, call_next):
             if user.get("role") != "ADMIN" and order.user_id != user.get("id"):
                 return JSONResponse({"detail": "Akses ditolak."}, status_code=403)
 
-    # Customer order detail page: require login and ownership.
     if method == "GET" and path.startswith("/pesanan/"):
         if not user:
             return RedirectResponse(url="/masuk", status_code=302)
@@ -120,7 +117,7 @@ async def security_and_user_context(request: Request, call_next):
 
 
 # Import routes AFTER app creation
-from app.routers import admin, admin_assignment, api, api_pesanan, auth, customer
+from app.routers import admin, admin_assignment, api, api_pesanan, auth, customer, notifications
 
 app.include_router(auth.router)
 app.include_router(customer.router)
@@ -128,6 +125,7 @@ app.include_router(admin.router)
 app.include_router(api.router)
 app.include_router(api_pesanan.router)
 app.include_router(admin_assignment.router)
+app.include_router(notifications.router)
 
 
 @app.get("/sw.js")
