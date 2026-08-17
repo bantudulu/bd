@@ -2,11 +2,11 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.models import Assignment, Notifikasi, Pesanan, Petugas
+from app.models import Assignment, Layanan, LayananVarian, Notifikasi, Pesanan, Petugas, User
 
 router = APIRouter(prefix="/api/admin", tags=["admin-assignment"])
 
@@ -42,6 +42,21 @@ class AssignmentCreate(BaseModel):
     alasan_penggantian: str | None = Field(default=None, max_length=1000)
 
 
+class OperationalStatusUpdate(BaseModel):
+    status: str = Field(min_length=2, max_length=30)
+
+
+STATUS_TRANSITIONS = {
+    "menunggu": {"dibatalkan"},
+    "diproses": {"dibatalkan"},  # legacy state only
+    "ditugaskan": {"menuju_lokasi", "dibatalkan"},
+    "menuju_lokasi": {"dimulai", "dibatalkan"},
+    "dimulai": {"selesai"},
+    "selesai": set(),
+    "dibatalkan": set(),
+}
+
+
 def petugas_payload(p: Petugas) -> dict:
     return {
         "id": p.id,
@@ -55,6 +70,13 @@ def petugas_payload(p: Petugas) -> dict:
         "created_at": p.created_at.isoformat() if p.created_at else None,
         "updated_at": p.updated_at.isoformat() if p.updated_at else None,
     }
+
+
+async def _find_order(db: AsyncSession, identifier: str) -> Pesanan | None:
+    result = await db.execute(
+        select(Pesanan).where((Pesanan.id == identifier) | (Pesanan.kode == identifier))
+    )
+    return result.scalar_one_or_none()
 
 
 @router.get("/petugas")
@@ -105,6 +127,116 @@ async def update_petugas(
     return petugas_payload(petugas)
 
 
+@router.get("/operasional/pesanan")
+async def list_operational_orders(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Operational queue used by the admin assignment dashboard."""
+    require_admin(request)
+    active_statuses = {"menunggu", "diproses", "ditugaskan", "menuju_lokasi", "dimulai"}
+    result = await db.execute(
+        select(Pesanan)
+        .where(Pesanan.status.in_(active_statuses))
+        .order_by(Pesanan.created_at.asc())
+    )
+    orders = result.scalars().all()
+
+    payload = []
+    for order in orders:
+        customer = await db.get(User, order.user_id)
+        layanan = await db.get(Layanan, order.layanan_id)
+        varian = await db.get(LayananVarian, order.varian_id)
+
+        assignment_result = await db.execute(
+            select(Assignment)
+            .where(Assignment.pesanan_id == order.id, Assignment.status == "aktif")
+            .order_by(Assignment.assigned_at.desc())
+            .limit(1)
+        )
+        active_assignment = assignment_result.scalar_one_or_none()
+        active_worker = await db.get(Petugas, active_assignment.petugas_id) if active_assignment else None
+
+        count_result = await db.execute(
+            select(func.count(Assignment.id)).where(Assignment.pesanan_id == order.id)
+        )
+        assignment_count = int(count_result.scalar() or 0)
+
+        payload.append({
+            "id": order.id,
+            "kode": order.kode,
+            "status": order.status,
+            "jadwal": order.jadwal,
+            "jam": order.jam,
+            "durasi": order.durasi,
+            "alamat": order.alamat,
+            "catatan": order.catatan,
+            "total_harga": order.total_harga,
+            "created_at": order.created_at.isoformat() if order.created_at else None,
+            "pelanggan": {
+                "nama": customer.nama if customer else "Unknown",
+                "no_hp": customer.no_hp if customer else None,
+            },
+            "layanan": {
+                "nama": layanan.nama if layanan else "Layanan",
+                "jenis_layanan": layanan.jenis_layanan if layanan else None,
+                "varian": varian.nama if varian else None,
+            },
+            "assignment": {
+                "id": active_assignment.id,
+                "assigned_at": active_assignment.assigned_at.isoformat() if active_assignment.assigned_at else None,
+                "petugas": {
+                    "id": active_worker.id,
+                    "nama": active_worker.nama,
+                    "no_hp": active_worker.no_hp,
+                    "wilayah": active_worker.wilayah,
+                    "keahlian": active_worker.keahlian,
+                } if active_worker else None,
+            } if active_assignment else None,
+            "assignment_count": assignment_count,
+            "needs_worker": active_assignment is None,
+        })
+
+    return payload
+
+
+@router.put("/operasional/pesanan/{pesanan_id}/status")
+async def update_operational_status(
+    pesanan_id: str,
+    body: OperationalStatusUpdate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    require_admin(request)
+    order = await _find_order(db, pesanan_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Pesanan tidak ditemukan.")
+
+    target = body.status.lower().strip()
+    current = (order.status or "").lower().strip()
+    allowed = STATUS_TRANSITIONS.get(current)
+    if allowed is None or target not in allowed:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Perubahan status {current} -> {target} tidak diizinkan.",
+        )
+
+    if target in {"menuju_lokasi", "dimulai", "selesai"}:
+        assignment_result = await db.execute(
+            select(Assignment.id).where(
+                Assignment.pesanan_id == order.id,
+                Assignment.status == "aktif",
+            )
+        )
+        if assignment_result.scalar_one_or_none() is None:
+            raise HTTPException(status_code=409, detail="Pesanan belum memiliki petugas aktif.")
+
+    order.status = target
+    await db.commit()
+    await db.refresh(order)
+    return {"success": True, "id": order.id, "kode": order.kode, "status": order.status}
+
+
 @router.get("/pesanan/{pesanan_id}/assignment")
 async def get_assignment_history(
     pesanan_id: str,
@@ -112,10 +244,7 @@ async def get_assignment_history(
     db: AsyncSession = Depends(get_db),
 ):
     require_admin(request)
-    order = await db.get(Pesanan, pesanan_id)
-    if not order:
-        result = await db.execute(select(Pesanan).where(Pesanan.kode == pesanan_id))
-        order = result.scalar_one_or_none()
+    order = await _find_order(db, pesanan_id)
     if not order:
         raise HTTPException(status_code=404, detail="Pesanan tidak ditemukan.")
 
@@ -129,17 +258,20 @@ async def get_assignment_history(
     data = []
     for assignment in assignments:
         petugas = await db.get(Petugas, assignment.petugas_id)
+        admin = await db.get(User, assignment.assigned_by)
         data.append({
             "id": assignment.id,
             "status": assignment.status,
             "assigned_at": assignment.assigned_at.isoformat() if assignment.assigned_at else None,
             "replaced_at": assignment.replaced_at.isoformat() if assignment.replaced_at else None,
             "replaced_reason": assignment.replaced_reason,
+            "assigned_by": admin.nama if admin else None,
             "petugas": {
                 "id": petugas.id,
                 "nama": petugas.nama,
                 "foto": petugas.foto,
                 "wilayah": petugas.wilayah,
+                "no_hp": petugas.no_hp,
             } if petugas else None,
         })
 
@@ -154,11 +286,7 @@ async def assign_petugas(
     db: AsyncSession = Depends(get_db),
 ):
     admin = require_admin(request)
-
-    result = await db.execute(
-        select(Pesanan).where((Pesanan.id == pesanan_id) | (Pesanan.kode == pesanan_id))
-    )
-    order = result.scalar_one_or_none()
+    order = await _find_order(db, pesanan_id)
     if not order:
         raise HTTPException(status_code=404, detail="Pesanan tidak ditemukan.")
     if order.status in {"selesai", "dibatalkan"}:
@@ -178,7 +306,6 @@ async def assign_petugas(
 
     if current and current.petugas_id == petugas.id:
         raise HTTPException(status_code=409, detail="Petugas tersebut sudah aktif pada pesanan ini.")
-
     if current and not body.alasan_penggantian:
         raise HTTPException(status_code=400, detail="Alasan penggantian wajib diisi saat mengganti petugas.")
 
@@ -197,7 +324,6 @@ async def assign_petugas(
             assigned_at=now,
         )
         db.add(assignment)
-
         order.status = "ditugaskan"
 
         notification_title = "Petugas BantuDulu sudah siap"
@@ -207,18 +333,14 @@ async def assign_petugas(
                 f"{petugas.nama} akan membantu pesanan Anda."
             )
         else:
-            notification_message = (
-                f"{petugas.nama} telah ditugaskan untuk membantu pesanan {order.kode}."
-            )
+            notification_message = f"{petugas.nama} telah ditugaskan untuk membantu pesanan {order.kode}."
 
-        db.add(
-            Notifikasi(
-                user_id=order.user_id,
-                pesanan_id=order.id,
-                judul=notification_title,
-                pesan=notification_message,
-            )
-        )
+        db.add(Notifikasi(
+            user_id=order.user_id,
+            pesanan_id=order.id,
+            judul=notification_title,
+            pesan=notification_message,
+        ))
 
         await db.commit()
         await db.refresh(assignment)
