@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Pesanan — Admin BantuDulu</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="apple-touch-icon" href="/static/images/pwa/apple-touch-icon.png" />
+  <meta name="theme-color" content="#042544" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BantuDulu" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://app.kazza.id">
+  <style>
+    /* ── Detail Page Specific ── */
+    .detail-content { max-width: 720px; margin: 0 auto; }
+    .detail-card {
+      background: #fff; border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 24px; margin-bottom: 18px;
+    }
+    .detail-card h3 {
+      font-size: 15px; font-weight: 700; color: var(--gray-600);
+      margin-bottom: 16px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .detail-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid #f9fafb;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label {
+      font-size: 13px; color: var(--gray-500); font-weight: 500;
+    }
+    .detail-value {
+      font-size: 14px; color: var(--gray-800); font-weight: 600;
+      text-align: right; max-width: 55%;
+    }
+    .detail-value.harga {
+      font-size: 16px; color: var(--primary); font-weight: 800;
+    }
+    .detail-value.kode {
+      font-family: monospace; background: var(--gray-100);
+      padding: 2px 8px; border-radius: 4px; font-size: 13px;
+    }
+    .detail-value.alamat {
+      font-weight: 400; font-size: 13px; line-height: 1.5;
+    }
+    .detail-value.form-field {
+      font-weight: 400; font-size: 13px;
+      word-break: break-word;
+    }
+
+    /* ── Status Badge ── */
+    .status-detail {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 16px; border-radius: 100px;
+      font-size: 13px; font-weight: 700;
+    }
+    .status-detail.menunggu,
+    .status-detail.pending { background: var(--yellow-100); color: #b45309; }
+    .status-detail.diproses,
+    .status-detail.processing { background: var(--blue-100); color: var(--blue-500); }
+    .status-detail.selesai,
+    .status-detail.completed { background: var(--green-100); color: #16a34a; }
+    .status-detail.dibatalkan,
+    .status-detail.cancelled { background: var(--red-100); color: var(--red-500); }
+    .status-dot-detail {
+      width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+    }
+    .status-detail.menunggu .status-dot-detail,
+    .status-detail.pending .status-dot-detail { background: #b45309; }
+    .status-detail.diproses .status-dot-detail,
+    .status-detail.processing .status-dot-detail { background: var(--blue-500); }
+    .status-detail.selesai .status-dot-detail,
+    .status-detail.completed .status-dot-detail { background: #16a34a; }
+    .status-detail.dibatalkan .status-dot-detail,
+    .status-detail.cancelled .status-dot-detail { background: var(--red-500); }
+
+    /* Status update section */
+    .status-update {
+      margin-top: 16px; padding-top: 16px;
+      border-top: 1px solid var(--gray-100);
+    }
+    .status-update-row {
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    }
+    .status-update-row select {
+      flex: 1; min-width: 160px; padding: 10px 14px;
+      border: 2px solid var(--gray-200); border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 14px; font-weight: 600; color: var(--gray-700);
+      background: #fff; cursor: pointer;
+    }
+    .status-update-row select:focus {
+      outline: none; border-color: var(--primary-light);
+    }
+    .btn-update-status {
+      padding: 10px 24px; background: var(--primary);
+      color: #fff; border: none; border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 14px; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      transition: background .15s;
+    }
+    .btn-update-status:hover { background: var(--primary-dark); }
+    .btn-update-status:disabled { opacity: .5; cursor: not-allowed; }
+    .status-msg {
+      font-size: 13px; margin-top: 8px; font-weight: 600;
+    }
+    .status-msg.success { color: #16a34a; }
+    .status-msg.error { color: var(--red-500); }
+
+    /* ── Skeleton ── */
+    .sk-box {
+      background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);
+      background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite;
+      border-radius: 6px; margin-bottom: 10px;
+    }
+    .sk-box.h24 { height: 24px; }
+    .sk-box.h60 { height: 60px; }
+    .sk-box.w70 { width: 70%; }
+    .sk-box.w50 { width: 50%; }
+    .sk-box.w30 { width: 30%; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ── Error ── */
+    .error-box {
+      text-align: center; padding: 40px 20px;
+    }
+    .error-box .error-icon { font-size: 48px; margin-bottom: 12px; }
+    .error-box h3 { font-size: 18px; color: var(--gray-700); margin-bottom: 8px; }
+    .error-box p { font-size: 14px; color: var(--gray-500); margin-bottom: 16px; }
+
+    @media(max-width:600px){
+      .detail-card { padding: 16px; }
+      .detail-value { max-width: 50%; font-size: 13px; }
+      .detail-value.harga { font-size: 14px; }
+      .status-update-row { flex-direction: column; }
+      .status-update-row select { width: 100%; }
+      .btn-update-status { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <img src="/static/images/logo.png?v=3?v=2" alt="BantuDulu" style="height:32px; width:auto;">
+    <h2>Bantu<span>Dulu</span></h2>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Menu</div>
+    <a href="/admin/dashboard" class="nav-item">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a href="/admin/pesanan" class="nav-item active">
+      <span class="nav-icon">📋</span> Pesanan
+    </a>
+    <a href="/admin/layanan" class="nav-item">
+      <span class="nav-icon">🧹</span> Layanan
+    </a>
+    <a href="/admin/laporan" class="nav-item">
+      <span class="nav-icon">📈</span> Laporan
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/admin/pesanan" class="nav-item">
+      <span class="nav-icon">←</span> Kembali ke Pesanan
+    </a>
+  </div>
+</aside>
+
+<!-- ===== Main ===== -->
+<div class="main-wrapper">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <a href="/admin/pesanan" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:18px;">←</span>
+      </a>
+      <h1>Detail Pesanan</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="admin-info">
+        <div class="admin-avatar">A</div>
+        <div>
+          <div class="admin-name">Admin BantuDulu</div>
+          <div class="admin-role">Administrator</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-content detail-content">
+
+    <!-- Loading skeleton -->
+    <div id="loadingSkeleton">
+      <div class="detail-card"><h3><div class="sk-box h24 w50"></div></h3>
+        <div class="sk-box h24 w70"></div><div class="sk-box h24 w50"></div>
+        <div class="sk-box h60"></div><div class="sk-box h24 w30"></div>
+      </div>
+      <div class="detail-card"><h3><div class="sk-box h24 w50"></div></h3>
+        <div class="sk-box h24 w70"></div><div class="sk-box h24 w50"></div>
+      </div>
+    </div>
+
+    <!-- Real content (hidden initially) -->
+    <div id="detailContent" style="display:none;">
+
+      <!-- ─── Status Header ─── -->
+      <div class="detail-card" style="text-align:center;padding:20px;">
+        <div style="font-size:28px;margin-bottom:4px;" id="statusIcon">📋</div>
+        <div style="font-size:20px;font-weight:800;margin-bottom:4px;" id="layananNama">—</div>
+        <div style="font-size:14px;color:var(--gray-500);margin-bottom:12px;" id="varianNama">—</div>
+        <div id="statusBadgeContainer"></div>
+        <div style="margin-top:12px;display:flex;justify-content:center;gap:20px;font-size:13px;color:var(--gray-500);" id="kodeTanggal">
+          <span>Kode: <strong id="kodeText">—</strong></span>
+          <span>Tanggal: <strong id="tanggalText">—</strong></span>
+        </div>
+      </div>
+
+      <!-- ─── Detail Pesanan ─── -->
+      <div class="detail-card">
+        <h3>📋 Informasi Pesanan</h3>
+        <div id="infoPesanan"></div>
+      </div>
+
+      <!-- ─── Pelanggan ─── -->
+      <div class="detail-card">
+        <h3>👤 Pelanggan</h3>
+        <div id="infoPelanggan"></div>
+      </div>
+
+      <!-- ─── Form Data ─── -->
+      <div class="detail-card" id="formDataCard" style="display:none;">
+        <h3>📝 Data Tambahan</h3>
+        <div id="formDataFields"></div>
+      </div>
+
+      <!-- ─── Update Status ─── -->
+      <div class="detail-card">
+        <h3>⚙️ Update Status</h3>
+        <div class="status-update">
+          <div class="status-update-row">
+            <select id="newStatusSelect">
+              <option value="menunggu">Menunggu</option>
+              <option value="diproses">Diproses</option>
+              <option value="ditugaskan">Ditugaskan</option>
+              <option value="menuju_lokasi">Menuju Lokasi</option>
+              <option value="dimulai">Dimulai</option>
+              <option value="selesai">Selesai</option>
+              <option value="dibatalkan">Dibatalkan</option>
+            </select>
+            <button class="btn-update-status" id="btnUpdate" onclick="updateStatus()">Simpan</button>
+          </div>
+          <div id="statusMessage" class="status-msg"></div>
+        </div>
+      </div>
+
+    </div><!-- /detailContent -->
+
+  </div><!-- /page-content -->
+</div><!-- /main-wrapper -->
+
+<script>
+let detailData = null;
+
+function getStatusLabel(status) {
+  const map = {
+    'menunggu': 'Menunggu', 'pending': 'Menunggu',
+    'diproses': 'Diproses', 'processing': 'Diproses',
+    'ditugaskan': 'Ditugaskan',
+    'menuju_lokasi': 'Menuju Lokasi',
+    'dimulai': 'Dimulai',
+    'selesai': 'Selesai', 'completed': 'Selesai',
+    'dibatalkan': 'Dibatalkan', 'cancelled': 'Dibatalkan'
+  };
+  return map[status] || status;
+}
+
+function getStatusClass(status) {
+  const s = (status || '').toLowerCase();
+  if (['menunggu','pending'].includes(s)) return 'menunggu';
+  if (['diproses','processing','ditugaskan','menuju_lokasi','dimulai'].includes(s)) return 'diproses';
+  if (['selesai','completed'].includes(s)) return 'selesai';
+  if (['dibatalkan','cancelled'].includes(s)) return 'dibatalkan';
+  return 'menunggu';
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' }); }
+  catch(e) { return iso; }
+}
+
+function formatTime(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' }); }
+  catch(e) { return iso; }
+}
+
+function formatRupiah(val) {
+  if (val == null) return '—';
+  return 'Rp ' + Number(val).toLocaleString('id-ID');
+}
+
+function renderDetail(data) {
+  detailData = data;
+  const d = data;
+
+  // Status header
+  document.getElementById('statusIcon').textContent = '📋';
+  document.getElementById('layananNama').textContent = d.layanan_nama || 'Pesanan';
+  document.getElementById('varianNama').textContent = d.varian_nama ? 'Varian: ' + d.varian_nama : '';
+  document.getElementById('kodeText').textContent = d.kode || d.id || '—';
+  document.getElementById('tanggalText').textContent = formatDate(d.tanggal || d.created_at);
+
+  const statusCls = getStatusClass(d.status);
+  document.getElementById('statusBadgeContainer').innerHTML =
+    '<span class="status-detail ' + statusCls + '"><span class="status-dot-detail"></span> ' + getStatusLabel(d.status) + '</span>';
+
+  // Set current status in dropdown
+  document.getElementById('newStatusSelect').value = d.status || 'menunggu';
+
+  // Info pesanan
+  let infoRows = '';
+  const fields = [
+    { label: 'Kode Pesanan', value: '<span class="kode">' + (d.kode || d.id || '—') + '</span>' },
+    { label: 'Status', value: '<span class="status-detail ' + statusCls + '" style="font-size:12px;padding:3px 10px;"><span class="status-dot-detail"></span> ' + getStatusLabel(d.status) + '</span>' },
+    { label: 'Layanan', value: d.layanan_nama || '—' },
+    { label: 'Varian', value: d.varian_nama || '—' },
+    { label: 'Total Harga', value: '<span class="harga">' + formatRupiah(d.total_harga) + '</span>' },
+    { label: 'Metode Bayar', value: (d.metode_pembayaran || 'cod').toUpperCase() },
+    { label: 'Tanggal Pesan', value: formatDate(d.created_at) + ' ' + formatTime(d.created_at) },
+    { label: 'Jadwal', value: d.jadwal || '—' },
+    { label: 'Jam', value: d.jam || '—' },
+    { label: 'Durasi', value: d.durasi || '—' },
+    { label: 'Catatan', value: d.catatan || '—' },
+  ];
+  fields.forEach(f => {
+    infoRows += '<div class="detail-row"><span class="detail-label">' + f.label + '</span><span class="detail-value">' + f.value + '</span></div>';
+  });
+  document.getElementById('infoPesanan').innerHTML = infoRows;
+
+  // Info pelanggan
+  let custRows = '';
+  const custFields = [
+    { label: 'Nama Pelanggan', value: d.pelanggan_nama || d.pelanggan || '—' },
+    { label: 'No. WhatsApp', value: d.no_wa || d.wa_kontak || d.pelanggan_wa || '—' },
+    { label: 'Alamat', value: '<span class="alamat">' + (d.alamat || '—') + '</span>' },
+  ];
+  custFields.forEach(f => {
+    custRows += '<div class="detail-row"><span class="detail-label">' + f.label + '</span><span class="detail-value">' + f.value + '</span></div>';
+  });
+  document.getElementById('infoPelanggan').innerHTML = custRows;
+
+  // Form data
+  const formCard = document.getElementById('formDataCard');
+  const formFields = document.getElementById('formDataFields');
+  if (d.form_data) {
+    try {
+      const fd = typeof d.form_data === 'string' ? JSON.parse(d.form_data) : d.form_data;
+      const keys = Object.keys(fd).filter(k => !['no_wa','noWa','no_hp','telepon'].includes(k));
+      if (keys.length > 0) {
+        formCard.style.display = 'block';
+        formFields.innerHTML = keys.map(k =>
+          '<div class="detail-row"><span class="detail-label">' + k.replace(/_/g,' ') + '</span><span class="detail-value form-field">' + (fd[k] || '—') + '</span></div>'
+        ).join('');
+      } else {
+        formCard.style.display = 'none';
+      }
+    } catch(e) {
+      formCard.style.display = 'none';
+    }
+  } else {
+    formCard.style.display = 'none';
+  }
+}
+
+async function loadDetail() {
+  const pesananId = '{{ pesanan_id }}';
+  try {
+    const res = await fetch('/api/pesanan/' + encodeURIComponent(pesananId));
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    // Hide loading, show content
+    document.getElementById('loadingSkeleton').style.display = 'none';
+    document.getElementById('detailContent').style.display = 'block';
+
+    renderDetail(data);
+  } catch (err) {
+    document.getElementById('loadingSkeleton').innerHTML =
+      '<div class="error-box"><div class="error-icon">😕</div><h3>Gagal Memuat Detail</h3><p>' + err.message + '</p><a href="/admin/pesanan" class="btn btn-primary">Kembali ke Pesanan</a></div>';
+  }
+}
+
+async function updateStatus() {
+  const newStatus = document.getElementById('newStatusSelect').value;
+  const pesananId = '{{ pesanan_id }}';
+  const btn = document.getElementById('btnUpdate');
+  const msg = document.getElementById('statusMessage');
+
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+  msg.className = 'status-msg';
+  msg.textContent = '';
+
+  try {
+    const res = await fetch('/api/admin/pesanan/' + encodeURIComponent(pesananId) + '/status', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const result = await res.json();
+
+    msg.className = 'status-msg success';
+    msg.textContent = '✅ Status berhasil diubah ke "' + getStatusLabel(newStatus) + '"';
+
+    // Update status badge
+    const statusCls = getStatusClass(newStatus);
+    document.getElementById('statusBadgeContainer').innerHTML =
+      '<span class="status-detail ' + statusCls + '"><span class="status-dot-detail"></span> ' + getStatusLabel(newStatus) + '</span>';
+
+    // Also update in info pesanan
+    const infoDiv = document.getElementById('infoPesanan');
+    const statusRow = infoDiv.querySelector('.detail-row:first-child');
+    if (statusRow) {
+      statusRow.innerHTML =
+        '<span class="detail-label">Kode Pesanan</span><span class="detail-value"><span class="kode">' + (detailData.kode || detailData.id || '—') + '</span></span>';
+    }
+    // Reload detail to update status row properly
+    setTimeout(() => loadDetail(), 1000);
+  } catch (err) {
+    msg.className = 'status-msg error';
+    msg.textContent = '❌ Gagal mengubah status: ' + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Simpan';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadDetail);
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' });
+  }
+</script>
+</body>
+</html>

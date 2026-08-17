@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="bantudulu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tentang · BantuDulu</title>
+  <meta name="description" content="BantuDulu adalah platform jasa on-demand Makassar. Langsung ke rumah, harga transparan, penyedia terverifikasi." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* Hallmark · macrostructure: Manifesto · tone: editorial · anchor hue: warm-amber
+     * Pre-emit critique: P5 H4 E5 S4 R5 V5
+     * Genre: editorial · Theme: custom (BantuDulu · warm navy · amber accent)
+     * Nav: N1a wordmark + 2 links · Footer: Ft5 statement
+     * Differentials: custom theme (not catalog) — first run, no rotation needed
+     */
+
+    /* ─── Tokens ──────────────────────────────────────────── */
+    :root {
+      --color-paper:    oklch(97.5% 0.006 85);
+      --color-paper-2:  oklch(94% 0.008 82);
+      --color-paper-3:  oklch(89% 0.012 78);
+      --color-ink:      oklch(22% 0.034 265);
+      --color-ink-2:    oklch(32% 0.028 262);
+      --color-muted:    oklch(52% 0.014 260);
+      --color-rule:     oklch(85% 0.008 80);
+      --color-rule-2:   oklch(75% 0.012 78);
+
+      --color-accent:     oklch(68% 0.155 72);
+      --color-accent-2:   oklch(72% 0.145 72 / 0.15);
+      --color-accent-ink: oklch(22% 0.034 265);
+
+      --color-bleed:   oklch(22% 0.034 265);
+
+      --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+      --font-body:    "Inter", system-ui, -apple-system, sans-serif;
+      --font-outlier: "JetBrains Mono", ui-monospace, monospace;
+
+      --text-xs:   0.75rem;
+      --text-sm:   0.875rem;
+      --text-base: 1rem;
+      --text-md:   1.125rem;
+      --text-lg:   1.375rem;
+      --text-xl:   1.75rem;
+      --text-2xl:  2.25rem;
+      --text-3xl:  3rem;
+      --text-4xl:  clamp(2.5rem, 5vw + 1rem, 4.5rem);
+      --text-5xl:  clamp(3.25rem, 7vw + 1rem, 6rem);
+
+      --lh-tight:  1.05;
+      --lh-snug:   1.2;
+      --lh-normal: 1.5;
+      --lh-relaxed: 1.65;
+
+      --tracking-display: -0.025em;
+      --tracking-wide:    0.06em;
+      --tracking-label:   0.12em;
+
+      --space-xs:  0.5rem;
+      --space-sm:  0.75rem;
+      --space-md:  1rem;
+      --space-lg:  1.5rem;
+      --space-xl:  2.5rem;
+      --space-2xl: 4rem;
+      --space-3xl: 6.5rem;
+      --space-4xl: 10rem;
+
+      --page-max:    72rem;
+      --page-gutter: clamp(1.25rem, 4vw, 3rem);
+      --measure:     60ch;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --dur-fast: 150ms;
+      --dur-med:  300ms;
+    }
+
+    /* ─── Reset & Base ────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { overflow-x: clip; }
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: var(--lh-normal);
+      color: var(--color-ink-2);
+      background: var(--color-paper);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; height: auto; display: block; }
+
+    /* ─── Utilities ───────────────────────────────────────── */
+    .container {
+      max-width: var(--page-max);
+      margin: 0 auto;
+      padding: 0 var(--page-gutter);
+    }
+    .measure { max-width: var(--measure); }
+    .caps { text-transform: uppercase; letter-spacing: var(--tracking-label); }
+    .block-accent {
+      display: block;
+      color: var(--color-accent);
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
+
+    /* ─── Nav: N1a — wordmark + 2 links ──────────────────── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: oklch(97.5% 0.006 85 / 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 0.5px solid var(--color-rule);
+    }
+    .nav__inner {
+      max-width: var(--page-max);
+      margin: 0 auto;
+      padding: 0 var(--page-gutter);
+      display: flex;
+      align-items: center;
+      height: 60px;
+      gap: var(--space-xl);
+    }
+    .nav__brand {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: var(--text-lg);
+      color: var(--color-ink);
+      letter-spacing: var(--tracking-display);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    .nav__brand mark {
+      background: none;
+      color: var(--color-accent);
+    }
+    .nav__links {
+      display: flex;
+      gap: var(--space-lg);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--color-muted);
+      margin-left: auto;
+    }
+    .nav__links a {
+      transition: color var(--dur-fast) var(--ease-out);
+    }
+    .nav__links a:hover {
+      color: var(--color-ink);
+    }
+
+    /* ─── Hero: Manifesto ─────────────────────────────────── */
+    .hero {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      padding: 100px 0 var(--space-3xl);
+    }
+    .hero__content {
+      max-width: 64rem;
+    }
+    .hero__eyebrow {
+      font-family: var(--font-outlier);
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-label);
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: var(--space-lg);
+    }
+    .hero__title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: var(--text-5xl);
+      line-height: var(--lh-tight);
+      color: var(--color-ink);
+      letter-spacing: var(--tracking-display);
+      margin-bottom: var(--space-xl);
+    }
+    .hero__title .accent-word {
+      color: var(--color-accent);
+      font-style: normal;
+    }
+    .hero__sub {
+      font-size: clamp(var(--text-md), 2vw, var(--text-xl));
+      line-height: var(--lh-relaxed);
+      color: var(--color-muted);
+      max-width: var(--measure);
+    }
+
+    /* ─── Section: Beliefs ────────────────────────────────── */
+    .beliefs {
+      padding: var(--space-3xl) 0;
+    }
+    .beliefs__grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2xl);
+    }
+    .belief {
+      border-top: 0.5px solid var(--color-rule);
+      padding-top: var(--space-xl);
+      display: grid;
+      grid-template-columns: 3rem 1fr;
+      gap: var(--space-lg);
+    }
+    .belief__num {
+      font-family: var(--font-outlier);
+      font-size: var(--text-sm);
+      color: var(--color-accent);
+      letter-spacing: var(--tracking-label);
+      padding-top: 0.2em;
+    }
+    .belief__content h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: var(--text-2xl);
+      line-height: var(--lh-snug);
+      color: var(--color-ink);
+      margin-bottom: var(--space-sm);
+    }
+    .belief__content p {
+      font-size: var(--text-base);
+      line-height: var(--lh-relaxed);
+      color: var(--color-ink-2);
+      max-width: var(--measure);
+    }
+
+    /* ─── Section: Stats — real numbers only ──────────────── */
+    .stats {
+      padding: var(--space-2xl) 0 var(--space-3xl);
+    }
+    .stats__inner {
+      display: flex;
+      gap: var(--space-2xl);
+      flex-wrap: wrap;
+    }
+    .stat {
+      flex: 1;
+      min-width: 140px;
+    }
+    .stat__num {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: var(--text-4xl);
+      line-height: var(--lh-tight);
+      color: var(--color-ink);
+      letter-spacing: var(--tracking-display);
+    }
+    .stat__num mark {
+      background: none;
+      color: var(--color-accent);
+    }
+    .stat__label {
+      font-size: var(--text-sm);
+      color: var(--color-muted);
+      letter-spacing: var(--tracking-label);
+      text-transform: uppercase;
+      margin-top: var(--space-xs);
+    }
+    .stat__note {
+      font-size: var(--text-xs);
+      color: var(--color-rule-2);
+      margin-top: var(--space-2xs);
+    }
+
+    /* ─── Bleed section ───────────────────────────────────── */
+    .bleed {
+      background: var(--color-bleed);
+      color: oklch(92% 0.008 85);
+      padding: var(--space-3xl) 0;
+      margin: var(--space-3xl) calc(-1 * var(--page-gutter));
+      padding-left: var(--page-gutter);
+      padding-right: var(--page-gutter);
+    }
+    .bleed blockquote {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(var(--text-xl), 3vw, var(--text-3xl));
+      line-height: var(--lh-snug);
+      max-width: var(--measure);
+      font-style: normal;
+    }
+    .bleed blockquote cite {
+      display: block;
+      margin-top: var(--space-lg);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 400;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: oklch(75% 0.03 70);
+      font-style: normal;
+    }
+
+    /* ─── CTA ─────────────────────────────────────────────── */
+    .cta {
+      padding: var(--space-3xl) 0 var(--space-4xl);
+      text-align: center;
+    }
+    .cta__title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: var(--text-3xl);
+      line-height: var(--lh-snug);
+      color: var(--color-ink);
+      margin-bottom: var(--space-lg);
+    }
+    .cta__btn {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: var(--text-base);
+      color: var(--color-accent-ink);
+      background: var(--color-accent);
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform var(--dur-fast) var(--ease-out),
+                  box-shadow var(--dur-fast) var(--ease-out);
+    }
+    .cta__btn:hover {
+      transform: scale(1.03);
+    }
+    .cta__btn:active {
+      transform: scale(0.97);
+    }
+    .cta__btn:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 3px;
+    }
+
+    /* ─── Footer: Ft5 Statement ──────────────────────────── */
+    .footer {
+      border-top: 0.5px solid var(--color-rule);
+      padding: var(--space-2xl) 0 var(--space-xl);
+    }
+    .footer__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+    }
+    .footer__brand {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: var(--text-base);
+      color: var(--color-ink);
+    }
+    .footer__brand mark {
+      background: none;
+      color: var(--color-accent);
+    }
+    .footer__statement {
+      font-size: var(--text-sm);
+      color: var(--color-muted);
+    }
+    .footer__links {
+      display: flex;
+      gap: var(--space-lg);
+      font-size: var(--text-sm);
+      color: var(--color-muted);
+    }
+    .footer__links a {
+      transition: color var(--dur-fast) var(--ease-out);
+    }
+    .footer__links a:hover {
+      color: var(--color-ink);
+    }
+
+    /* ─── Responsive ──────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .nav__links { display: none; }
+      .hero__title { font-size: clamp(2.25rem, 10vw, 3.5rem); }
+      .belief { grid-template-columns: 2rem 1fr; }
+      .stats__inner { flex-direction: column; gap: var(--space-xl); }
+      .footer__inner { flex-direction: column; text-align: center; }
+      .bleed { margin-left: 0; margin-right: 0; }
+    }
+    @media (max-width: 375px) {
+      .hero { min-height: auto; padding: 80px 0 var(--space-2xl); }
+      .cta__btn { width: 100%; text-align: center; }
+    }
+
+    /* ─── Reduced motion ──────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ Nav ═══ -->
+  <header class="nav" role="banner">
+    <div class="nav__inner">
+      <a class="nav__brand" href="/" aria-label="BantuDulu — beranda">
+        <mark>Bantu</mark>Dulu
+      </a>
+      <nav class="nav__links" aria-label="Navigasi utama">
+        <a href="/">Beranda</a>
+        <a href="/cari">Layanan</a>
+        <a href="/tentang-hallmark" aria-current="page">Tentang</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ═══ Hero ═══ -->
+    <section class="hero">
+      <div class="container hero__content">
+        <p class="hero__eyebrow">Tentang BantuDulu</p>
+        <h1 class="hero__title">
+          Jasa on-demand<br />
+          <span class="accent-word">Makassar.</span>
+          <span class="block-accent">Langsung ke rumah.</span>
+        </h1>
+        <p class="hero__sub">
+          Kami menghubungkan warga Makassar dengan penyedia jasa terverifikasi
+          — bersih rumah, laundry, perbaikan, pijat tradisional, MUA, dan helper
+          — dengan harga yang transparan. Tanpa biaya tersembunyi. Tanpa drama.
+        </p>
+      </div>
+    </section>
+
+    <!-- ═══ Stats: real data ═══ -->
+    <section class="stats">
+      <div class="container">
+        <div class="stats__inner">
+          <div class="stat">
+            <div class="stat__num"><mark>54</mark></div>
+            <div class="stat__label">Pesanan Diproses</div>
+            <div class="stat__note">per Juni 2026</div>
+          </div>
+          <div class="stat">
+            <div class="stat__num"><mark>6</mark></div>
+            <div class="stat__label">Kategori Layanan</div>
+            <div class="stat__note">Cleaning, Antar, Perbaikan, Pijat, MUA, Helper</div>
+          </div>
+          <div class="stat">
+            <div class="stat__num"><mark>7</mark></div>
+            <div class="stat__label">Status Pesanan</div>
+            <div class="stat__note">Dari menunggu hingga selesai</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Beliefs ═══ -->
+    <section class="beliefs">
+      <div class="container">
+        <div class="beliefs__grid">
+
+          <article class="belief">
+            <div class="belief__num">01</div>
+            <div class="belief__content">
+              <h2>Harga tanpa teka-teki</h2>
+              <p>
+                Yang kamu lihat adalah yang kamu bayar. Ongkos kirim, biaya tambahan,
+                semuanya dijelaskan sebelum kamu klik <em>Pesan Sekarang</em>.
+                Tidak ada biaya admin diam-diam.
+              </p>
+            </div>
+          </article>
+
+          <article class="belief">
+            <div class="belief__num">02</div>
+            <div class="belief__content">
+              <h2>Penyedia, bukan sekadar daftar</h2>
+              <p>
+                Setiap mitra kami verifikasi sebelum bisa menerima pesanan.
+                Tidak ada akun anonim. Setiap tukang, pembersih, dan terapis
+                adalah orang yang nyata dengan reputasi yang bisa dilihat.
+              </p>
+            </div>
+          </article>
+
+          <article class="belief">
+            <div class="belief__num">03</div>
+            <div class="belief__content">
+              <h2>Dibuat di Makassar</h2>
+              <p>
+                BantuDulu lahir dari kebutuhan warga Makassar. Bukan startup
+                Jakarta yang di-<em>expand</em> ke daerah. Kami tahu jalan mana
+                yang macet, mana tukang yang bisa diandalkan, dan mana harga
+                yang pantas.
+              </p>
+            </div>
+          </article>
+
+          <article class="belief">
+            <div class="belief__num">04</div>
+            <div class="belief__content">
+              <h2>Teknologi yang melayani, bukan mempersulit</h2>
+              <p>
+                Aplikasi web, PWA, dan aplikasi Android — semuanya bisa diakses
+                tanpa akun bank atau kartu kredit. Cukup HP dan nomor WhatsApp.
+              </p>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Bleed quote ═══ -->
+    <section class="bleed">
+      <div class="container">
+        <blockquote>
+          &ldquo;Kami tidak menjual janji. Kami menjual jasa yang datang
+          ke rumah Anda, dengan harga yang Anda setujui sebelumnya.&rdquo;
+          <cite>Ahmad Maulana Agung · Pendiri BantuDulu</cite>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- ═══ CTA ═══ -->
+    <section class="cta">
+      <div class="container">
+        <h2 class="cta__title">Butuh bantuan sekarang?</h2>
+        <a class="cta__btn" href="/cari">Cari Layanan</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══ Footer ═══ -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand"><mark>Bantu</mark>Dulu</div>
+      <p class="footer__statement">Jasa on-demand Makassar. Langsung ke rumah.</p>
+      <nav class="footer__links" aria-label="Footer links">
+        <a href="/kebijakan-privasi">Privasi</a>
+        <a href="/syarat-ketentuan">Syarat</a>
+        <a href="/tentang-hallmark">Tentang</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    }
+  </script>
+</body>
+</html>

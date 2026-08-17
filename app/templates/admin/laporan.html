@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan — Admin BantuDulu</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="apple-touch-icon" href="/static/images/pwa/apple-touch-icon.png" />
+  <meta name="theme-color" content="#042544" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BantuDulu" />
+  <meta name="description" content="Layanan jasa on-demand langsung ke rumah Anda. Bersih rumah, cuci AC, les privat, pijat, salon, bantu belanja." />
+  <meta name="application-name" content="BantuDulu" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://app.kazza.id">
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <img src="/static/images/logo.png?v=3" alt="BantuDulu" style="height:32px; width:auto;">
+    <h2>Bantu<span>Dulu</span></h2>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Menu</div>
+    <a href="/admin/dashboard" class="nav-item">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a href="/admin/pesanan" class="nav-item">
+      <span class="nav-icon">📋</span> Pesanan
+    </a>
+    <a href="/admin/layanan" class="nav-item">
+      <span class="nav-icon">🧹</span> Layanan
+    </a>
+    <a href="/admin/laporan" class="nav-item active">
+      <span class="nav-icon">📈</span> Laporan
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/" class="nav-item">
+      <span class="nav-icon">←</span> Kembali ke Situs
+    </a>
+  </div>
+</aside>
+
+<!-- ===== Main Wrapper ===== -->
+<div class="main-wrapper">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <img src="/static/images/logo.png?v=3" style="height:28px;">
+      <h1>Laporan</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="admin-info">
+        <div class="admin-avatar">A</div>
+        <div>
+          <div class="admin-name">Admin BantuDulu</div>
+          <div class="admin-role">Administrator</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <!-- Date Range Filter -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Filter Laporan</h3>
+      </div>
+      <div class="card-body" style="padding: 20px 24px;">
+        <div class="date-range">
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="startDate">Dari Tanggal</label>
+            <input type="date" id="startDate" class="form-control">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="endDate">Sampai Tanggal</label>
+            <input type="date" id="endDate" class="form-control">
+          </div>
+          <button class="btn btn-primary" onclick="loadReport()" style="margin-top:18px;">🔍 Tampilkan</button>
+          <button class="btn btn-outline" onclick="resetDateRange()" style="margin-top:18px;">↺ Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report Stats -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Ringkasan Laporan</h3>
+        <span id="reportPeriod" style="font-size:13px;color:var(--gray-400);"></span>
+      </div>
+      <div class="card-body" style="padding: 20px 24px;">
+        <div class="report-stats" id="reportStats">
+          <div class="report-stat-item">
+            <div class="label">Total Pesanan</div>
+            <div class="value" id="rTotalPesanan">—</div>
+          </div>
+          <div class="report-stat-item">
+            <div class="label">Pesanan Selesai</div>
+            <div class="value" id="rSelesai">—</div>
+          </div>
+          <div class="report-stat-item">
+            <div class="label">Pesanan Dibatalkan</div>
+            <div class="value" id="rDibatalkan">—</div>
+          </div>
+          <div class="report-stat-item">
+            <div class="label">Total Pendapatan</div>
+            <div class="value" id="rPendapatan">—</div>
+          </div>
+          <div class="report-stat-item">
+            <div class="label">Rata-rata Pesanan/Hari</div>
+            <div class="value" id="rRataHari">—</div>
+          </div>
+          <div class="report-stat-item">
+            <div class="label">Pelanggan Aktif</div>
+            <div class="value" id="rPelangganAktif">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Section -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Ekspor Data</h3>
+      </div>
+      <div class="card-body" style="padding: 20px 24px;">
+        <div class="quick-actions">
+          <button class="btn btn-outline" onclick="exportCSV()" id="exportCSVBtn">
+            📄 Ekspor CSV
+          </button>
+          <button class="btn btn-outline" onclick="exportExcel()" id="exportExcelBtn">
+            📊 Ekspor Excel
+          </button>
+          <button class="btn btn-outline" onclick="exportPDF()" id="exportPDFBtn">
+            📑 Ekspor PDF
+          </button>
+        </div>
+        <p style="margin-top:12px;font-size:13px;color:var(--gray-400);">
+          💡 Fitur ekspor akan segera tersedia. Saat ini dalam tahap pengembangan.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function getDateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+
+function setDefaultDates() {
+  const today = new Date();
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+
+  document.getElementById('startDate').value = getDateStr(thirtyDaysAgo);
+  document.getElementById('endDate').value = getDateStr(today);
+}
+
+function resetDateRange() {
+  setDefaultDates();
+  loadReport();
+}
+
+function formatRupiah(val) {
+  if (val == null) return '—';
+  return 'Rp ' + Number(val).toLocaleString('id-ID');
+}
+
+// ── Toast Notification ──
+function showToast(type, message) {
+  let c = document.getElementById('toastContainer');
+  if (!c) { c = document.createElement('div'); c.id = 'toastContainer'; c.className = 'toast-container'; document.body.appendChild(c); }
+  const icons = {error:'❌', warning:'⚠️', success:'✅', info:'ℹ️'};
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || 'info');
+  el.innerHTML = '<span class="toast-icon">' + (icons[type]||'ℹ️') + '</span> ' + message;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+// ── /Toast ──
+
+async function loadReport() {
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+
+  if (!startDate || !endDate) {
+    alert('Harap pilih tanggal mulai dan tanggal selesai.');
+    return;
+  }
+
+  // Show loading state
+  document.querySelectorAll('#reportStats .value').forEach(el => el.textContent = '...');
+  document.getElementById('reportPeriod').textContent = 'Memuat...';
+
+  try {
+    const params = new URLSearchParams({ start_date: startDate, end_date: endDate });
+    const res = await fetch('/api/admin/laporan?' + params.toString());
+    if (!res.ok) throw new Error('HTTP ' + status);
+
+    const data = await res.json();
+
+    document.getElementById('rTotalPesanan').textContent = data.total_pesanan ?? data.totalOrders ?? '0';
+    document.getElementById('rSelesai').textContent = data.selesai ?? data.completed ?? '0';
+    document.getElementById('rDibatalkan').textContent = data.dibatalkan ?? data.cancelled ?? '0';
+    document.getElementById('rPendapatan').textContent = formatRupiah(data.total_pendapatan ?? data.totalRevenue ?? 0);
+    document.getElementById('rRataHari').textContent = data.rata_rata_hari ?? data.avgPerDay ?? '—';
+    document.getElementById('rPelangganAktif').textContent = data.pelanggan_aktif ?? data.activeCustomers ?? '—';
+
+    // Format period text
+    const fmtStart = new Date(startDate + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const fmtEnd = new Date(endDate + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    document.getElementById('reportPeriod').textContent = fmtStart + ' — ' + fmtEnd;
+
+  } catch (err) {
+    console.error('Gagal memuat laporan:', err);
+    showToast('error', 'Gagal memuat laporan. Cek koneksi server.');
+    document.querySelectorAll('#reportStats .value').forEach(el => el.textContent = '⚠️');
+    document.getElementById('reportPeriod').textContent = 'Gagal memuat data. Pastikan server berjalan.';
+  }
+}
+
+function exportCSV() {
+  alert('Fitur ekspor CSV sedang dalam pengembangan. Segera hadir!');
+}
+
+function exportExcel() {
+  alert('Fitur ekspor Excel sedang dalam pengembangan. Segera hadir!');
+}
+
+function exportPDF() {
+  alert('Fitur ekspor PDF sedang dalam pengembangan. Segera hadir!');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setDefaultDates();
+  loadReport();
+});
+</script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    }
+  </script>
+</body>
+</html>

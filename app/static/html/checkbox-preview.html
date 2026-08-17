@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Preview Checkbox BantuDulu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    background: #f4f7f6;
+    color: #1e293b;
+    padding: 20px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .preview-title {
+    font-size: 18px; font-weight: 800;
+    color: #042544;
+    margin: 20px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  .preview-title:first-child { margin-top: 0; }
+  .preview-sub { font-size: 12px; color: #6b7280; margin-bottom: 12px; font-weight: 500; }
+
+  /* ── Card wrapper ── */
+  .section-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  /* ══════════════════════════════════════
+     A: SEKARANG (default browser checkbox)
+     ══════════════════════════════════════ */
+  .style-a .addon-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; background: #f9fafb; border-radius: 14px;
+    margin-bottom: 8px; cursor: pointer; user-select: none;
+    transition: background 0.15s;
+  }
+  .style-a .addon-item.checked {
+    background: #fef7e6; border: 1px solid #EAAE24;
+  }
+  .style-a .addon-item input[type="checkbox"] {
+    width: 20px; height: 20px;
+    accent-color: #042544; flex-shrink: 0; margin-right: 10px;
+  }
+  .style-a .addon-label { flex: 1; font-size: 14px; font-weight: 600; color: #1f2937; }
+  .style-a .addon-price { font-size: 14px; font-weight: 700; color: #042544; }
+
+  /* ══════════════════════════════════════
+     B: TOGGLE SWITCH (iOS style)
+     ══════════════════════════════════════ */
+  .style-b .addon-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; background: #f9fafb; border-radius: 14px;
+    margin-bottom: 8px; cursor: pointer; user-select: none;
+    transition: all 0.2s;
+  }
+  .style-b .addon-item.checked {
+    background: #fef7e6; border: 1px solid #EAAE24;
+  }
+  .style-b .addon-info { flex: 1; display: flex; align-items: center; gap: 10px; }
+  .style-b .toggle-switch {
+    position: relative; width: 44px; height: 26px; flex-shrink: 0;
+  }
+  .style-b .toggle-track {
+    position: absolute; inset: 0;
+    background: #d1d5db; border-radius: 13px;
+    transition: background 0.25s;
+  }
+  .style-b .toggle-thumb {
+    position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px; background: #fff;
+    border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    transition: transform 0.25s;
+  }
+  .style-b .checked .toggle-track { background: #042544; }
+  .style-b .checked .toggle-thumb { transform: translateX(18px); }
+  .style-b .addon-label { font-size: 14px; font-weight: 600; color: #1f2937; }
+  .style-b .addon-price { font-size: 14px; font-weight: 700; color: #042544; }
+
+  /* ══════════════════════════════════════
+     C: CUSTOM ROUNDED CHECKBOX (circle)
+     ══════════════════════════════════════ */
+  .style-c .addon-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; background: #f9fafb; border-radius: 14px;
+    margin-bottom: 8px; cursor: pointer; user-select: none;
+    transition: all 0.2s;
+  }
+  .style-c .addon-item.checked {
+    background: #fef7e6; border: 1px solid #EAAE24;
+  }
+  .style-c .addon-info { flex: 1; display: flex; align-items: center; gap: 10px; }
+  .style-c .custom-cb {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid #d1d5db; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .style-c .checked .custom-cb {
+    border-color: #042544; background: #042544;
+  }
+  .style-c .checked .custom-cb::after {
+    content: '✓'; color: #fff; font-size: 13px; font-weight: 700;
+  }
+  .style-c .addon-label { font-size: 14px; font-weight: 600; color: #1f2937; }
+  .style-c .addon-price { font-size: 14px; font-weight: 700; color: #042544; }
+
+  /* ══════════════════════════════════════
+     D: PILL/TAG STYLE (no visible checkbox)
+     ══════════════════════════════════════ */
+  .style-d .addon-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    background: #fff; border: 2px solid #e5e7eb;
+    border-radius: 100px; margin-bottom: 8px;
+    cursor: pointer; user-select: none;
+    transition: all 0.2s;
+  }
+  .style-d .addon-item.checked {
+    border-color: #042544; background: #f0f4ff;
+  }
+  .style-d .addon-info { display: flex; align-items: center; gap: 8px; }
+  .style-d .pill-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #d1d5db; transition: all 0.25s;
+  }
+  .style-d .checked .pill-dot { background: #042544; box-shadow: 0 0 0 3px rgba(4,37,68,0.15); }
+  .style-d .addon-label { font-size: 14px; font-weight: 600; color: #1f2937; }
+  .style-d .addon-price { font-size: 14px; font-weight: 700; color: #042544; }
+</style>
+</head>
+<body>
+
+<!-- YANG SEKARANG -->
+<div class="section-card style-a">
+  <div class="preview-title">A. Yang Sekarang ⬅️</div>
+  <div class="preview-sub">☐ Browser default checkbox</div>
+  <div class="addon-item checked">
+    <input type="checkbox" checked />
+    <span class="addon-label">Refleksi Kaki</span>
+    <span class="addon-price">+Rp30.000</span>
+  </div>
+  <div class="addon-item">
+    <input type="checkbox" />
+    <span class="addon-label">Kerokan Tradisional</span>
+    <span class="addon-price">+Rp20.000</span>
+  </div>
+  <div class="addon-item">
+    <input type="checkbox" />
+    <span class="addon-label">Kretek Rempah</span>
+    <span class="addon-price">+Rp30.000</span>
+  </div>
+</div>
+
+<!-- OPSI B: TOGGLE SWITCH -->
+<div class="section-card style-b">
+  <div class="preview-title">B. Toggle Switch (iOS)</div>
+  <div class="preview-sub">Pill switch ala iOS/Android</div>
+  <div class="addon-item checked">
+    <div class="addon-info">
+      <div class="toggle-switch">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </div>
+      <span class="addon-label">Refleksi Kaki</span>
+    </div>
+    <span class="addon-price">+Rp30.000</span>
+  </div>
+  <div class="addon-item">
+    <div class="addon-info">
+      <div class="toggle-switch">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </div>
+      <span class="addon-label">Kerokan Tradisional</span>
+    </div>
+    <span class="addon-price">+Rp20.000</span>
+  </div>
+  <div class="addon-item">
+    <div class="addon-info">
+      <div class="toggle-switch">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </div>
+      <span class="addon-label">Kretek Rempah</span>
+    </div>
+    <span class="addon-price">+Rp30.000</span>
+  </div>
+</div>
+
+<!-- OPSI C: CUSTOM ROUNDED CHECKBOX -->
+<div class="section-card style-c">
+  <div class="preview-title">C. Custom Lingkaran (Radio-style) 🔵</div>
+  <div class="preview-sub">☑ Lingkaran custom kayak varian & payment</div>
+  <div class="addon-item checked">
+    <div class="addon-info">
+      <div class="custom-cb">✓</div>
+      <span class="addon-label">Refleksi Kaki</span>
+    </div>
+    <span class="addon-price">+Rp30.000</span>
+  </div>
+  <div class="addon-item">
+    <div class="addon-info">
+      <div class="custom-cb"></div>
+      <span class="addon-label">Kerokan Tradisional</span>
+    </div>
+    <span class="addon-price">+Rp20.000</span>
+  </div>
+  <div class="addon-item">
+    <div class="addon-info">
+      <div class="custom-cb"></div>
+      <span class="addon-label">Kretek Rempah</span>
+    </div>
+    <span class="addon-price">+Rp30.000</span>
+  </div>
+</div>
+
+<!-- OPSI D: PILL/TAG -->
+<div class="section-card style-d">
+  <div class="preview-title">D. Pill/Tag Style 💊</div>
+  <div class="preview-sub">Tombol pil tanpa checkbox — highlight + dot aja</div>
+  <div class="addon-item checked">
+    <div class="addon-info">
+      <div class="pill-dot"></div>
+      <span class="addon-label">Refleksi Kaki</span>
+    </div>
+    <span class="addon-price">+Rp30.000</span>
+  </div>
+  <div class="addon-item">
+    <div class="addon-info">
+      <div class="pill-dot"></div>
+      <span class="addon-label">Kerokan Tradisional</span>
+    </div>
+    <span class="addon-price">+Rp20.000</span>
+  </div>
+  <div class="addon-item">
+    <div class="addon-info">
+      <div class="pill-dot"></div>
+      <span class="addon-label">Kretek Rempah</span>
+    </div>
+    <span class="addon-price">+Rp30.000</span>
+  </div>
+</div>
+
+</body>
+</html>

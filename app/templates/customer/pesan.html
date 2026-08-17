@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Pesan · BantuDulu</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="apple-touch-icon" href="/static/images/pwa/apple-touch-icon.png" />
+  <meta name="theme-color" content="#042544" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BantuDulu" />
+  <meta name="description" content="Layanan jasa on-demand langsung ke rumah Anda. Bersih rumah, cuci AC, les privat, pijat, salon, bantu belanja." />
+  <meta name="application-name" content="BantuDulu" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f4f7f6;
+      color: #1e293b;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-bottom: 100px;
+    }
+    .app-container { max-width: 480px; margin: 0 auto; position: relative; }
+
+    /* ─── Hero ─────────────────────────────────── */
+    .order-hero {
+      background: linear-gradient(135deg, rgba(4,37,68,0.85) 0%, rgba(6,58,110,0.7) 50%, rgba(10,80,152,0.6) 100%),
+                  url('/static/images/bg-beranda.png') center / cover no-repeat;
+      border-radius: 0 0 32px 32px;
+      padding: 20px 20px 28px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      min-height: 170px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .order-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30px;
+      left: -20px;
+      right: -20px;
+      height: 60px;
+      background: #f4f7f6;
+      border-radius: 50% 50% 0 0;
+    }
+    .hero-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .btn-back {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(4px);
+      border: none; color: #fff;
+      font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-back:active { background: rgba(255,255,255,0.35); }
+    .hero-step {
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.75;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .hero-service {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-service-icon {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px; flex-shrink: 0;
+    }
+    .hero-service-info { flex: 1; }
+    .hero-service-info .svc-title {
+      font-size: 20px; font-weight: 800;
+      margin-bottom: 2px; line-height: 1.2;
+    }
+    .hero-service-info .svc-cat {
+      font-size: 12px; font-weight: 500;
+      opacity: 0.8;
+    }
+    .hero-service-price {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .hero-service-price .price-label {
+      font-size: 11px; font-weight: 500;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .hero-service-price .price-value {
+      font-size: 24px; font-weight: 800;
+      color: #EAAE24;
+      line-height: 1.1;
+      margin-top: 2px;
+    }
+
+    /* ─── Skeleton ─────────────────────────────── */
+    .skeleton-row {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .skeleton-icon {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.12);
+      flex-shrink: 0;
+      animation: pulse 1.5s infinite;
+    }
+    .skeleton-lines { flex: 1; }
+    .skeleton-line {
+      height: 14px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.12);
+      margin-bottom: 8px;
+      animation: pulse 1.5s infinite;
+    }
+    .skeleton-line:first-child { width: 60%; }
+    .skeleton-line:last-child { width: 40%; margin-bottom: 0; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.7; }
+    }
+
+    /* ─── Content ──────────────────────────────── */
+    .content { padding: 12px 16px 0; position: relative; z-index: 1; margin-top: -8px; }
+
+    .section-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #042544;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .section-title .hl { color: #EAAE24; }
+
+    /* ─── Varian Cards ─────────────────────────── */
+    .varian-group { display: flex; flex-direction: column; gap: 10px; }
+    .varian-option {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      gap: 14px;
+      position: relative;
+    }
+    .varian-option:active { transform: scale(0.98); }
+    .varian-option.selected {
+      border-color: #042544;
+      background: #f0f4ff;
+    }
+    .varian-option .v-radio {
+      width: 22px; height: 22px;
+      border: 2px solid #d1d5db;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .varian-option.selected .v-radio {
+      border-color: #042544;
+      background: #042544;
+    }
+    .varian-option.selected .v-radio::after {
+      content: '✓';
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .varian-option .v-label { flex: 1; font-size: 14px; font-weight: 600; color: #1e293b; }
+    .varian-option .v-price { font-size: 16px; font-weight: 700; color: #EAAE24; white-space: nowrap; }
+
+    /* ─── Floating Inputs ──────────────────────── */
+    .floating-group { position: relative; margin-bottom: 16px; }
+    .floating-group:last-child { margin-bottom: 0; }
+    .floating-group input,
+    .floating-group select,
+    .floating-group textarea {
+      width: 100%;
+      padding: 18px 14px 8px;
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px;
+      color: #1e293b;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .floating-group textarea { min-height: 80px; resize: vertical; }
+    .floating-group input:focus,
+    .floating-group select:focus,
+    .floating-group textarea:focus {
+      border-color: #042544;
+      box-shadow: 0 0 0 3px rgba(4,37,68,0.08);
+    }
+    .floating-group label {
+      position: absolute;
+      left: 14px;
+      top: 16px;
+      font-size: 14px;
+      color: #9ca3af;
+      font-weight: 500;
+      pointer-events: none;
+      transition: all 0.18s;
+      background: #fff;
+      padding: 0 4px;
+    }
+    .floating-group input:focus ~ label,
+    .floating-group input:not(:placeholder-shown) ~ label,
+    .floating-group select ~ label,
+    .floating-group textarea:focus ~ label,
+    .floating-group textarea:not(:placeholder-shown) ~ label {
+      top: 4px;
+      font-size: 11px;
+      color: #042544;
+    }
+    .floating-group input::placeholder,
+    .floating-group textarea::placeholder { color: transparent; }
+    .floating-group select {
+      padding-top: 18px;
+      padding-bottom: 8px;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+    .row { display: flex; gap: 12px; }
+    .row .floating-group { flex: 1; }
+
+    /* ─── Payment ──────────────────────────────── */
+    .payment-group { display: flex; flex-direction: column; gap: 10px; }
+    .payment-option {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      gap: 12px;
+    }
+    .payment-option:active { transform: scale(0.98); }
+    .payment-option.selected {
+      border-color: #042544;
+      background: #f0f4ff;
+    }
+    .payment-option .pay-dot {
+      width: 22px; height: 22px;
+      border: 2px solid #d1d5db;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .payment-option.selected .pay-dot {
+      border-color: #042544;
+      background: #042544;
+    }
+    .payment-option.selected .pay-dot::after {
+      content: '✓';
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .payment-option .pay-icon { font-size: 26px; flex-shrink: 0; }
+    .payment-option .pay-label { flex: 1; }
+    .payment-option .pay-name { font-size: 14px; font-weight: 600; color: #1e293b; }
+    .payment-option .pay-sub { font-size: 12px; color: #6b7280; font-weight: 400; }
+    .payment-option .pay-badge {
+      font-size: 10px;
+      font-weight: 700;
+      background: #EAAE24;
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .payment-gateway-info {
+      margin-top: 12px;
+      padding: 14px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+    }
+    .payment-gateway-info .pg-text {
+      font-size: 13px;
+      color: #6b7280;
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .payment-gateway-info .pg-logos {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .payment-gateway-info .pg-logos span {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    /* ─── Summary ──────────────────────────────── */
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      font-size: 14px;
+      color: #6b7280;
+    }
+    .summary-row:first-child { padding-top: 0; }
+    .summary-row.total {
+      border-top: 2px solid #e5e7eb;
+      margin-top: 8px;
+      padding-top: 14px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #042544;
+    }
+    .summary-row.total span:last-child { font-size: 22px; color: #EAAE24; }
+    .summary-payment {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #f9fafb;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .summary-payment strong { color: #1e293b; }
+
+    /* ─── Sticky Bottom Bar ────────────────────── */
+    .sticky-bottom {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #fff;
+      border-top: 1px solid #e5e7eb;
+      padding: 12px 20px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      max-width: 480px;
+      margin: 0 auto;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+    }
+    .sticky-bottom .sb-info { flex: 1; }
+    .sticky-bottom .sb-total-label { font-size: 11px; color: #9ca3af; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .sticky-bottom .sb-total { font-size: 22px; font-weight: 800; color: #EAAE24; line-height: 1.2; }
+    .btn-pesan {
+      padding: 16px 32px;
+      background: linear-gradient(135deg, #042544, #063a6e);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(4,37,68,0.3);
+    }
+    .btn-pesan:active { transform: scale(0.96); box-shadow: 0 2px 8px rgba(4,37,68,0.2); }
+    .btn-pesan:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ─── Loading ──────────────────────────────── */
+    .spinner-overlay {
+      position: fixed; inset: 0;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #042544;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-text {
+      margin-top: 14px;
+      font-size: 15px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    /* ─── Success Modal ────────────────────────── */
+    .success-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      padding: 20px;
+    }
+    .success-modal {
+      background: #fff;
+      border-radius: 28px;
+      padding: 40px 28px 28px;
+      max-width: 340px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+      animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .success-check {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: #ecfdf5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 36px;
+    }
+    .success-title {
+      font-size: 22px; font-weight: 800;
+      color: #042544;
+      margin-bottom: 4px;
+    }
+    .success-sub {
+      font-size: 14px; color: #6b7280;
+      margin-bottom: 16px;
+    }
+    .success-kode-box {
+      background: #f0f4ff;
+      border: 1px dashed #c7d2fe;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+    .success-kode-label { font-size: 11px; color: #6b7280; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .success-kode-val { font-size: 20px; font-weight: 800; color: #042544; margin-top: 2px; letter-spacing: 1px; }
+    .success-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #042544, #063a6e);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s;
+      text-decoration: none;
+    }
+    .success-btn:active { transform: scale(0.97); }
+    .success-btn-outline {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: #fff;
+      color: #042544;
+      border: 2px solid #042544;
+      border-radius: 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.15s;
+      text-decoration: none;
+    }
+    .success-btn-outline:active { background: #f0f4ff; }
+
+    /* ─── Addon Toggle Switch ──────────────────── */
+    .addon-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: #f9fafb;
+      border-radius: 14px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .addon-item.checked {
+      background: #fef7e6;
+      border-color: #EAAE24;
+    }
+    .addon-item .addon-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .addon-item input[type="checkbox"] {
+      position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px; height: 26px;
+      flex-shrink: 0;
+    }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: #d1d5db;
+      border-radius: 13px;
+      transition: background 0.25s;
+    }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px;
+      width: 20px; height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      transition: transform 0.25s;
+    }
+    .addon-item.checked .toggle-track { background: #042544; }
+    .addon-item.checked .toggle-thumb { transform: translateX(18px); }
+    .addon-item .addon-label { font-size: 14px; font-weight: 600; color: #1f2937; }
+    .addon-item .addon-price { font-size: 14px; font-weight: 700; color: #042544; }
+
+    /* ─── Date / Time / Alamat ─────────────────  */
+    .date-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .date-pill {
+      padding: 10px 18px;
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px; font-weight: 600;
+      background: #fff; color: #1e293b;
+      cursor: pointer; transition: all 0.2s;
+      flex: 1; text-align: center; user-select: none;
+    }
+    .date-pill:active { transform: scale(0.96); }
+    .date-pill.active {
+      border-color: #042544;
+      background: #f0f4ff;
+      color: #042544;
+    }
+    .date-pill .pill-icon { display: block; font-size: 20px; margin-bottom: 2px; }
+    .date-pill .pill-label { display: block; font-size: 11px; font-weight: 400; color: #6b7280; margin-top: 1px; }
+    .date-pill.active .pill-label { color: #042544; }
+    .date-picker-wrap {
+      position: relative;
+      margin-bottom: 12px;
+    }
+    .date-picker-wrap input[type="date"] {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px;
+      color: #1e293b;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .date-picker-wrap input[type="date"]:focus {
+      border-color: #042544;
+      box-shadow: 0 0 0 3px rgba(4,37,68,0.08);
+    }
+    .date-picker-wrap input[type="date"]:valid {
+      border-color: #042544;
+    }
+    .time-row { display: flex; gap: 12px; align-items: center; }
+    .time-row label { font-size: 14px; font-weight: 600; color: #374151; white-space: nowrap; }
+    .time-row select {
+      flex: 1;
+      padding: 14px;
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px;
+      color: #1e293b;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+    .time-row select:focus {
+      border-color: #042544;
+      box-shadow: 0 0 0 3px rgba(4,37,68,0.08);
+    }
+    .alamat-wrap { margin-top: 12px; }
+    .alamat-wrap textarea {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px;
+      color: #1e293b;
+      background: #fff;
+      outline: none;
+      min-height: 80px;
+      resize: vertical;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .alamat-wrap textarea:focus {
+      border-color: #042544;
+      box-shadow: 0 0 0 3px rgba(4,37,68,0.08);
+    }
+    .alamat-wrap .alamat-label {
+      display: block;
+      font-size: 14px; font-weight: 600; color: #374151;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Hero Header -->
+    <div class="order-hero">
+      <div class="hero-top">
+        <a href="javascript:history.back()" class="btn-back" aria-label="Kembali">‹</a>
+        <div class="hero-step" id="heroStep">Lengkapi Pesanan</div>
+      </div>
+      <div class="hero-service" id="heroService">
+        <!-- SSR skeleton fallback -->
+        {% if svc_data %}
+        <div class="hero-service-icon">{{ svc_data.kategori_icon or '📋' }}</div>
+        <div class="hero-service-info">
+          <div class="svc-title">{{ svc_data.nama }}</div>
+          <div class="svc-cat">{{ svc_data.kategori_nama or '' }}</div>
+        </div>
+        <div class="hero-service-price">
+          <div class="price-label">Mulai Dari</div>
+          <div class="price-value" id="heroPrice">Rp{{ (svc_data.varian | map(attribute='harga') | min) | default(0) | formatrupiah }}</div>
+        </div>
+        {% else %}
+        <div class="skeleton-row">
+          <div class="skeleton-icon"></div>
+          <div class="skeleton-lines">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="content">
+
+      <!-- Step 1: Pilih Varian -->
+      <div id="stepVarian" class="section-card">
+        <div class="section-title"><span class="num">1</span> Pilih <span class="hl">Varian</span></div>
+        <div class="varian-group" id="varianGroup">
+          {% if svc_data and svc_data.varian %}
+            {% for v in svc_data.varian %}
+            <div class="varian-option{% if loop.first %} selected{% endif %}" data-id="{{ v.id }}" data-harga="{{ v.harga }}" onclick="selectVarian(this)">
+              <div class="v-radio"></div>
+              <span class="v-label">{{ v.nama }}</span>
+              <span class="v-price">Rp{{ v.harga | formatrupiah }}</span>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="skeleton skeleton-row" style="height:56px;border-radius:16px;margin-bottom:8px;"></div>
+            <div class="skeleton skeleton-row" style="height:56px;border-radius:16px;"></div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Step 2: Jadwal & Alamat -->
+      <div id="stepJadwal" class="section-card">
+        <div class="section-title"><span class="num">2</span> Jadwal & <span class="hl">Alamat</span></div>
+
+        <!-- Quick date pills -->
+        <div class="date-pills" id="datePills">
+          <div class="date-pill active" data-value="hari_ini" onclick="selectDatePill(this)">
+            <span class="pill-icon">⚡</span>
+            Hari Ini
+            <span class="pill-label" id="hariIniLabel">—</span>
+          </div>
+          <div class="date-pill" data-value="besok" onclick="selectDatePill(this)">
+            <span class="pill-icon">📅</span>
+            Besok
+            <span class="pill-label" id="besokLabel">—</span>
+          </div>
+        </div>
+
+        <!-- Date picker -->
+        <div class="date-picker-wrap">
+          <input type="date" id="jadwalInput" onchange="onDatePickerChange()" />
+        </div>
+
+        <!-- Time picker -->
+        <div class="time-row">
+          <label>⏰ Jam</label>
+          <select id="jamInput">
+            <option value="">Pilih Jam</option>
+            <!-- filled by JS -->
+          </select>
+        </div>
+
+        <!-- Alamat -->
+        <div class="alamat-wrap">
+          <label class="alamat-label">📍 Alamat Lengkap *</label>
+          <textarea id="alamatInput" placeholder="Jl. Contoh No. 123, Kecamatan, Makassar" required></textarea>
+        </div>
+      </div>
+
+      <!-- Step 3: Detail Pesanan -->
+      <div id="stepDetail" class="section-card">
+        <div class="section-title"><span class="num">3</span> Detail <span class="hl">Pesanan</span></div>
+        <div id="formFields">
+          {% if svc_data and svc_data.form_fields %}
+            {% for f in svc_data.form_fields %}
+            <div class="floating-group">
+              {% if f.field_type == 'textarea' %}
+              <textarea id="field_{{ f.id }}" placeholder=" " {% if f.required %}required{% endif %}></textarea>
+              {% elif f.field_type == 'select' %}
+              <select id="field_{{ f.id }}" {% if f.required %}required{% endif %}>
+                <option value="">Pilih {{ f.label }}</option>
+                {% for opt in f.options %}
+                {% set o = opt.strip().split('|') %}
+                <option value="{{ opt.strip() }}"{% if o|length > 1 and o[1].strip() %} data-tambah="{{ o[1].strip() }}"{% endif %}>{{ o[0].strip() }}</option>
+                {% endfor %}
+              </select>
+              {% elif f.field_type == 'number' %}
+              <input type="number" id="field_{{ f.id }}" placeholder=" " {% if f.required %}required{% endif %} />
+              {% elif f.field_type == 'checkbox' %}
+              <div class="addon-item" onclick="toggleAddon(this)">
+                <input type="checkbox" id="field_{{ f.id }}" data-harga="{{ f.harga_tambahan or 0 }}" {% if f.required %}required{% endif %} />
+                <div class="addon-info">
+                  <div class="toggle-switch">
+                    <div class="toggle-track"></div>
+                    <div class="toggle-thumb"></div>
+                  </div>
+                  <span class="addon-label">{{ f.label }}</span>
+                </div>
+                <span class="addon-price">+Rp{{ (f.harga_tambahan or 0) | formatrupiah }}</span>
+              </div>
+              {% else %}
+              <input type="text" id="field_{{ f.id }}" placeholder=" " {% if f.required %}required{% endif %} />
+              {% endif %}
+              <label for="field_{{ f.id }}">{{ f.label }}{% if f.required %} *{% endif %}</label>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="skeleton skeleton-text w90"></div>
+            <div class="skeleton skeleton-text w70" style="margin-top:10px;"></div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Step 4: Ringkasan Harga + Step 5: Metode Pembayaran -->
+      <div id="stepPayment" class="section-card">
+        <div class="section-title"><span class="num">4</span> Ringkasan <span class="hl">Harga</span></div>
+        <div class="summary-row">
+          <span>Harga Layanan</span>
+          <span><span id="summaryHargaLayanan">Rp0</span></span>
+        </div>
+        <div class="summary-row" id="biayaLantaiRow" style="display:none;">
+          <span>Biaya Lantai 2+</span>
+          <span id="biayaLantaiVal">Rp0</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="totalPriceBreakdown">Rp0</span>
+        </div>
+
+        <div class="section-title" style="margin-top:20px;"><span class="num" style="background:#EAAE24;color:#042544;">5</span> Metode <span class="hl">Pembayaran</span></div>
+        <div class="payment-group" id="paymentGroup">
+          <div class="payment-option selected" data-metode="cod" onclick="selectPayment(this)">
+            <div class="pay-dot"></div>
+            <span class="pay-icon">💵</span>
+            <div class="pay-label">
+              <div class="pay-name">Bayar di Tempat (COD)</div>
+              <div class="pay-sub">Bayar tunai saat petugas tiba</div>
+            </div>
+          </div>
+          <div class="payment-option" data-metode="transfer" onclick="selectPayment(this)">
+            <div class="pay-dot"></div>
+            <span class="pay-icon">🏦</span>
+            <div class="pay-label">
+              <div class="pay-name">Transfer Bank</div>
+              <div class="pay-sub">BCA, Mandiri, BRI, BNI, dll</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sticky Bottom Bar -->
+    <div class="sticky-bottom">
+      <div class="sb-info">
+        <div class="sb-total-label">Total</div>
+        <div class="sb-total" id="totalPrice">{% if svc_data %}Rp{{ (svc_data.varian | map(attribute='harga') | min) | default(0) | formatrupiah }}{% else %}Rp0{% endif %}</div>
+      </div>
+      <button class="btn-pesan" id="btnPesan" onclick="submitOrder()">Pesan Sekarang</button>
+    </div>
+
+  </div>
+
+  <!-- Success Modal (hidden) -->
+  <div id="successOverlay" class="success-overlay" style="display:none;">
+    <div class="success-modal">
+      <div class="success-check">✅</div>
+      <div class="success-title">Pesanan Berhasil!</div>
+      <div class="success-sub">Pesanan kamu telah diterima. Kami akan segera memprosesnya.</div>
+      <div class="success-kode-box">
+        <div class="success-kode-label">Kode Pesanan</div>
+        <div class="success-kode-val" id="successKode">—</div>
+      </div>
+      <a class="success-btn" id="successBtnDetail" href="#">Lihat Detail Pesanan</a>
+      <a class="success-btn-outline" href="/">Kembali ke Beranda</a>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      const btnPesan = document.getElementById('btnPesan');
+      let selectedVarianId = null;
+      let selectedVarianHarga = 0;
+      let selectedMetode = 'cod';
+
+      // Init varian selection
+      const varianOptions = document.querySelectorAll('.varian-option');
+      if (varianOptions.length > 0) {
+        const first = varianOptions[0];
+        if (first) {
+          selectedVarianId = first.dataset.id;
+          selectedVarianHarga = parseInt(first.dataset.harga) || 0;
+        }
+      }
+
+      // ── Init Jadwal ─────────────────────────────
+      function pad2(n) { return String(n).padStart(2, '0'); }
+
+      function formatDate(d) {
+        return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+      }
+
+      function formatLabel(d) {
+        const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        const bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        return hari[d.getDay()] + ', ' + d.getDate() + ' ' + bulan[d.getMonth()];
+      }
+
+      // Fill time options: 07:00 - 21:00, interval 30 menit
+      const jamSelect = document.getElementById('jamInput');
+      for (let h = 7; h <= 21; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          if (h === 21 && m === 30) break; // stop at 21:00
+          const val = pad2(h) + ':' + pad2(m);
+          const opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = val;
+          jamSelect.appendChild(opt);
+        }
+      }
+
+      // Default ke jam 09:00
+      jamSelect.value = '09:00';
+
+      // Set today & tomorrow labels
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      document.getElementById('jadwalInput').value = formatDate(today);
+      document.getElementById('hariIniLabel').textContent = formatLabel(today);
+      document.getElementById('besokLabel').textContent = formatLabel(tomorrow);
+
+      window.selectVarian = function(el) {
+        document.querySelectorAll('.varian-option').forEach(function(o) { o.classList.remove('selected'); });
+        el.classList.add('selected');
+        selectedVarianId = el.dataset.id;
+        selectedVarianHarga = parseInt(el.dataset.harga) || 0;
+        updateTotal();
+      };
+
+      window.selectPayment = function(el) {
+        document.querySelectorAll('.payment-option').forEach(function(o) { o.classList.remove('selected'); });
+        el.classList.add('selected');
+        selectedMetode = el.dataset.metode;
+      };
+
+      // Listen for durasi changes to update total live
+      document.getElementById('formFields').addEventListener('change', function(e) {
+        updateTotal();
+      });
+
+      function getDurasi() {
+        // Cari semua select di form, cek yang options-nya mengandung angka + "Jam"
+        const selects = document.querySelectorAll('#formFields select');
+        for (const sel of selects) {
+          if (sel.value) {
+            // Cek apakah value mengandung angka diikuti "Jam"
+            const match = sel.value.match(/(\d+)\s*Jam/);
+            if (match) return parseInt(match[1]) || 1;
+          }
+          // Cek apakah option labels mengandung "Jam" — ini field durasi
+          const hasJamOption = Array.from(sel.options).some(function(opt) {
+            return opt.text && opt.text.includes('Jam') && !opt.disabled;
+          });
+          if (hasJamOption && sel.value) {
+            const match = sel.value.match(/(\d+)/);
+            if (match) return parseInt(match[1]) || 1;
+          }
+        }
+        return 1;
+      }
+
+      window.toggleAddon = function(el) {
+        const cb = el.querySelector('input[type="checkbox"]');
+        if (cb) {
+          cb.checked = !cb.checked;
+          el.classList.toggle('checked');
+          updateTotal();
+        }
+      };
+
+      function getAddonTotal() {
+        let total = 0;
+        document.querySelectorAll('#formFields input[type="checkbox"]').forEach(function(cb) {
+          if (cb.checked) {
+            total += parseInt(cb.dataset.harga) || 0;
+          }
+        });
+        return total;
+      }
+
+      function getBiayaLantai() {
+        var selects = document.querySelectorAll('#formFields select');
+        for (var i = 0; i < selects.length; i++) {
+          if (selects[i].value && selects[i].value.indexOf('Lantai 2+') !== -1) {
+            return 50000;
+          }
+        }
+        return 0;
+      }
+
+      // Tambahan harga dari opsi select bertipe harga (data-tambah per option), dikali durasi (per jam)
+      function getPekerjaanTambah() {
+        var selects = document.querySelectorAll('#formFields select');
+        for (var i = 0; i < selects.length; i++) {
+          var sel = selects[i];
+          var opt = sel.options[sel.selectedIndex];
+          if (opt && opt.dataset.tambah) {
+            var tambah = parseInt(opt.dataset.tambah) || 0;
+            if (tambah > 0) return tambah * getDurasi();
+          }
+        }
+        return 0;
+      }
+
+      function updateTotal() {
+        const durasi = getDurasi();
+        const addons = getAddonTotal();
+        const biayaLantai = getBiayaLantai();
+        const pekerjaan = getPekerjaanTambah();
+        const baseTotal = selectedVarianHarga * durasi;
+        const total = baseTotal + addons + biayaLantai + pekerjaan;
+        const totalEl = document.getElementById('totalPrice');
+        const heroPrice = document.getElementById('heroPrice');
+        const biayaLantaiRow = document.getElementById('biayaLantaiRow');
+        const biayaLantaiVal = document.getElementById('biayaLantaiVal');
+        const summaryHargaLayanan = document.getElementById('summaryHargaLayanan');
+        const totalPriceBreakdown = document.getElementById('totalPriceBreakdown');
+        if (totalEl) totalEl.textContent = 'Rp' + total.toLocaleString('id-ID');
+        if (heroPrice) heroPrice.textContent = 'Rp' + selectedVarianHarga.toLocaleString('id-ID');
+        if (summaryHargaLayanan) summaryHargaLayanan.textContent = 'Rp' + baseTotal.toLocaleString('id-ID');
+        if (totalPriceBreakdown) totalPriceBreakdown.textContent = 'Rp' + total.toLocaleString('id-ID');
+        if (biayaLantaiRow && biayaLantaiVal) {
+          if (biayaLantai > 0) {
+            biayaLantaiRow.style.display = 'flex';
+            biayaLantaiVal.textContent = 'Rp' + biayaLantai.toLocaleString('id-ID');
+          } else {
+            biayaLantaiRow.style.display = 'none';
+          }
+        }
+      }
+
+      // ── Jadwal functions ─────────────────────────
+      window.selectDatePill = function(el) {
+        document.querySelectorAll('.date-pill').forEach(function(p) { p.classList.remove('active'); });
+        el.classList.add('active');
+        const val = el.dataset.value;
+        const today = new Date();
+        const target = new Date(today);
+        if (val === 'besok') {
+          target.setDate(target.getDate() + 1);
+        }
+        document.getElementById('jadwalInput').value = formatDate(target);
+      };
+
+      window.onDatePickerChange = function() {
+        // If user picks a custom date via datepicker, deselect the pills
+        document.querySelectorAll('.date-pill').forEach(function(p) { p.classList.remove('active'); });
+      };
+
+      window.submitOrder = async function() {
+        if (!selectedVarianId) {
+          alert('Silakan pilih varian terlebih dahulu.');
+          return;
+        }
+
+        // Validate jadwal
+        const jadwal = document.getElementById('jadwalInput').value;
+        const jam = document.getElementById('jamInput').value;
+        const alamat = document.getElementById('alamatInput').value.trim();
+        if (!jadwal) {
+          alert('Silakan pilih tanggal.');
+          return;
+        }
+        if (!jam) {
+          alert('Silakan pilih jam.');
+          return;
+        }
+        if (!alamat) {
+          alert('Silakan isi alamat lengkap.');
+          return;
+        }
+
+        // Collect form data
+        const fields = document.querySelectorAll('#formFields .floating-group input, #formFields .floating-group select, #formFields .floating-group textarea');
+        const formData = {};
+        fields.forEach(function(f) {
+          const id = f.id;
+          if (id) {
+            formData[id] = f.value;
+          }
+        });
+
+        // Show loading
+        btnPesan.disabled = true;
+        btnPesan.textContent = 'Memproses...';
+
+        try {
+          const layananId = window.location.pathname.split('/').pop();
+          const body = {
+            layanan_id: layananId,
+            varian_id: selectedVarianId,
+            jadwal: jadwal,
+            jam: jam,
+            alamat: alamat,
+            durasi: getDurasi(),
+            addon_total: getAddonTotal() + getPekerjaanTambah(),
+            metode_pembayaran: selectedMetode,
+            form_data: formData,
+          };
+
+          const res = await fetch('/api/pesanan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(data.error || data.detail || 'Gagal membuat pesanan');
+          }
+
+          const order = data.data || data;
+          const kode = order.kode || order.id || '-';
+
+          // Show success
+          document.getElementById('successKode').textContent = kode;
+          document.getElementById('successBtnDetail').href = '/pesanan/' + kode;
+          document.getElementById('successOverlay').style.display = 'flex';
+
+        } catch (e) {
+          alert('Error: ' + e.message);
+        } finally {
+          btnPesan.disabled = false;
+          btnPesan.textContent = 'Pesan Sekarang';
+        }
+      };
+
+    })();
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    }
+  </script>
+</body>
+</html>

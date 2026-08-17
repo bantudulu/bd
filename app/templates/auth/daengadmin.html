@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Daeng Admin · BantuDulu</title>
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <meta name="theme-color" content="#042544" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" /></noscript>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .daeng-card {
+      width: 100%;
+      max-width: 400px;
+      background: #1e293b;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+    .daeng-header {
+      padding: 36px 24px 24px;
+      text-align: center;
+    }
+    .daeng-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(234,174,36,0.3);
+      box-shadow: 0 4px 20px rgba(234,174,36,0.15);
+      display: block;
+      margin: 0 auto 16px;
+    }
+    .daeng-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+    }
+    .daeng-title span {
+      color: #EAAE24;
+    }
+    .daeng-sub {
+      font-size: 13px;
+      color: #94a3b8;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+    .daeng-body {
+      padding: 0 24px 24px;
+    }
+    .error-msg {
+      background: rgba(239,68,68,0.12);
+      color: #fca5a5;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      display: none;
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .error-msg.visible { display: block; }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      color: #64748b;
+      font-size: 18px;
+      pointer-events: none;
+      line-height: 1;
+    }
+    .input-field {
+      width: 100%;
+      padding: 14px 14px 14px 44px;
+      border: 1.5px solid #334155;
+      border-radius: 12px;
+      font-size: 15px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #f1f5f9;
+      background: #0f172a;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .input-field::placeholder {
+      color: #475569;
+      font-size: 14px;
+    }
+    .input-field:focus {
+      border-color: #EAAE24;
+      box-shadow: 0 0 0 3px rgba(234,174,36,0.1);
+      background: #1e293b;
+    }
+    .btn-daeng {
+      width: 100%;
+      padding: 15px;
+      background: #EAAE24;
+      color: #0f172a;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 6px;
+    }
+    .btn-daeng:hover {
+      background: #f0bc3a;
+    }
+    .btn-daeng:active {
+      transform: scale(0.98);
+    }
+    .btn-daeng:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .daeng-footer {
+      padding: 0 24px 28px;
+      text-align: center;
+    }
+    .daeng-footer a {
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .daeng-footer a:hover {
+      color: #EAAE24;
+    }
+    .daeng-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(234,174,36,0.1);
+      border: 1px solid rgba(234,174,36,0.2);
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #EAAE24;
+      margin-bottom: 20px;
+    }
+    .daeng-shield {
+      font-size: 12px;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      .daeng-card { border-radius: 16px; }
+      .daeng-header { padding: 28px 20px 20px; }
+      .daeng-body { padding: 0 20px 20px; }
+      .daeng-footer { padding: 0 20px 24px; }
+      .daeng-logo { width: 60px; height: 60px; }
+      .daeng-title { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="daeng-card">
+    <div class="daeng-header">
+      <img src="/static/logo.png?v=3" alt="BantuDulu" class="daeng-logo" />
+      <div class="daeng-badge">🛡️ Panel Administrator</div>
+      <div class="daeng-title">Daeng <span>Admin</span></div>
+      <div class="daeng-sub">Masuk ke panel admin BantuDulu</div>
+    </div>
+
+    <div class="daeng-body">
+      <div class="error-msg" id="errorMsg"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <div class="input-wrapper">
+            <span class="input-icon">✉️</span>
+            <input class="input-field" type="email" id="email" name="email" placeholder="admin@bantudulu.id" autocomplete="email" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Kata Sandi</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input class="input-field" type="password" id="password" name="password" placeholder="Masukkan kata sandi" autocomplete="current-password" required>
+          </div>
+        </div>
+
+        <button class="btn-daeng" type="submit" id="submitBtn">Masuk ke Dashboard</button>
+      </form>
+    </div>
+
+    <div class="daeng-footer">
+      <a href="/masuk">← Bukan admin? Masuk sebagai customer</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.remove('visible');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Memproses...';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        errorMsg.textContent = 'Harap isi email dan kata sandi.';
+        errorMsg.classList.add('visible');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Masuk ke Dashboard';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          errorMsg.textContent = data.error || 'Email atau password salah.';
+          errorMsg.classList.add('visible');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Masuk ke Dashboard';
+          return;
+        }
+
+        // Check if user is admin via a separate API call
+        const meRes = await fetch('/api/auth/me');
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          if (meData.role !== 'ADMIN') {
+            errorMsg.textContent = 'Akses ditolak. Hanya admin yang bisa masuk lewat sini.';
+            errorMsg.classList.add('visible');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Masuk ke Dashboard';
+            return;
+          }
+        }
+
+        window.location.href = '/admin/dashboard';
+
+      } catch (err) {
+        errorMsg.textContent = 'Terjadi kesalahan jaringan. Silakan coba lagi.';
+        errorMsg.classList.add('visible');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Masuk ke Dashboard';
+      }
+    });
+  </script>
+</body>
+</html>

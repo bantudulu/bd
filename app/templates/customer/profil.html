@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Akun Saya · BantuDulu</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="apple-touch-icon" href="/static/images/pwa/apple-touch-icon.png" />
+  <meta name="theme-color" content="#042544" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BantuDulu" />
+  <meta name="description" content="Layanan jasa on-demand langsung ke rumah Anda. Bersih rumah, cuci AC, les privat, pijat, salon, bantu belanja." />
+  <meta name="application-name" content="BantuDulu" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://app.kazza.id" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" /></noscript>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f3f0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-bottom: calc(68px + 16px);
+    }
+    .app-container {
+      max-width: 480px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      padding: 20px 20px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-logo {
+      height: 28px;
+      width: auto;
+      display: block;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .page-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    /* ── Avatar ── */
+    .avatar-section {
+      padding: 0 20px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .avatar-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #042544 0%, #063a6e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(4,37,68,0.25);
+    }
+    .profile-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 3px;
+    }
+    .profile-email {
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    /* ── Menu List ── */
+    .menu-section {
+      padding: 0 20px 20px;
+    }
+    .card-list {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      text-decoration: none;
+      color: #1e293b;
+      font-size: 15px;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+    .menu-item:last-child { border-bottom: none; }
+    .menu-item:active { background: #f1f5f9; }
+
+    .menu-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .menu-icon.orders { background: #e0f2fe; }
+    .menu-icon.address { background: #fef3c7; }
+    .menu-icon.settings { background: #ede9fe; }
+    .menu-icon.help { background: #d1fae5; }
+
+    .menu-arrow {
+      margin-left: auto;
+      color: #9ca3af;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    /* ── Logout ── */
+    .logout-wrapper {
+      padding: 0 20px 24px;
+    }
+    .btn-logout {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: #ef4444;
+      color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 14px;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      border: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-logout:hover { background: #dc2626; }
+    .btn-logout:active { background: #b91c1c; }
+
+    /* ── Bottom Navigation (SVG Icons) ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 68px;
+      background: #fff;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-around;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    .bottom-nav-inner {
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-around;
+    }
+    .bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      text-decoration: none;
+      color: #9ca3af;
+      transition: color 0.15s;
+      padding: 6px 0;
+    }
+    .bottom-nav-item .nav-icon svg {
+      width: 24px;
+      height: 24px;
+      display: block;
+      fill: currentColor;
+    }
+    .bottom-nav-item .nav-label {
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .bottom-nav-item.active { color: #EAAE24; }
+    .bottom-nav-item:hover,
+    .bottom-nav-item:active { color: #EAAE24; }
+
+    /* ── Responsive ── */
+    @media (max-width: 360px) {
+      .avatar-circle { width: 68px; height: 68px; font-size: 24px; }
+      .menu-item { padding: 14px 16px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <div class="page-header">
+      <img src="/static/images/logo.png" alt="BantuDulu" class="header-logo" />
+      <h1>Akun Saya</h1>
+    </div>
+
+    <!-- Avatar -->
+    <div class="avatar-section">
+      <div class="avatar-circle">{{ user.nama[0] if user and user.nama else 'U' }}</div>
+      <div class="profile-name">{{ user.nama if user else 'Pengguna' }}</div>
+      <div class="profile-email">{{ user.email if user else 'user@email.com' }}</div>
+    </div>
+
+    <!-- Menu List -->
+    <div class="menu-section">
+      <div class="card-list">
+        <a href="/pesanan" class="menu-item">
+          <div class="menu-icon orders">📋</div>
+          <span>Riwayat Pesanan</span>
+          <span class="menu-arrow">›</span>
+        </a>
+        <a href="/alamat" class="menu-item">
+          <div class="menu-icon address">📍</div>
+          <span>Alamat</span>
+          <span class="menu-arrow">›</span>
+        </a>
+        <a href="/pengaturan" class="menu-item">
+          <div class="menu-icon settings">⚙️</div>
+          <span>Pengaturan</span>
+          <span class="menu-arrow">›</span>
+        </a>
+        <a href="/pusat-bantuan" class="menu-item">
+          <div class="menu-icon help">💬</div>
+          <span>Bantuan</span>
+          <span class="menu-arrow">›</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Logout -->
+    <div class="logout-wrapper">
+      <a href="/keluar" class="btn-logout">Keluar</a>
+    </div>
+
+    <!-- Bottom Navigation (SVG Icons) -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-inner">
+        <a href="/" class="bottom-nav-item">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <path d="M12 3L4 9v12h5v-7h6v7h5V9z"/>
+            </svg>
+          </span>
+          <span class="nav-label">Beranda</span>
+        </a>
+        <a href="/cari" class="bottom-nav-item">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <circle cx="11" cy="11" r="7"/>
+              <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+          </span>
+          <span class="nav-label">Cari</span>
+        </a>
+        <a href="/pesanan" class="bottom-nav-item">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <rect x="4" y="2" width="16" height="20" rx="2"/>
+              <path d="M8 7h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <path d="M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <path d="M8 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+          </span>
+          <span class="nav-label">Pesanan</span>
+        </a>
+        <a href="/akun" class="bottom-nav-item active">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </span>
+          <span class="nav-label">Akun</span>
+        </a>
+      </div>
+    </nav>
+  </div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    }
+  </script>
+</body>
+</html>

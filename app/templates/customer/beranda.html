@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Beranda · BantuDulu</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="apple-touch-icon" href="/static/images/pwa/apple-touch-icon.png" />
+  <meta name="theme-color" content="#042544" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BantuDulu" />
+  <meta name="description" content="Layanan jasa on-demand langsung ke rumah Anda. Bersih rumah, cuci AC, les privat, pijat, salon, bantu belanja." />
+  <meta name="application-name" content="BantuDulu" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <!-- ── Fonts: non-render-blocking (swap) ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" /></noscript>
+  <!-- ── Baloo 2 (category heading) ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&display=swap" /></noscript>
+  <!-- ── Non-critical CSS: async load ── -->
+  <link rel="preload" as="style" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/style.css" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="/static/css/style.css" /></noscript>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :focus-visible { outline: 2.5px solid #EAAE24; outline-offset: 2px; border-radius: 4px; }
+    :focus:not(:focus-visible) { outline: none; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f4f7f6;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-bottom: calc(68px + 16px);
+    }
+    .app-container {
+      max-width: 480px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* ── Hero Header ── */
+    .hero-header {
+      background: linear-gradient(135deg, rgba(4,37,68,0.68) 0%, rgba(6,58,110,0.62) 50%, rgba(10,80,152,0.58) 100%),
+                  url('/static/images/bg-beranda.png') center / cover no-repeat;
+      border-radius: 0 0 28px 28px;
+      padding: 20px 20px 28px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .hero-brand-logo {
+      height: 48px;
+      width: 48px;
+      object-fit: cover;
+      display: block;
+      border-radius: 50%;
+    }
+    .hero-brand-text {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+    .hero-greeting {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .hero-sub {
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.85;
+    }
+
+    /* ── Content ── */
+    .content {
+      padding: 20px;
+      padding-bottom: calc(68px + 24px);
+    }
+
+    /* ── Section Titles ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .section-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: #EAAE24;
+      text-decoration: none;
+    }
+
+    /* ── Category Grid (2×3) — premium redesign ── */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .category-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 14px 18px;
+      border-radius: 24px;
+      text-decoration: none;
+      overflow: hidden;
+      background: var(--cat-bg);
+      box-shadow: 0 10px 20px -12px var(--cat-shadow);
+      transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease;
+    }
+    .category-card:active {
+      transform: scale(.94) translateY(2px);
+      box-shadow: 0 4px 10px -6px var(--cat-shadow);
+    }
+    .category-dot {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cat-dot);
+      opacity: .8;
+    }
+    .category-icon-wrap {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--cat-icon-bg);
+      border-radius: 42% 58% 55% 45% / 45% 40% 60% 55%;
+    }
+    .category-icon {
+      font-size: 26px;
+      line-height: 1;
+    }
+    .category-name {
+      font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--cat-text);
+      text-align: center;
+      line-height: 1.3;
+    }
+    /* palet warna soft, bergantian tiap kartu */
+    .category-card:nth-child(6n+1) { --cat-bg:#FFECDE; --cat-icon-bg:#FFD3AC; --cat-text:#B4470E; --cat-shadow: rgba(234,110,40,.28); --cat-dot:#FFB07A; }
+    .category-card:nth-child(6n+2) { --cat-bg:#E1F7EC; --cat-icon-bg:#B9EDD3; --cat-text:#0F7A5D; --cat-shadow: rgba(20,160,110,.25); --cat-dot:#7BD9AE; }
+    .category-card:nth-child(6n+3) { --cat-bg:#F0EBFF; --cat-icon-bg:#DBCCFF; --cat-text:#6428C9; --cat-shadow: rgba(120,70,230,.25); --cat-dot:#B79BFF; }
+    .category-card:nth-child(6n+4) { --cat-bg:#FFE7F1; --cat-icon-bg:#FFC7DE; --cat-text:#B71458; --cat-shadow: rgba(220,50,120,.25); --cat-dot:#FF93BF; }
+    .category-card:nth-child(6n+5) { --cat-bg:#E4F2FF; --cat-icon-bg:#C1E2FF; --cat-text:#08639C; --cat-shadow: rgba(20,120,200,.25); --cat-dot:#84C3FF; }
+    .category-card:nth-child(6n+6) { --cat-bg:#FFF7DB; --cat-icon-bg:#FFE998; --cat-text:#8A5D06; --cat-shadow: rgba(210,160,10,.25); --cat-dot:#FFD65C; }
+    @media (max-width: 360px) {
+      .category-grid { gap: 10px; }
+      .category-card { padding: 18px 10px 14px; gap: 8px; }
+      .category-icon-wrap { width: 44px; height: 44px; }
+      .category-icon { font-size: 22px; }
+    }
+
+    /* ── Promo Banner ── */
+    .promo-banner {
+      background: linear-gradient(135deg, rgba(4,37,68,0.68) 0%, rgba(6,58,110,0.62) 50%, rgba(10,80,152,0.58) 100%),
+                  url('/static/images/bg-promo.png') center / cover no-repeat;
+      border-radius: 18px;
+      padding: 20px 22px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(4,37,68,0.25);
+      transition: transform 0.15s;
+    }
+    .promo-banner:active { transform: scale(0.97); }
+    .promo-banner-left { flex: 1; }
+    .promo-banner-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .promo-banner-desc {
+      font-size: 13px;
+      opacity: 0.85;
+      font-weight: 500;
+    }
+    .promo-banner-icon { font-size: 36px; margin-left: 12px; }
+
+    /* ── Layanan Populer (Vertical Cards) — redesign ── */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .service-card {
+      position: relative;
+      background: var(--srv-bg);
+      border-radius: 22px;
+      padding: 22px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 20px -12px var(--srv-shadow);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease;
+    }
+    .service-card:active {
+      transform: scale(.95) translateY(2px);
+      box-shadow: 0 4px 10px -6px var(--srv-shadow);
+    }
+    .service-dot {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--srv-dot);
+      opacity: .8;
+    }
+    .service-icon-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 42% 58% 55% 45% / 45% 40% 60% 55%;
+      background: var(--srv-icon-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 2px;
+    }
+    .service-name {
+      font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--srv-text);
+      line-height: 1.3;
+    }
+    .service-desc {
+      font-size: 12px;
+      color: #8B87A0;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 34px;
+    }
+    .service-price {
+      margin-top: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.65);
+      color: var(--srv-text);
+      font-weight: 600;
+      font-size: 12.5px;
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+    .service-price-label {
+      font-weight: 400;
+      font-size: 10.5px;
+      color: #8B87A0;
+      margin-right: 2px;
+    }
+    /* palet warna soft, konsisten dengan kategori */
+    .service-card:nth-child(6n+1) { --srv-bg:#FFECDE; --srv-icon-bg:#FFD3AC; --srv-text:#B4470E; --srv-shadow: rgba(234,110,40,.28); --srv-dot:#FFB07A; }
+    .service-card:nth-child(6n+2) { --srv-bg:#E1F7EC; --srv-icon-bg:#B9EDD3; --srv-text:#0F7A5D; --srv-shadow: rgba(20,160,110,.25); --srv-dot:#7BD9AE; }
+    .service-card:nth-child(6n+3) { --srv-bg:#F0EBFF; --srv-icon-bg:#DBCCFF; --srv-text:#6428C9; --srv-shadow: rgba(120,70,230,.25); --srv-dot:#B79BFF; }
+    .service-card:nth-child(6n+4) { --srv-bg:#FFE7F1; --srv-icon-bg:#FFC7DE; --srv-text:#B71458; --srv-shadow: rgba(220,50,120,.25); --srv-dot:#FF93BF; }
+    .service-card:nth-child(6n+5) { --srv-bg:#E4F2FF; --srv-icon-bg:#C1E2FF; --srv-text:#08639C; --srv-shadow: rgba(20,120,200,.25); --srv-dot:#84C3FF; }
+    .service-card:nth-child(6n+6) { --srv-bg:#FFF7DB; --srv-icon-bg:#FFE998; --srv-text:#8A5D06; --srv-shadow: rgba(210,160,10,.25); --srv-dot:#FFD65C; }
+    @media (max-width: 360px) {
+      .services-grid { gap: 10px; }
+      .service-card { padding: 18px 10px 14px; }
+      .service-icon-circle { width: 44px; height: 44px; font-size: 22px; }
+      .service-name { font-size: 13px; }
+    }
+
+    /* ── Active Orders ── */
+    .active-orders-section { margin-bottom: 24px; }
+    .order-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 16px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .order-card:active { transform: scale(0.98); }
+    .order-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .order-service-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .order-status {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .order-status.berjalan { background: #eff6ff; color: #2563eb; }
+    .order-status.menunggu,
+    .order-status.diproses { background: #fffbeb; color: #b45309; }
+    .order-status.selesai { background: #f0fdf4; color: #16a34a; }
+    .order-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .order-price { font-weight: 700; color: #EAAE24; font-size: 14px; }
+
+    /* ── App Footer ── */
+    .app-footer {
+      background: #fff;
+      padding: 20px 20px 12px;
+      margin-top: 8px;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+    }
+    .footer-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .footer-divider::before,
+    .footer-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
+    .footer-store-badges {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .footer-store-badge {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 8px;
+      background: #0f172a;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .footer-store-badge:active { transform: scale(0.97); background: #1e293b; }
+    .fs-icon { font-size: 22px; line-height: 1; }
+    .fs-svg {
+      width: 24px; height: 24px;
+      display: block;
+      flex-shrink: 0;
+    }
+    .fs-text { display: flex; flex-direction: column; align-items: flex-start; }
+    .fs-sub { font-size: 9px; color: #94a3b8; font-weight: 500; line-height: 1.2; }
+    .fs-name { font-size: 13px; color: #fff; font-weight: 700; line-height: 1.3; }
+    .footer-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .footer-links a {
+      color: #6b7280;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: #EAAE24; }
+    .fl-dot { color: #d1d5db; font-size: 8px; }
+    .footer-copy {
+      font-size: 11px;
+      color: #9ca3af;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    /* ── Responsive for footer ── */
+    @media (max-width: 360px) {
+      .app-footer { padding: 16px 14px 10px; }
+      .footer-store-badges { gap: 8px; }
+      .footer-store-badge { padding: 8px 6px; }
+    }
+
+    /* ── Bottom Navigation (SVG Icons) ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 68px;
+      background: #fff;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-around;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    .bottom-nav-inner {
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-around;
+    }
+    .bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      text-decoration: none;
+      color: #9ca3af;
+      transition: color 0.15s;
+      padding: 6px 0;
+    }
+    .bottom-nav-item .nav-icon svg {
+      width: 24px;
+      height: 24px;
+      display: block;
+      fill: currentColor;
+    }
+    .bottom-nav-item .nav-label {
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .bottom-nav-item.active {
+      color: #EAAE24;
+    }
+    .bottom-nav-item:hover,
+    .bottom-nav-item:active {
+      color: #EAAE24;
+    }
+
+    /* ── Loading & Error ── */
+    .loading-state, .error-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: #9ca3af;
+      font-size: 14px;
+    }
+    .loading-spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 3px solid #e5e7eb;
+      border-top: 3px solid #042544;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-bottom: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-state { color: #ef4444; }
+
+    /* ── Responsive ── */
+    @media (max-width: 360px) {
+      .category-grid { gap: 8px; }
+      .category-card { padding: 14px 8px 10px; }
+      .category-icon { font-size: 30px; }
+      .services-grid { gap: 8px; }
+      .service-card { padding: 16px 10px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Hero Header -->
+    <div class="hero-header">
+      <div class="hero-brand">
+        <span class="hero-brand-text">BantuDulu</span>
+      </div>
+      <div class="hero-greeting">Halo, {% if user and user.nama %}{{ user.nama }}{% else %}Pengguna{% endif %}! 👋</div>
+      <div class="hero-sub">Ada yang bisa kami bantu hari ini?</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+
+      <!-- Category Grid -->
+      <div class="section-header">
+        <h2 class="section-title">Kategori</h2>
+      </div>
+      <div class="category-grid">
+        {% if categories %}
+          {% for cat in categories[:12] %}
+          <a href="/kategori/{{ cat.slug | urlencode }}" class="category-card">
+            <span class="category-dot"></span>
+            <div class="category-icon-wrap">
+              <span class="category-icon">{{ cat.icon }}</span>
+            </div>
+            <span class="category-name">{{ cat.nama }}</span>
+          </a>
+          {% endfor %}
+        {% else %}
+          <div class="error-state" style="grid-column:1/-1;">Kategori tidak tersedia</div>
+        {% endif %}
+      </div>
+
+      <!-- Promo Banner -->
+      <div class="promo-banner" onclick="window.location.href='/cari'">
+        <div class="promo-banner-left">
+          <div class="promo-banner-title">🎉 Promo Spesial!</div>
+          <div class="promo-banner-desc">Diskon hingga 30% untuk layanan pertama</div>
+        </div>
+        <span class="promo-banner-icon">🏷️</span>
+      </div>
+
+      <!-- Layanan Populer -->
+      <div class="section-header">
+        <h2 class="section-title">Layanan Populer</h2>
+        <a href="/cari" class="section-link">Lihat Semua</a>
+      </div>
+      <div class="services-grid">
+        {% if services %}
+          {% for svc in services[:4] %}
+          <a href="/layanan/{{ svc.id | urlencode }}" class="service-card">
+            <span class="service-dot"></span>
+            <div class="service-icon-circle">🛠️</div>
+            <div class="service-name">{{ svc.nama }}</div>
+            <div class="service-desc">{{ svc.deskripsi }}</div>
+            <div class="service-price">
+              <span class="service-price-label">Mulai</span>
+              Rp{{ "{:,.0f}".format(svc.harga_min).replace(',', '.') }}
+            </div>
+          </a>
+          {% endfor %}
+        {% else %}
+          <div class="error-state" style="grid-column:1/-1;">Layanan tidak tersedia</div>
+        {% endif %}
+      </div>
+
+      <!-- Active Orders -->
+      <div class="active-orders-section" id="activeOrdersSection" style="display:none;">
+        <div class="section-header">
+          <h2 class="section-title">Pesanan Aktif</h2>
+          <a href="/pesanan" class="section-link">Lihat Semua</a>
+        </div>
+        <div id="ordersContainer"></div>
+      </div>
+
+    </div>
+
+    <!-- App Footer -->
+    <div class="app-footer">
+      <div class="footer-store">
+        <div class="footer-divider"><span>Download Aplikasi</span></div>
+        <div class="footer-store-badges">
+          <a href="#" class="footer-store-badge" aria-label="Download di App Store">
+            <svg class="fs-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 2H7C5.34 2 4 3.34 4 5v14c0 1.66 1.34 3 3 3h10c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3z" fill="#fff"/>
+              <path d="M12 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm-2 2h4c1.1 0 2 .9 2 2v1H8v-1c0-1.1.9-2 2-2z" fill="#0f172a"/>
+            </svg>
+            <div class="fs-text">
+              <span class="fs-sub">Download di</span>
+              <span class="fs-name">App Store</span>
+            </div>
+          </a>
+          <a href="#" class="footer-store-badge" aria-label="Download di Google Play">
+            <svg class="fs-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4.16 2.14c-.1.1-.16.24-.16.39v19c0 .15.06.29.16.39l.01.01 9.84-9.84v-.02l-9.85-9.93z" fill="#fff"/>
+              <path d="M17.34 14.28l-3.33-3.33v-.02l3.33-3.33.01.01c.67.39 1.12 1.11 1.12 1.93v3.14c0 .82-.45 1.54-1.12 1.93l-.01-.01z" fill="#fff"/>
+              <path d="M4.16 2.14L14 12l-9.84 9.86c-.2-.13-.33-.35-.33-.61V2.75c0-.26.13-.48.33-.61z" fill="#fff" opacity="0.5"/>
+            </svg>
+            <div class="fs-text">
+              <span class="fs-sub">Download di</span>
+              <span class="fs-name">Google Play</span>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="/kebijakan-privasi">Kebijakan Privasi</a>
+        <span class="fl-dot">●</span>
+        <a href="/syarat-ketentuan">Syarat &amp; Ketentuan</a>
+        <span class="fl-dot">●</span>
+        <a href="/tentang-kami">Tentang Kami</a>
+      </div>
+      <div class="footer-copy">© {{ now.year if now else '' }} BantuDulu. All rights reserved.</div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-inner">
+        <a href="/" class="bottom-nav-item active">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <path d="M12 3L4 9v12h5v-7h6v7h5V9z"/>
+            </svg>
+          </span>
+          <span class="nav-label">Beranda</span>
+        </a>
+        <a href="/cari" class="bottom-nav-item">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <circle cx="11" cy="11" r="7"/>
+              <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+          </span>
+          <span class="nav-label">Cari</span>
+        </a>
+        <a href="/pesanan" class="bottom-nav-item">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <rect x="4" y="2" width="16" height="20" rx="2"/>
+              <path d="M8 7h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <path d="M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <path d="M8 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+          </span>
+          <span class="nav-label">Pesanan</span>
+        </a>
+        <a href="/profil" class="bottom-nav-item">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </span>
+          <span class="nav-label">Akun</span>
+        </a>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Active Orders Script -->
+  <script>
+    (function() {
+      const section = document.getElementById('activeOrdersSection');
+      const container = document.getElementById('ordersContainer');
+
+      async function loadActiveOrders() {
+        try {
+          const res = await fetch('/api/pesanan/aktif');
+          if (!res.ok) throw new Error('Gagal');
+          const data = await res.json();
+          const orders = data.data || data || [];
+          if (!Array.isArray(orders) || orders.length === 0) {
+            section.style.display = 'none';
+            return;
+          }
+          section.style.display = 'block';
+          container.innerHTML = orders.map(function(o) {
+            return '<div class="order-card" onclick="window.location.href=\'/pesanan/' + o.kode + '\'">' +
+              '<div class="order-top">' +
+                '<span class="order-service-name">' + (o.layanan_nama || 'Pesanan') + '</span>' +
+                '<span class="order-status ' + (o.status || 'menunggu') + '">' + (o.status || 'menunggu') + '</span>' +
+              '</div>' +
+              '<div class="order-bottom">' +
+                '<span>' + (o.alamat || '') + '</span>' +
+                '<span class="order-price">Rp' + Number(o.total_harga || 0).toLocaleString('id-ID') + '</span>' +
+              '</div>' +
+            '</div>';
+          }).join('');
+        } catch (e) {
+          section.style.display = 'none';
+        }
+      }
+
+      loadActiveOrders();
+    })();
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>{% if kategori %}{{ kategori.nama }}{% else %}Kategori{% endif %} · BantuDulu</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="apple-touch-icon" href="/static/images/pwa/apple-touch-icon.png" />
+  <meta name="theme-color" content="#042544" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BantuDulu" />
+  <meta name="description" content="Layanan jasa on-demand langsung ke rumah Anda. Bersih rumah, cuci AC, les privat, pijat, salon, bantu belanja." />
+  <meta name="application-name" content="BantuDulu" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <!-- ── Fonts: non-render-blocking (swap) ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" /></noscript>
+  <link rel="preload" as="style" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/style.css" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="/static/css/style.css" /></noscript>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f3f0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-bottom: calc(68px + 16px);
+    }
+    .app-container { max-width: 480px; margin: 0 auto; position: relative; }
+
+    /* ── Hero Header (seukuran beranda) ── */
+    .hero-header {
+      background: linear-gradient(135deg, rgba(4,37,68,0.68) 0%, rgba(6,58,110,0.62) 50%, rgba(10,80,152,0.58) 100%),
+                  url('/static/images/{{ bg_image }}') center / cover no-repeat;
+      border-radius: 0 0 28px 28px;
+      padding: 20px 20px 28px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .hero-header .back-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .hero-header .back-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      border: none; color: #fff;
+      font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; text-decoration: none;
+      transition: background 0.15s;
+    }
+    .hero-header .back-btn:active { background: rgba(255,255,255,0.35); }
+    .hero-header .kat-display {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .hero-header .kat-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px; flex-shrink: 0;
+    }
+    .hero-header .kat-info { flex: 1; }
+    .hero-header .kat-info h1 { font-size: 22px; font-weight: 800; margin-bottom: 2px; line-height: 1.2; }
+    .hero-header .kat-info p { font-size: 13px; opacity: 0.85; }
+
+    /* ── Content ── */
+    .content { padding: 20px; }
+    .section-title {
+      font-size: 16px; font-weight: 700; color: #111827;
+      margin-bottom: 14px;
+    }
+
+    /* ── Service Cards (Vertical) ── */
+    .services-list { display: flex; flex-direction: column; gap: 12px; }
+    .service-card {
+      background: #fff; border-radius: 18px; padding: 18px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      cursor: pointer; transition: transform 0.15s;
+      text-decoration: none; color: inherit;
+    }
+    .service-card:active { transform: scale(0.98); }
+    .service-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: #eef3f8; display: flex; align-items: center;
+      justify-content: center; font-size: 26px; flex-shrink: 0;
+    }
+    .service-info { flex: 1; min-width: 0; }
+    .service-name { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 2px; }
+    .service-desc { font-size: 12px; color: #6b7280; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .service-price { font-size: 13px; font-weight: 700; color: #EAAE24; margin-top: 4px; }
+    .service-arrow { font-size: 20px; color: #d1d5db; flex-shrink: 0; }
+
+    /* ── Empty state ── */
+    .empty-state { text-align: center; padding: 40px 20px; }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 16px; color: #374151; margin-bottom: 6px; }
+    .empty-state p { font-size: 13px; color: #9ca3af; }
+
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; border-top: 1px solid #e5e7eb;
+      display: flex; justify-content: space-around;
+      align-items: center; height: 68px;
+      max-width: 480px; margin: 0 auto;
+      z-index: 100;
+    }
+    .bottom-nav .nav-item {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 3px; text-decoration: none; color: #9ca3af;
+      font-size: 11px; font-weight: 500; padding: 6px 12px;
+      transition: color 0.15s;
+    }
+    .bottom-nav .nav-item svg { width: 24px; height: 24px; }
+    .bottom-nav .nav-item.active { color: #EAAE24; }
+  </style>
+</head>
+<body>
+<div class="app-container">
+
+  <!-- ── Hero Header (SSR) ── -->
+  <div class="hero-header">
+    <div class="back-row">
+      <a href="javascript:history.back()" class="back-btn">‹</a>
+    </div>
+    <div class="kat-display">
+      {% if kategori %}
+      <div class="kat-icon">{{ kategori.icon }}</div>
+      <div class="kat-info">
+        <h1>{{ kategori.nama }}</h1>
+        <p>Pilih layanan yang Anda butuhkan</p>
+      </div>
+      {% else %}
+      <div class="kat-icon">M-pM-^_M-^SM-^K</div>
+      <div class="kat-info">
+        <h1>Kategori</h1>
+        <p>Kategori tidak ditemukan</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Content (SSR) ── -->
+  <div class="content">
+    <div class="section-title">Layanan Tersedia</div>
+    <div class="services-list">
+      {% if layanan %}
+        {% for l in layanan %}
+        <a href="/layanan/{{ l.id }}" class="service-card">
+          <div class="service-icon">{{ kategori.icon if kategori else 'M-pM-^_M-^SM-&' }}</div>
+          <div class="service-info">
+            <div class="service-name">{{ l.nama }}</div>
+            {% if l.deskripsi %}<div class="service-desc">{{ l.deskripsi }}</div>{% endif %}
+            <div class="service-price">Mulai dari Rp{{ l.harga_min | formatrupiah if l.harga_min else '0' }}</div>
+          </div>
+          <span class="service-arrow">›</span>
+        </a>
+        {% endfor %}
+      {% else %}
+      <div class="empty-state">
+        <div class="icon">M-pM-^_M-^SM--</div>
+        <h3>Belum ada layanan</h3>
+        <p>Belum tersedia layanan di kategori ini</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Bottom Nav ── -->
+  <nav class="bottom-nav">
+    <a href="/beranda" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Beranda</span>
+    </a>
+    <a href="/cari" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Cari</span>
+    </a>
+    <a href="/pesanan" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><line x1="10" y1="10" x2="14" y2="10"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+      <span>Pesanan</span>
+    </a>
+    <a href="/profil" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Akun</span>
+    </a>
+  </nav>
+
+</div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    }
+  </script>
+</body>
+</html>

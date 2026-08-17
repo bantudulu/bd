@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Pesanan Saya · BantuDulu</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="apple-touch-icon" href="/static/images/pwa/apple-touch-icon.png" />
+  <meta name="theme-color" content="#042544" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BantuDulu" />
+  <meta name="description" content="Layanan jasa on-demand langsung ke rumah Anda. Bersih rumah, cuci AC, les privat, pijat, salon, bantu belanja." />
+  <meta name="application-name" content="BantuDulu" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://app.kazza.id" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" /></noscript>
+  <link rel="preload" as="style" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/style.css" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="/static/css/style.css" /></noscript>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :focus-visible{outline:2.5px solid #EAAE24;outline-offset:2px;border-radius:4px}
+    :focus:not(:focus-visible){outline:none}
+    body{
+      font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+      background:#f4f6f9;
+      min-height:100vh;min-height:100dvh;
+      padding-bottom:calc(68px+16px);
+      -webkit-font-smoothing:antialiased
+    }
+    .app{max-width:480px;margin:0 auto;position:relative}
+
+    /* ─── Hero ─────────────────────────────── */
+    .hero{
+      background:linear-gradient(135deg,rgba(4,37,68,.92) 0%,rgba(6,58,110,.8) 50%,rgba(10,80,152,.65) 100%),
+        url('/static/images/bg-beranda.png') center/cover no-repeat;
+      padding:24px 20px 32px;
+      color:#fff;
+      position:relative;
+      border-radius:0 0 32px 32px
+    }
+    .hero::after{
+      content:'';position:absolute;
+      bottom:-28px;left:-16px;right:-16px;
+      height:56px;background:#f4f6f9;
+      border-radius:50% 50% 0 0
+    }
+    .hero-top{
+      display:flex;align-items:center;gap:14px;
+      position:relative;z-index:1
+    }
+    .hero-avatar{
+      width:48px;height:48px;border-radius:50%;
+      background:rgba(255,255,255,.2);
+      backdrop-filter:blur(6px);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;font-size:18px;color:#fff;
+      flex-shrink:0;overflow:hidden
+    }
+    .hero-avatar img{width:100%;height:100%;object-fit:cover}
+    .hero-info{flex:1;min-width:0}
+    .hero-greeting{font-size:13px;font-weight:500;opacity:.8;margin-bottom:1px}
+    .hero-name{font-size:18px;font-weight:800;line-height:1.2}
+    .hero-notif{
+      width:40px;height:40px;border-radius:50%;
+      background:rgba(255,255,255,.18);
+      backdrop-filter:blur(6px);
+      border:none;color:#fff;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;position:relative;
+      transition:background .15s
+    }
+    .hero-notif:active{background:rgba(255,255,255,.3)}
+    .notif-dot{
+      position:absolute;top:8px;right:8px;
+      width:8px;height:8px;border-radius:50%;
+      background:#ef4444;border:2px solid #042544
+    }
+    .hero-stats{
+      display:flex;gap:12px;margin-top:18px;
+      position:relative;z-index:1
+    }
+    .stat-card{
+      flex:1;background:rgba(255,255,255,.12);
+      backdrop-filter:blur(6px);border-radius:14px;
+      padding:14px 12px;text-align:center;
+      border:1px solid rgba(255,255,255,.08)
+    }
+    .stat-number{
+      font-size:24px;font-weight:800;
+      line-height:1;margin-bottom:2px
+    }
+    .stat-label{
+      font-size:11px;font-weight:500;opacity:.7;
+      text-transform:uppercase;letter-spacing:.5px
+    }
+
+    /* ─── Search/Filter Bar ─────────────────── */
+    .action-bar{
+      display:flex;gap:10px;
+      padding:0 20px;margin:-8px 0 16px;
+      position:relative;z-index:2
+    }
+    .action-bar-inner{
+      flex:1;background:#fff;border-radius:16px;
+      padding:4px;display:flex;gap:2px;
+      box-shadow:0 2px 8px rgba(0,0,0,.06)
+    }
+    .filter-tab{
+      flex:1;text-align:center;
+      padding:10px 4px;border-radius:13px;
+      font-size:13px;font-weight:600;
+      color:#6b7280;cursor:pointer;border:none;
+      background:none;font-family:inherit;
+      transition:all .25s ease;
+      -webkit-tap-highlight-color:transparent;
+      position:relative
+    }
+    .filter-tab.active{
+      background:#042544;color:#fff;
+      box-shadow:0 2px 8px rgba(4,37,68,.25)
+    }
+    .filter-tab .tab-count{
+      display:inline-block;font-size:10px;
+      background:rgba(0,0,0,.08);border-radius:8px;
+      padding:1px 7px;margin-left:4px;font-weight:700
+    }
+    .filter-tab.active .tab-count{
+      background:rgba(255,255,255,.2);color:#fff
+    }
+
+    /* ─── Orders List ───────────────────────── */
+    .list-wrap{padding:0 20px 20px}
+
+    /* ─── Premium Order Card ────────────────── */
+    .order-card{
+      background:#fff;border-radius:18px;
+      padding:16px;margin-bottom:12px;
+      cursor:pointer;transition:all .2s ease;
+      border:1px solid #edf2f7;
+      box-shadow:0 1px 3px rgba(0,0,0,.04);
+      position:relative;overflow:hidden
+    }
+    .order-card:active{transform:scale(.97)}
+    .order-card-top{
+      display:flex;align-items:flex-start;gap:14px
+    }
+    .order-icon{
+      width:44px;height:44px;border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:22px;flex-shrink:0
+    }
+    .order-icon.bersih{background:#e0f2fe;color:#0284c7}
+    .order-icon.elektronik{background:#fef3c7;color:#d97706}
+    .order-icon.les{background:#ede9fe;color:#7c3aed}
+    .order-icon.pijat{background:#fce7f3;color:#db2777}
+    .order-icon.salon{background:#d1fae5;color:#059669}
+    .order-icon.belanja{background:#ffe4e6;color:#e11d48}
+    .order-icon.umum{background:#e5e7eb;color:#4b5563}
+    .order-info{flex:1;min-width:0}
+    .order-name{
+      font-size:15px;font-weight:700;color:#111827;
+      line-height:1.3;margin-bottom:2px;
+      display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden
+    }
+    .order-desc{
+      font-size:12px;color:#6b7280;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      margin-top:1px
+    }
+    .order-mid{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-top:12px;padding-top:10px;
+      border-top:1px solid #f3f4f6
+    }
+    .order-date{
+      font-size:12px;color:#9ca3af;font-weight:500;
+      display:flex;align-items:center;gap:4px
+    }
+    .order-price{
+      font-size:16px;font-weight:800;color:#042544;
+      letter-spacing:-.3px
+    }
+    .order-id-badge{
+      font-size:10px;color:#9ca3af;
+      background:#f9fafb;padding:2px 8px;
+      border-radius:6px;font-weight:500
+    }
+
+    /* ─── Status Badge ──────────────────────── */
+    .status-badge{
+      display:inline-flex;align-items:center;gap:5px;
+      font-size:11px;font-weight:700;
+      padding:4px 12px;border-radius:999px;
+      white-space:nowrap;flex-shrink:0;
+      letter-spacing:.2px
+    }
+    .status-badge.menunggu{
+      background:#fffbeb;color:#b45309;
+      border:1px solid #fde68a
+    }
+    .status-badge.diproses{
+      background:#eff6ff;color:#2563eb;
+      border:1px solid #bfdbfe
+    }
+    .status-badge.selesai{
+      background:#f0fdf4;color:#16a34a;
+      border:1px solid #bbf7d0
+    }
+    .status-badge.dibatalkan{
+      background:#fef2f2;color:#dc2626;
+      border:1px solid #fecaca
+    }
+    .status-badge.berjalan{
+      background:#eff6ff;color:#2563eb;
+      border:1px solid #bfdbfe
+    }
+    .status-dot{
+      width:6px;height:6px;border-radius:50%;display:inline-block
+    }
+    .status-badge.menunggu .status-dot{background:#b45309}
+    .status-badge.diproses .status-dot,
+    .status-badge.berjalan .status-dot{background:#2563eb;animation:pulse 1.4s ease-in-out infinite}
+    .status-badge.selesai .status-dot{background:#16a34a}
+    .status-badge.dibatalkan .status-dot{background:#dc2626}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+    /* ─── Shimmer Skeleton ──────────────────── */
+    .sk-card{
+      background:#fff;border-radius:18px;padding:16px;
+      margin-bottom:12px;border:1px solid #edf2f7
+    }
+    .sk-row{display:flex;gap:12px;align-items:center}
+    .sk-icon{
+      width:44px;height:44px;border-radius:14px;
+      background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);
+      background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite;
+      flex-shrink:0
+    }
+    .sk-lines{flex:1}
+    .sk-line{
+      height:12px;border-radius:6px;
+      background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);
+      background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite;
+      margin-bottom:6px
+    }
+    .sk-line.w50{width:50%}.sk-line.w70{width:70%}
+    .sk-line.w35{width:35%}.sk-line.w25{width:25%}
+    .sk-bottom{display:flex;justify-content:space-between;margin-top:12px;padding-top:10px}
+    .sk-date{height:10px;width:35%;border-radius:5px;
+      background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);
+      background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite
+    }
+    .sk-price{height:14px;width:20%;border-radius:5px;
+      background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);
+      background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite
+    }
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* ─── Empty State ───────────────────────── */
+    .empty-state{
+      text-align:center;padding:60px 20px 40px
+    }
+    .empty-illust{
+      width:140px;height:140px;border-radius:50%;
+      background:linear-gradient(135deg,#f0f4ff,#e8ecf4);
+      display:flex;align-items:center;justify-content:center;
+      font-size:52px;margin:0 auto 18px;
+      box-shadow:0 4px 20px rgba(4,37,68,.08)
+    }
+    .empty-title{
+      font-size:18px;font-weight:800;color:#111827;margin-bottom:6px
+    }
+    .empty-desc{
+      font-size:14px;color:#6b7280;line-height:1.5;
+      max-width:280px;margin:0 auto 22px
+    }
+    .empty-btn{
+      display:inline-flex;align-items:center;gap:8px;
+      background:linear-gradient(135deg,#042544,#0a5098);
+      color:#fff;font-weight:700;font-size:14px;
+      padding:14px 28px;border-radius:16px;text-decoration:none;
+      font-family:inherit;box-shadow:0 4px 12px rgba(4,37,68,.3);
+      transition:all .2s
+    }
+    .empty-btn:active{transform:scale(.96);box-shadow:0 2px 6px rgba(4,37,68,.2)}
+
+    /* ─── Error State ───────────────────────── */
+    .error-state{
+      text-align:center;padding:48px 20px
+    }
+    .error-icon{
+      font-size:48px;margin-bottom:12px;display:block
+    }
+    .error-text{
+      font-size:15px;font-weight:600;color:#374151;margin-bottom:16px
+    }
+    .error-btn{
+      background:#042544;color:#fff;font-weight:600;
+      font-size:13px;padding:10px 24px;border-radius:12px;
+      border:none;font-family:inherit;cursor:pointer;
+      transition:background .15s
+    }
+    .error-btn:active{background:#031a30}
+
+    /* ─── Bottom Navigation ─────────────────── */
+    .bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;
+      height:68px;background:#fff;
+      border-top:1px solid #e5e7eb;
+      display:flex;align-items:stretch;
+      justify-content:space-around;z-index:100;
+      padding-bottom:env(safe-area-inset-bottom,0)
+    }
+    .bn-inner{max-width:480px;width:100%;margin:0 auto;display:flex;align-items:stretch;justify-content:space-around}
+    .bn-item{
+      flex:1;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;gap:3px;text-decoration:none;
+      color:#9ca3af;transition:color .15s;
+      padding:6px 0;font-family:inherit
+    }
+    .bn-item svg{width:24px;height:24px;display:block;fill:currentColor}
+    .bn-item .bn-label{font-size:11px;font-weight:600;line-height:1}
+    .bn-item.active{color:#EAAE24}
+    .bn-item:active{color:#EAAE24}
+
+    /* ─── Responsive ────────────────────────── */
+    @media(max-width:360px){
+      .hero{padding:18px 16px 26px}
+      .stat-card{padding:10px 8px}
+      .stat-number{font-size:20px}
+      .order-card{padding:14px}
+      .order-price{font-size:14px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- ════ Hero Section ════ -->
+    <div class="hero">
+      <div class="hero-top">
+        <div class="hero-avatar">
+          {% if user and user.foto %}
+            <img src="{{ user.foto }}" alt="{{ user.nama }}" />
+          {% else %}
+            {{ (user.nama[:1] or 'U')|upper }}
+          {% endif %}
+        </div>
+        <div class="hero-info">
+          <div class="hero-greeting">Halo,</div>
+          <div class="hero-name">{{ user.nama or 'Pengguna' }}</div>
+        </div>
+        <a href="/profil" class="hero-notif" aria-label="Profil">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </a>
+      </div>
+      <div class="hero-stats" id="heroStats">
+        <div class="stat-card">
+          <div class="stat-number" id="statTotal">—</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statAktif">—</div>
+          <div class="stat-label">Aktif</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statSelesai">—</div>
+          <div class="stat-label">Selesai</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ Filter Tabs ════ -->
+    <div class="action-bar">
+      <div class="action-bar-inner" id="tabBar">
+        <button class="filter-tab active" data-filter="semua">Semua <span class="tab-count" id="countSemua">0</span></button>
+        <button class="filter-tab" data-filter="aktif">Aktif <span class="tab-count" id="countAktif">0</span></button>
+        <button class="filter-tab" data-filter="selesai">Selesai <span class="tab-count" id="countSelesai">0</span></button>
+      </div>
+    </div>
+
+    <!-- ════ Orders List ════ -->
+    <div class="list-wrap" id="ordersList">
+      {% if orders %}
+        {% for o in orders %}
+          {% set s = o.status|lower %}
+          {% set cls = 'menunggu' if s in ('menunggu','pending') else 'diproses' if s in ('diproses','proses','ditunggu','berjalan') else 'selesai' if s in ('selesai','completed','done') else 'dibatalkan' %}
+          {% set label = 'Menunggu' if s in ('menunggu','pending') else 'Diproses' if s in ('diproses','proses','ditunggu','berjalan') else 'Selesai' if s in ('selesai','completed','done') else 'Dibatalkan' %}
+          {% set icon = '📋' %}
+          {% set catClass = 'umum' %}
+          <div class="order-card" onclick="window.location.href='/pesanan/{{ o.kode or o.id }}'">
+            <div class="order-card-top">
+              <div class="order-icon {{ catClass }}">{{ icon }}</div>
+              <div class="order-info">
+                <div class="order-name">{{ o.layanan_nama or 'Pesanan' }}</div>
+                <div class="order-desc">{{ o.varian_nama or '' }}</div>
+              </div>
+              <span class="status-badge {{ cls }}"><span class="status-dot"></span>{{ label }}</span>
+            </div>
+            <div class="order-mid">
+              <span class="order-date">📅 {{ o.tanggal[:10] if o.tanggal else '-' }}</span>
+              <span class="order-price">Rp{{ "{:,.0f}".format(o.total_harga|int).replace(',','.') }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state" style="display:block;">
+          <div class="empty-illust">📋</div>
+          <div class="empty-title">Belum Ada Pesanan</div>
+          <div class="empty-desc">Yuk, pesan layanan pertama kamu sekarang!</div>
+          <a href="/" class="empty-btn">🏠 Cari Layanan</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- ════ SSR Data (embedded JSON for JS filtering) ════ -->
+    <script id="ordersData" type="application/json">{{ orders_json | safe }}</script>
+
+    <!-- ════ User Data (SSR) ════ -->
+    <meta name="user-id" content="{{ user.id }}" />
+    <meta name="user-nama" content="{{ user.nama }}" />
+
+    <!-- ════ Bottom Navigation ════ -->
+    <nav class="bottom-nav">
+      <div class="bn-inner">
+        <a href="/" class="bn-item">
+          <svg viewBox="0 0 24 24"><path d="M12 3L4 9v12h5v-7h6v7h5V9z"/></svg>
+          <span class="bn-label">Beranda</span>
+        </a>
+        <a href="/cari" class="bn-item">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+          <span class="bn-label">Cari</span>
+        </a>
+        <a href="/pesanan" class="bn-item active">
+          <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 7h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M8 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+          <span class="bn-label">Pesanan</span>
+        </a>
+        <a href="/profil" class="bn-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <span class="bn-label">Akun</span>
+        </a>
+      </div>
+    </nav>
+  </div>
+
+  <script>
+  (function(){
+    'use strict';
+
+    /* ── State ── */
+    const tabBar = document.getElementById('tabBar');
+    const ordersList = document.getElementById('ordersList');
+    let allOrders = [];
+    let currentFilter = 'semua';
+
+    /* ── Icons per kategori ── */
+    const CAT_ICONS = {
+      bersih: '🧹', 'bersih-bersih': '🧹', 'bersih rumah': '🧹', 'bersih_rumah': '🧹',
+      elektronik: '🔧', cuci_ac: '🔧', 'cuci ac': '🔧', ac: '🔧',
+      les: '📚', les_privat: '📚', 'les privat': '📚',
+      pijat: '💆', pijat_relaksasi: '💆', 'pijat relaksasi': '💆',
+      salon: '💇', salon_kecantikan: '💇',
+      belanja: '🛒', bantu_belanja: '🛒', 'bantu belanja': '🛒',
+      perbaikan: '🔧', renovasi: '🏗️', kebersihan: '🧹',
+    };
+    const CAT_CLASSES = {
+      bersih: 'bersih', 'bersih-bersih': 'bersih', 'bersih rumah': 'bersih', 'bersih_rumah': 'bersih',
+      elektronik: 'elektronik', cuci_ac: 'elektronik', 'cuci ac': 'elektronik', ac: 'elektronik',
+      les: 'les', les_privat: 'les', 'les privat': 'les',
+      pijat: 'pijat', pijat_relaksasi: 'pijat', 'pijat relaksasi': 'pijat',
+      salon: 'salon', salon_kecantikan: 'salon',
+      belanja: 'belanja', bantu_belanja: 'belanja', 'bantu belanja': 'belanja',
+    };
+
+    function getCatIcon(name) {
+      if (!name) return '📋';
+      const n = name.toLowerCase().trim();
+      for (const [k, v] of Object.entries(CAT_ICONS)) {
+        if (n.includes(k)) return v;
+      }
+      return '📋';
+    }
+    function getCatClass(name) {
+      if (!name) return 'umum';
+      const n = name.toLowerCase().trim();
+      for (const [k, v] of Object.entries(CAT_CLASSES)) {
+        if (n.includes(k)) return v;
+      }
+      return 'umum';
+    }
+
+    /* ── Tab Switching ── */
+    tabBar.addEventListener('click', function(e) {
+      const tab = e.target.closest('.filter-tab');
+      if (!tab) return;
+      tabBar.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentFilter = tab.dataset.filter;
+      renderOrders();
+    });
+
+    const skCards = '<div class="sk-card">...skeleton cards...</div>';
+    
+    /* ── SSR: orders data already embedded ── */
+    let allOrders = [];
+    try {
+      const script = document.getElementById('ordersData');
+      if (script && script.textContent.trim()) {
+        const parsed = JSON.parse(script.textContent);
+        if (Array.isArray(parsed)) allOrders = parsed;
+      }
+    } catch(e) { console.warn('SSR orders parse failed, falling back to fetch'); }
+    
+    if (allOrders.length > 0) {
+      renderOrders();
+      updateStats();
+    } else {
+      loadOrders();
+    }
+
+    async function loadOrders() {
+      ordersList.innerHTML =
+        '<div class="sk-card"><div class="sk-row"><div class="sk-icon"></div><div class="sk-lines"><div class="sk-line w70"></div><div class="sk-line w50"></div><div class="sk-line w35" style="margin:0"></div></div></div><div class="sk-bottom"><div class="sk-date"></div><div class="sk-price"></div></div></div>'.repeat(3);
+
+      try {
+        const userId = getUserId();
+        const params = new URLSearchParams();
+        if (userId) params.set('user_id', userId);
+        const res = await fetch('/api/pesanan?' + params.toString());
+        if (!res.ok) throw new Error('Failed to load orders');
+        const data = await res.json();
+        allOrders = data.data || data || [];
+        if (!Array.isArray(allOrders)) allOrders = [];
+        renderOrders();
+        updateStats();
+      } catch (e) {
+        ordersList.innerHTML =
+          '<div class="error-state"><span class="error-icon">😕</span><div class="error-text">Gagal memuat pesanan</div><button class="error-btn" onclick="location.reload()">Coba Lagi</button></div>';
+      }
+    }
+
+    function getUserId() {
+      const meta = document.querySelector('meta[name="user-id"]');
+      if (meta) return meta.getAttribute('content');
+      {% if user and user.id %}
+      return '{{ user.id }}';
+      {% endif %}
+      return null;
+    }
+
+    /* ── Render Orders ── */
+    function formatDate(isoStr) {
+      if (!isoStr) return '-';
+      try {
+        const d = new Date(isoStr);
+        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      } catch (e) {
+        return isoStr;
+      }
+    }
+
+    function formatPrice(val) {
+      return 'Rp' + Number(val || 0).toLocaleString('id-ID');
+    }
+
+    function getStatusInfo(status) {
+      const s = (status || '').toLowerCase();
+      if (s === 'menunggu' || s === 'pending') return { label: 'Menunggu', cls: 'menunggu' };
+      if (s === 'diproses' || s === 'proses' || s === 'ditunggu' || s === 'berjalan') return { label: 'Diproses', cls: 'diproses' };
+      if (s === 'selesai' || s === 'completed' || s === 'done') return { label: 'Selesai', cls: 'selesai' };
+      if (s === 'dibatalkan' || s === 'cancelled' || s === 'batal') return { label: 'Dibatalkan', cls: 'dibatalkan' };
+      return { label: status || 'Unknown', cls: 'menunggu' };
+    }
+
+    function isActive(order) {
+      const s = (order.status || '').toLowerCase();
+      return s === 'menunggu' || s === 'pending' || s === 'diproses' || s === 'proses' || s === 'ditunggu' || s === 'berjalan';
+    }
+
+    function renderOrders() {
+      if (allOrders.length === 0) {
+        ordersList.innerHTML =
+          '<div class="empty-state">' +
+            '<div class="empty-illust">📋</div>' +
+            '<div class="empty-title">Belum Ada Pesanan</div>' +
+            '<div class="empty-desc">Yuk, pesan layanan pertama kamu sekarang!</div>' +
+            '<a href="/" class="empty-btn">🏠 Cari Layanan</a>' +
+          '</div>';
+        return;
+      }
+
+      let filtered = allOrders;
+      if (currentFilter === 'aktif') {
+        filtered = allOrders.filter(isActive);
+      } else if (currentFilter === 'selesai') {
+        filtered = allOrders.filter(function(o) {
+          const s = (o.status || '').toLowerCase();
+          return s === 'selesai' || s === 'completed' || s === 'done';
+        });
+      }
+
+      if (filtered.length === 0) {
+        ordersList.innerHTML =
+          '<div class="empty-state">' +
+            '<div class="empty-illust">📭</div>' +
+            '<div class="empty-title">Tidak Ada Pesanan</div>' +
+            '<div class="empty-desc">Tidak ada pesanan dengan filter ini.</div>' +
+          '</div>';
+        return;
+      }
+
+      ordersList.innerHTML = filtered.map(function(o) {
+        const statusInfo = getStatusInfo(o.status);
+        const catName = o.kategori_nama || o.layanan_kategori || '';
+        const icon = getCatIcon(catName);
+        const catClass = getCatClass(catName);
+        return '<div class="order-card" onclick="window.location.href=\'/pesanan/' + (o.kode || o.id) + '\'">' +
+          '<div class="order-card-top">' +
+            '<div class="order-icon ' + catClass + '">' + icon + '</div>' +
+            '<div class="order-info">' +
+              '<div class="order-name">' + (o.layanan_nama || 'Pesanan') + '</div>' +
+              '<div class="order-desc">' + (o.varian_nama || '') + '</div>' +
+            '</div>' +
+            '<span class="status-badge ' + statusInfo.cls + '">' +
+              '<span class="status-dot"></span>' + statusInfo.label +
+            '</span>' +
+          '</div>' +
+          '<div class="order-mid">' +
+            '<span class="order-date">📅 ' + formatDate(o.tanggal || o.created_at) + '</span>' +
+            '<span class="order-price">' + formatPrice(o.total_harga) + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    /* ── Update Stats ── */
+    function updateStats() {
+      const total = allOrders.length;
+      const aktif = allOrders.filter(isActive).length;
+      const selesai = allOrders.filter(function(o) {
+        const s = (o.status || '').toLowerCase();
+        return s === 'selesai' || s === 'completed' || s === 'done';
+      }).length;
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statAktif').textContent = aktif;
+      document.getElementById('statSelesai').textContent = selesai;
+
+      document.getElementById('countSemua').textContent = total;
+      document.getElementById('countAktif').textContent = aktif;
+      document.getElementById('countSelesai').textContent = selesai;
+    }
+
+  })();
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    }
+  </script>
+</body>
+</html>

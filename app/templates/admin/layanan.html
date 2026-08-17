@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layanan — Admin BantuDulu</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="apple-touch-icon" href="/static/images/pwa/apple-touch-icon.png" />
+  <meta name="theme-color" content="#042544" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BantuDulu" />
+  <meta name="description" content="Layanan jasa on-demand langsung ke rumah Anda. Bersih rumah, cuci AC, les privat, pijat, salon, bantu belanja." />
+  <meta name="application-name" content="BantuDulu" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://app.kazza.id">
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <img src="/static/images/logo.png?v=3" alt="BantuDulu" style="height:32px; width:auto;">
+    <h2>Bantu<span>Dulu</span></h2>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Menu</div>
+    <a href="/admin/dashboard" class="nav-item">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a href="/admin/pesanan" class="nav-item">
+      <span class="nav-icon">📋</span> Pesanan
+    </a>
+    <a href="/admin/layanan" class="nav-item active">
+      <span class="nav-icon">🧹</span> Layanan
+    </a>
+    <a href="/admin/laporan" class="nav-item">
+      <span class="nav-icon">📈</span> Laporan
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/" class="nav-item">
+      <span class="nav-icon">←</span> Kembali ke Situs
+    </a>
+  </div>
+</aside>
+
+<!-- ===== Main Wrapper ===== -->
+<div class="main-wrapper">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <img src="/static/images/logo.png?v=3" style="height:28px;">
+      <h1>Layanan</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="admin-info">
+        <div class="admin-avatar">A</div>
+        <div>
+          <div class="admin-name">Admin BantuDulu</div>
+          <div class="admin-role">Administrator</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <!-- Top Actions -->
+    <div class="flex-between mb-4">
+      <p style="font-size:14px;color:var(--gray-500);">Kelola layanan yang tersedia di platform BantuDulu.</p>
+      <button class="btn btn-primary" onclick="openAddModal()">➕ Tambah Layanan</button>
+    </div>
+
+    <!-- Services List -->
+    <div id="servicesContainer">
+      <div class="text-center text-muted" style="padding:48px;">
+        <div class="spinner"></div>
+        <p style="margin-top:8px;">Memuat layanan...</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== Add Service Modal ===== -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h3>Tambah Layanan Baru</h3>
+    <div class="form-group">
+      <label>Nama Layanan</label>
+      <input type="text" id="addNama" class="form-input" placeholder="Contoh: Bersih Rumah Standar">
+    </div>
+    <div class="form-group">
+      <label>Kategori</label>
+      <input type="text" id="addKategori" class="form-input" placeholder="Contoh: Kebersihan">
+    </div>
+    <div class="form-group">
+      <label>Harga (Rp)</label>
+      <input type="number" id="addHarga" class="form-input" placeholder="50000">
+    </div>
+    <div class="form-group">
+      <label>Deskripsi</label>
+      <textarea id="addDeskripsi" class="form-input" rows="3" placeholder="Deskripsi layanan..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeAddModal()">Batal</button>
+      <button class="btn btn-primary" onclick="addService()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allServices = [];
+
+function formatRupiah(val) {
+  if (val == null) return '—';
+  return 'Rp ' + Number(val).toLocaleString('id-ID');
+}
+
+// ── Toast Notification ──
+function showToast(type, message) {
+  let c = document.getElementById('toastContainer');
+  if (!c) { c = document.createElement('div'); c.id = 'toastContainer'; c.className = 'toast-container'; document.body.appendChild(c); }
+  const icons = {error:'❌', warning:'⚠️', success:'✅', info:'ℹ️'};
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || 'info');
+  el.innerHTML = '<span class="toast-icon">' + (icons[type]||'ℹ️') + '</span> ' + message;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+// ── /Toast ──
+
+async function loadServices() {
+  const container = document.getElementById('servicesContainer');
+  container.innerHTML = '<div class="text-center text-muted" style="padding:48px;"><div class="spinner"></div><p style="margin-top:8px;">Memuat layanan...</p></div>';
+
+  try {
+    const res = await fetch('/api/layanan');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    // Handle both array and { layanan: [...] } responses
+    allServices = Array.isArray(data) ? data : (data.layanan || data.services || []);
+    renderServices();
+  } catch (err) {
+    console.error('Gagal memuat layanan:', err);
+    showToast('error', 'Gagal memuat layanan.');
+    container.innerHTML = '<div class="text-center" style="padding:48px;color:#ef4444;">Gagal memuat data layanan. Pastikan server berjalan.</div>';
+  }
+}
+
+function renderServices() {
+  const container = document.getElementById('servicesContainer');
+
+  if (allServices.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🧹</div>
+      <h4>Belum ada layanan</h4>
+      <p style="font-size:13px;">Klik "Tambah Layanan" untuk menambahkan layanan pertama.</p>
+    </div>`;
+    return;
+  }
+
+  // Group by kategori
+  const groups = {};
+  allServices.forEach(s => {
+    const kat = s.kategori || s.category || 'Umum';
+    if (!groups[kat]) groups[kat] = [];
+    groups[kat].push(s);
+  });
+
+  let html = '';
+  for (const [kategori, items] of Object.entries(groups)) {
+    html += `<div class="service-group">
+      <h3>${kategori}</h3>`;
+
+    items.forEach(s => {
+      const isActive = s.active !== false && s.aktif !== false;
+      const id = s.id || s.kode || s.nama;
+      html += `<div class="service-item" data-id="${id}">
+        <div class="service-info">
+          <h4>${s.nama || s.name || '—'}</h4>
+          <p>${s.deskripsi || s.description || ''}</p>
+        </div>
+        <div class="flex gap-3" style="align-items:center;">
+          <div class="service-price">${formatRupiah(s.harga || s.price)}</div>
+          <label class="toggle">
+            <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleService('${id}', this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>`;
+    });
+
+    html += `</div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+async function toggleService(id, active) {
+  try {
+    const res = await fetch('/api/layanan/' + encodeURIComponent(id) + '/toggle', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active })
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    // Reload to reflect actual server state
+    await loadServices();
+  } catch (err) {
+    console.error('Gagal toggle layanan:', err);
+    showToast('error', 'Gagal mengubah status layanan.');
+    alert('Gagal mengubah status layanan. Coba lagi.');
+    await loadServices(); // revert UI
+  }
+}
+
+function openAddModal() {
+  document.getElementById('addModal').classList.add('show');
+}
+
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('show');
+  document.getElementById('addNama').value = '';
+  document.getElementById('addKategori').value = '';
+  document.getElementById('addHarga').value = '';
+  document.getElementById('addDeskripsi').value = '';
+}
+
+async function addService() {
+  const nama = document.getElementById('addNama').value.trim();
+  const kategori = document.getElementById('addKategori').value.trim();
+  const harga = document.getElementById('addHarga').value;
+  const deskripsi = document.getElementById('addDeskripsi').value.trim();
+
+  if (!nama || !kategori || !harga) {
+    alert('Harap isi nama, kategori, dan harga.');
+    return;
+  }
+
+  const btn = document.querySelector('#addModal .btn-primary');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+
+  try {
+    const res = await fetch('/api/layanan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nama,
+        kategori,
+        harga: Number(harga),
+        deskripsi
+      })
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    closeAddModal();
+    await loadServices();
+  } catch (err) {
+    console.error('Gagal tambah layanan:', err);
+    showToast('error', 'Gagal menambahkan layanan.');
+    alert('Gagal menambahkan layanan. Coba lagi.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Simpan';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadServices);
+</script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    }
+  </script>
+</body>
+</html>

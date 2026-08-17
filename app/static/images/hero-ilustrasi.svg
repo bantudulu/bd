@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 260" width="320" height="260">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#063a6e;stop-opacity:0.08"/>
+      <stop offset="100%" style="stop-color:#0a5098;stop-opacity:0.15"/>
+    </linearGradient>
+    <linearGradient id="phoneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#042544"/>
+      <stop offset="100%" style="stop-color:#0a5098"/>
+    </linearGradient>
+    <linearGradient id="btnGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#EAAE24"/>
+      <stop offset="100%" style="stop-color:#f5c84a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#f0f8ff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="320" height="260" rx="20" fill="url(#bgGrad)"/>
+
+  <!-- Floating dots background -->
+  <circle cx="40" cy="30" r="4" fill="#0a5098" opacity="0.12"/>
+  <circle cx="280" cy="45" r="3" fill="#0a5098" opacity="0.10"/>
+  <circle cx="50" cy="200" r="5" fill="#0a5098" opacity="0.08"/>
+  <circle cx="270" cy="220" r="3" fill="#0a5098" opacity="0.12"/>
+  <circle cx="160" cy="20" r="2" fill="#0a5098" opacity="0.10"/>
+
+  <!-- Phone body -->
+  <rect x="115" y="35" width="90" height="190" rx="16" fill="url(#phoneGrad)" stroke="#0a5098" stroke-width="1.5"/>
+  <!-- Phone screen -->
+  <rect x="123" y="47" width="74" height="148" rx="8" fill="url(#cardGrad)"/>
+
+  <!-- Phone notch -->
+  <rect x="150" y="39" width="20" height="4" rx="2" fill="#042544"/>
+
+  <!-- App screen content -->
+  <!-- Header bar -->
+  <rect x="127" y="51" width="66" height="14" rx="4" fill="#042544"/>
+  <circle cx="136" cy="58" r="4" fill="#EAAE24"/>
+  <text x="145" y="62" font-family="Arial,sans-serif" font-size="7" font-weight="bold" fill="#fff">BantuDulu</text>
+
+  <!-- Service cards in phone -->
+  <rect x="129" y="70" width="62" height="18" rx="4" fill="#e8f0fe"/>
+  <circle cx="137" cy="79" r="5" fill="#14b8a6"/>
+  <text x="145" y="82" font-family="Arial,sans-serif" font-size="5.5" fill="#333">Bersih-Bersih</text>
+
+  <rect x="129" y="92" width="62" height="18" rx="4" fill="#e8f0fe"/>
+  <circle cx="137" cy="101" r="5" fill="#06b6d4"/>
+  <text x="145" y="104" font-family="Arial,sans-serif" font-size="5.5" fill="#333">Cuci AC</text>
+
+  <rect x="129" y="114" width="62" height="18" rx="4" fill="#e8f0fe"/>
+  <circle cx="137" cy="123" r="5" fill="#f59e0b"/>
+  <text x="145" y="126" font-family="Arial,sans-serif" font-size="5.5" fill="#333">Les Privat</text>
+
+  <rect x="129" y="136" width="62" height="18" rx="4" fill="#e8f0fe"/>
+  <circle cx="137" cy="145" r="5" fill="#ec4899"/>
+  <text x="145" y="148" font-family="Arial,sans-serif" font-size="5.5" fill="#333">Pijat</text>
+
+  <!-- Bottom button -->
+  <rect x="131" y="162" width="58" height="14" rx="7" fill="url(#btnGrad)"/>
+  <text x="148" y="172" font-family="Arial,sans-serif" font-size="6.5" font-weight="bold" fill="#042544">Pesan Sekarang</text>
+
+  <!-- Home indicator -->
+  <rect x="150" y="198" width="20" height="3" rx="1.5" fill="#0a5098" opacity="0.3"/>
+
+  <!-- Floating badges around phone -->
+  <rect x="50" y="70" width="55" height="20" rx="10" fill="#fff" stroke="#0a5098" stroke-width="1" opacity="0.9"/>
+  <text x="67" y="83" font-family="Arial,sans-serif" font-size="8" fill="#042544" text-anchor="middle" font-weight="bold">✅ Terpercaya</text>
+
+  <rect x="215" y="120" width="55" height="20" rx="10" fill="#fff" stroke="#0a5098" stroke-width="1" opacity="0.9"/>
+  <text x="232" y="133" font-family="Arial,sans-serif" font-size="8" fill="#042544" text-anchor="middle" font-weight="bold">🏠 Ke Rumah</text>
+
+  <rect x="50" y="170" width="55" height="20" rx="10" fill="#fff" stroke="#0a5098" stroke-width="1" opacity="0.9"/>
+  <text x="67" y="183" font-family="Arial,sans-serif" font-size="8" fill="#042544" text-anchor="middle" font-weight="bold">💰 Harga Murah</text>
+</svg>

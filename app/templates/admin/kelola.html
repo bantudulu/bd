@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Pesanan — Admin BantuDulu</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="apple-touch-icon" href="/static/images/pwa/apple-touch-icon.png" />
+  <meta name="theme-color" content="#042544" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BantuDulu" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://app.kazza.id">
+  <style>
+    /* ── Kelola Page ── */
+    .kelola-content { max-width: 820px; margin: 0 auto; }
+
+    /* ── Stats bar ── */
+    .kelola-stats {
+      display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .kelola-stat {
+      background: #fff; border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 14px 20px; flex: 1; min-width: 120px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .kelola-stat-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .kelola-stat-icon.warning { background: var(--yellow-100); }
+    .kelola-stat-icon.info { background: var(--blue-100); }
+    .kelola-stat-icon.primary { background: var(--primary-bg); }
+    .kelola-stat-icon.danger { background: var(--red-100); }
+    .kelola-stat-num {
+      font-size: 24px; font-weight: 800; color: var(--gray-800); line-height: 1;
+    }
+    .kelola-stat-label {
+      font-size: 12px; color: var(--gray-500); font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* ── Filter Tabs ── */
+    .kelola-tabs {
+      display: flex; gap: 6px; margin-bottom: 18px; overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .kelola-tab {
+      padding: 8px 18px; border-radius: 100px; border: none;
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      background: var(--gray-100); color: var(--gray-600);
+      transition: all .15s;
+    }
+    .kelola-tab:hover { background: var(--gray-200); }
+    .kelola-tab.active {
+      background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(4,37,68,.25);
+    }
+    .kelola-tab .tab-count {
+      display: inline-block; margin-left: 5px;
+      background: rgba(255,255,255,.2); padding: 0 7px; border-radius: 10px;
+      font-size: 11px;
+    }
+    .kelola-tab.active .tab-count { background: rgba(255,255,255,.2); }
+    .kelola-tab:not(.active) .tab-count { background: var(--gray-200); color: var(--gray-500); }
+
+    /* ── Order Card ── */
+    .order-card {
+      background: #fff; border-radius: var(--radius); box-shadow: var(--shadow);
+      margin-bottom: 14px; overflow: hidden;
+      transition: box-shadow .15s;
+    }
+    .order-card:hover { box-shadow: var(--shadow-md); }
+
+    .order-card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 18px; border-bottom: 1px solid var(--gray-100);
+      flex-wrap: wrap; gap: 8px;
+    }
+    .order-card-header-left {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .order-kode {
+      font-family: monospace; font-size: 13px; font-weight: 700;
+      background: var(--gray-100); padding: 3px 10px; border-radius: 6px;
+      color: var(--gray-700);
+    }
+    .order-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 700;
+    }
+    .order-badge.menunggu { background: var(--yellow-100); color: #b45309; }
+    .order-badge.diproses { background: var(--blue-100); color: var(--blue-500); }
+    .order-badge.ditugaskan { background: #fef3c7; color: #d97706; }
+    .order-badge.menuju_lokasi { background: var(--blue-100); color: #7c3aed; }
+    .order-badge.dimulai { background: var(--green-100); color: #16a34a; }
+    .order-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%; display: inline-block;
+    }
+    .order-badge.menunggu .order-badge-dot { background: #b45309; }
+    .order-badge.diproses .order-badge-dot { background: var(--blue-500); }
+    .order-badge.ditugaskan .order-badge-dot { background: #d97706; }
+    .order-badge.menuju_lokasi .order-badge-dot { background: #7c3aed; }
+    .order-badge.dimulai .order-badge-dot { background: #16a34a; animation: pulse-kelola 1.4s infinite; }
+    @keyframes pulse-kelola { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .order-time {
+      font-size: 12px; color: var(--gray-400); display: flex; align-items: center; gap: 4px;
+    }
+
+    .order-card-body {
+      padding: 16px 18px;
+    }
+
+    .order-main-row {
+      display: flex; gap: 16px; flex-wrap: wrap;
+    }
+    .order-main-left { flex: 2; min-width: 240px; }
+    .order-main-right { flex: 1; min-width: 180px; }
+
+    .order-layanan {
+      font-size: 16px; font-weight: 700; color: var(--gray-800);
+      margin-bottom: 2px;
+    }
+    .order-varian {
+      font-size: 13px; color: var(--gray-500); margin-bottom: 8px;
+    }
+    .order-catatan {
+      font-size: 13px; color: var(--gray-600); background: var(--gray-50);
+      padding: 8px 12px; border-radius: 8px; margin-top: 6px;
+      border-left: 3px solid var(--gray-300);
+    }
+    .order-alamat {
+      font-size: 13px; color: var(--gray-600); line-height: 1.5;
+      margin-top: 8px; display: flex; align-items: flex-start; gap: 6px;
+    }
+    .order-alamat-icon { flex-shrink: 0; }
+
+    .order-price {
+      font-size: 18px; font-weight: 800; color: var(--primary);
+    }
+    .order-metode {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; font-weight: 700; color: var(--gray-600);
+      background: var(--gray-100); padding: 3px 10px; border-radius: 6px;
+      margin-top: 4px;
+    }
+    .order-pelanggan {
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px dashed var(--gray-200);
+    }
+    .order-pelanggan-item {
+      font-size: 13px; color: var(--gray-700);
+      display: flex; align-items: center; gap: 6px;
+      margin-bottom: 3px;
+    }
+
+    /* ── Fee breakdown (admin only) ── */
+    .order-fee-admin {
+      margin: 6px 0 6px;
+      padding: 6px 10px;
+      background: var(--gray-50);
+      border-radius: 8px;
+      border: 1px dashed var(--gray-200);
+      font-size: 12px;
+    }
+    .fee-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1px 0;
+    }
+    .fee-row span:first-child { color: var(--gray-500); font-weight: 500; }
+    .fee-minus { color: #ef4444; font-weight: 700; }
+    .fee-plus { color: #16a34a; font-weight: 700; }
+    .fee-mitra { padding-top: 3px; border-top: 1px solid var(--gray-200); margin-top: 3px; }
+    .fee-mitra span:first-child { color: var(--primary); font-weight: 600; }
+
+    /* ── Form data ── */
+    .order-form-data {
+      margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px 8px;
+    }
+    .order-form-tag {
+      font-size: 11px; background: var(--primary-bg); color: var(--primary-light);
+      padding: 2px 8px; border-radius: 4px; font-weight: 600;
+    }
+    .order-form-tag strong { color: var(--primary); }
+
+    /* ── Actions ── */
+    .order-card-actions {
+      display: flex; gap: 8px; padding: 12px 18px;
+      background: var(--gray-50); border-top: 1px solid var(--gray-100);
+      flex-wrap: wrap;
+    }
+    .action-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 16px; border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      border: none; cursor: pointer; text-decoration: none;
+      transition: all .15s;
+    }
+    .action-btn:active { transform: scale(.96); }
+    .action-btn.primary {
+      background: var(--primary); color: #fff;
+    }
+    .action-btn.primary:hover { background: var(--primary-dark); }
+    .action-btn.success {
+      background: var(--green-500); color: #fff;
+    }
+    .action-btn.success:hover { background: #16a34a; }
+    .action-btn.outline {
+      background: transparent; color: var(--gray-600);
+      border: 1.5px solid var(--gray-200);
+    }
+    .action-btn.outline:hover { border-color: var(--gray-400); }
+    .action-btn.danger {
+      background: var(--red-500); color: #fff;
+    }
+    .action-btn.danger:hover { background: #dc2626; }
+    .action-btn.wa {
+      background: #25D366; color: #fff;
+    }
+    .action-btn.wa:hover { background: #1ebe5c; }
+    .action-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .action-btn:disabled:active { transform: none; }
+
+    /* ── Empty state ── */
+    .empty-kelola {
+      text-align: center; padding: 60px 20px 40px;
+    }
+    .empty-kelola-icon {
+      font-size: 56px; margin-bottom: 12px;
+    }
+    .empty-kelola h3 {
+      font-size: 18px; color: var(--gray-700); margin-bottom: 4px;
+    }
+    .empty-kelola p {
+      font-size: 14px; color: var(--gray-500);
+    }
+
+    /* ── Loading ── */
+    .sk-card {
+      background: #fff; border-radius: var(--radius); box-shadow: var(--shadow);
+      margin-bottom: 14px; padding: 20px;
+    }
+    .sk-box {
+      background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);
+      background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite;
+      border-radius: 6px; margin-bottom: 10px;
+    }
+    .sk-box.h16 { height: 16px; }
+    .sk-box.h24 { height: 24px; }
+    .sk-box.h40 { height: 40px; }
+    .sk-box.w70 { width: 70%; }
+    .sk-box.w50 { width: 50%; }
+    .sk-box.w30 { width: 30%; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ── Responsive ── */
+    @media(max-width:600px){
+      .kelola-stats { gap: 8px; }
+      .kelola-stat { padding: 10px 14px; min-width: 80px; }
+      .kelola-stat-num { font-size: 18px; }
+      .order-card-header { padding: 12px 14px; }
+      .order-card-body { padding: 12px 14px; }
+      .order-card-actions { padding: 10px 14px; gap: 6px; }
+      .order-main-left { min-width: 100%; }
+      .order-main-right { min-width: 100%; }
+      .action-btn { flex: 1; justify-content: center; font-size: 12px; padding: 7px 12px; }
+      .kelola-tabs { gap: 4px; }
+      .kelola-tab { font-size: 12px; padding: 6px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <img src="/static/images/logo.png?v=3" alt="BantuDulu" style="height:32px; width:auto;">
+    <h2>Bantu<span>Dulu</span></h2>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Menu</div>
+    <a href="/admin/dashboard" class="nav-item">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a href="/admin/kelola" class="nav-item active">
+      <span class="nav-icon">🛠️</span> Kelola Pesanan
+    </a>
+    <a href="/admin/pesanan" class="nav-item">
+      <span class="nav-icon">📋</span> Pesanan
+    </a>
+    <a href="/admin/layanan" class="nav-item">
+      <span class="nav-icon">🧹</span> Layanan
+    </a>
+    <a href="/admin/laporan" class="nav-item">
+      <span class="nav-icon">📈</span> Laporan
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/" class="nav-item">
+      <span class="nav-icon">←</span> Kembali ke Situs
+    </a>
+  </div>
+</aside>
+
+<!-- ===== Main ===== -->
+<div class="main-wrapper">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <img src="/static/images/logo.png?v=3" style="height:28px;">
+      <h1>Kelola Pesanan</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="admin-info">
+        <div class="admin-avatar">A</div>
+        <div>
+          <div class="admin-name">Admin BantuDulu</div>
+          <div class="admin-role">Administrator</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-content kelola-content">
+
+    <!-- Stats -->
+    <div class="kelola-stats" id="statsBar">
+      <div class="kelola-stat">
+        <div class="kelola-stat-icon warning">⏳</div>
+        <div>
+          <div class="kelola-stat-num" id="statMenunggu">—</div>
+          <div class="kelola-stat-label">Menunggu</div>
+        </div>
+      </div>
+      <div class="kelola-stat">
+        <div class="kelola-stat-icon info">⚙️</div>
+        <div>
+          <div class="kelola-stat-num" id="statDiproses">—</div>
+          <div class="kelola-stat-label">Diproses</div>
+        </div>
+      </div>
+      <div class="kelola-stat">
+        <div class="kelola-stat-icon primary">🚚</div>
+        <div>
+          <div class="kelola-stat-num" id="statDalamPerjalanan">—</div>
+          <div class="kelola-stat-label">Dalam Perjalanan</div>
+        </div>
+      </div>
+      <div class="kelola-stat">
+        <div class="kelola-stat-icon danger">🔴</div>
+        <div>
+          <div class="kelola-stat-num" id="statTotal">—</div>
+          <div class="kelola-stat-label">Total Belum</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="kelola-tabs" id="tabBar">
+      <button class="kelola-tab active" data-filter="semua">Semua <span class="tab-count" id="countSemua">0</span></button>
+      <button class="kelola-tab" data-filter="menunggu">Menunggu <span class="tab-count" id="countMenunggu">0</span></button>
+      <button class="kelola-tab" data-filter="diproses">Diproses <span class="tab-count" id="countDiproses">0</span></button>
+      <button class="kelola-tab" data-filter="ditugaskan">Ditugaskan <span class="tab-count" id="countDitugaskan">0</span></button>
+      <button class="kelola-tab" data-filter="menuju_lokasi">Menuju Lokasi <span class="tab-count" id="countMenujuLokasi">0</span></button>
+      <button class="kelola-tab" data-filter="dimulai">Dimulai <span class="tab-count" id="countDimulai">0</span></button>
+    </div>
+
+    <!-- Orders Container -->
+    <div id="kelolaOrders">
+
+      <!-- Loading skeletons -->
+      <div class="sk-card">
+        <div class="sk-box h24 w70"></div>
+        <div class="sk-box h16 w50"></div>
+        <div class="sk-box h16 w30"></div>
+        <div class="sk-box h40" style="margin-top:12px;"></div>
+      </div>
+      <div class="sk-card">
+        <div class="sk-box h24 w50"></div>
+        <div class="sk-box h16 w70"></div>
+        <div class="sk-box h16 w30"></div>
+        <div class="sk-box h40" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let allOrders = [];
+let currentTab = 'semua';
+
+// ── Helpers ──
+function getStatusLabel(s) {
+  const map = {
+    'menunggu':'Menunggu','pending':'Menunggu',
+    'diproses':'Diproses','processing':'Diproses',
+    'ditugaskan':'Ditugaskan',
+    'menuju_lokasi':'Menuju Lokasi',
+    'dimulai':'Dimulai',
+    'selesai':'Selesai','completed':'Selesai',
+    'dibatalkan':'Dibatalkan','cancelled':'Dibatalkan'
+  };
+  return map[s] || s;
+}
+
+function formatRupiah(v) {
+  if (v == null) return '—';
+  return 'Rp ' + Number(v).toLocaleString('id-ID');
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+  } catch(e) { return iso; }
+}
+
+function getMetodeIcon(m) {
+  m = (m||'').toLowerCase();
+  if (m === 'cod') return '💵';
+  if (m === 'transfer' || m === 'transfer bank') return '🏦';
+  if (m === 'qris') return '📱';
+  return '💳';
+}
+
+// ── Render ──
+function renderOrders() {
+  const container = document.getElementById('kelolaOrders');
+
+  let filtered = allOrders;
+  if (currentTab !== 'semua') {
+    filtered = allOrders.filter(function(o) {
+      return (o.status || '').toLowerCase() === currentTab;
+    });
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML =
+      '<div class="empty-kelola">' +
+        '<div class="empty-kelola-icon">✅</div>' +
+        '<h3>Tidak Ada Pesanan</h3>' +
+        '<p>' + (currentTab === 'semua' ? 'Semua pesanan sudah selesai atau dibatalkan. Tenang, Boss! 😎' : 'Tidak ada pesanan dengan status ini.') + '</p>' +
+      '</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(function(o) {
+    const status = (o.status || '').toLowerCase();
+    const statusCls = ['menunggu','diproses','ditugaskan','menuju_lokasi','dimulai'].includes(status) ? status : 'menunggu';
+    const metodeIcon = getMetodeIcon(o.metode_pembayaran);
+
+    // Next status button
+    let nextBtn = '';
+    const nextStatus = getNextStatus(status);
+    if (nextStatus) {
+      nextBtn = '<button class="action-btn success" onclick="quickProcess(\'' + o.id + '\', \'' + nextStatus + '\')">➡️ ' + getStatusLabel(nextStatus) + '</button>';
+    }
+
+    // Cancel button
+    var cancelBtn = (status !== 'dimulai') ?
+      '<button class="action-btn danger" onclick="quickProcess(\'' + o.id + '\', \'dibatalkan\')">✕ Batalkan</button>' : '';
+
+    // Form data tags
+    var formTags = '';
+    if (o.form_data) {
+      var fd = o.form_data;
+      if (typeof fd === 'object') {
+        var keys = Object.keys(fd);
+        if (keys.length > 0) {
+          formTags = '<div class="order-form-data">' +
+            keys.map(function(k) {
+              return '<span class="order-form-tag"><strong>' + k.replace(/_/g,' ') + ':</strong> ' + fd[k] + '</span>';
+            }).join('') +
+          '</div>';
+        }
+      }
+    }
+
+    var waUrl = o.pelanggan_wa ? 'https://wa.me/' + o.pelanggan_wa.replace(/[^0-9]/g,'') : '#';
+
+    return '<div class="order-card" data-status="' + status + '">' +
+      '<div class="order-card-header">' +
+        '<div class="order-card-header-left">' +
+          '<span class="order-kode">' + (o.kode || '—') + '</span>' +
+          '<span class="order-badge ' + statusCls + '"><span class="order-badge-dot"></span> ' + getStatusLabel(status) + '</span>' +
+        '</div>' +
+        '<div class="order-time">🕐 ' + formatDate(o.created_at) + '</div>' +
+      '</div>' +
+      '<div class="order-card-body">' +
+        '<div class="order-main-row">' +
+          '<div class="order-main-left">' +
+            '<div class="order-layanan">' + (o.layanan_nama || 'Pesanan') + '</div>' +
+            '<div class="order-varian">' + (o.varian_nama || '') + '</div>' +
+            (o.catatan ? '<div class="order-catatan">📝 ' + o.catatan + '</div>' : '') +
+            (o.alamat ? '<div class="order-alamat"><span class="order-alamat-icon">📍</span> ' + o.alamat + '</div>' : '') +
+            formTags +
+          '</div>' +
+          '<div class="order-main-right">' +
+            '<div class="order-price">' + formatRupiah(o.total_harga) + '</div>' +
+            // Potongan admin 15% & diterima mitra (hanya admin)
+            '<div class="order-fee-admin">' +
+              '<div class="fee-row"><span>Potongan 15%</span><span class="fee-minus">-' + formatRupiah(Math.round(o.total_harga * 0.15)) + '</span></div>' +
+              '<div class="fee-row fee-mitra"><span>Diterima Mitra</span><span class="fee-plus">' + formatRupiah(Math.round(o.total_harga * 0.85)) + '</span></div>' +
+            '</div>' +
+            '<div class="order-metode">' + metodeIcon + ' ' + (o.metode_pembayaran||'cod').toUpperCase() + '</div>' +
+            '<div class="order-pelanggan">' +
+              '<div class="order-pelanggan-item">👤 ' + (o.pelanggan_nama || '—') + '</div>' +
+              (o.pelanggan_wa ? '<div class="order-pelanggan-item">📞 ' + o.pelanggan_wa + '</div>' : '') +
+              (o.jadwal ? '<div class="order-pelanggan-item">📅 ' + o.jadwal + (o.jam ? ' ' + o.jam : '') + '</div>' : '') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="order-card-actions">' +
+        '<a href="/admin/pesanan/' + o.id + '" class="action-btn outline">👁️ Detail</a>' +
+        (waUrl !== '#' ? '<a href="' + waUrl + '" target="_blank" class="action-btn wa">💬 WhatsApp</a>' : '') +
+        nextBtn +
+        cancelBtn +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function getNextStatus(status) {
+  const flow = ['menunggu','diproses','ditugaskan','menuju_lokasi','dimulai','selesai'];
+  var idx = flow.indexOf(status);
+  if (idx >= 0 && idx < flow.length - 1) return flow[idx + 1];
+  return null;
+}
+
+// ── Quick Process ──
+async function quickProcess(id, newStatus) {
+  if (newStatus === 'dibatalkan') {
+    if (!confirm('Yakin ingin membatalkan pesanan ini?')) return;
+  }
+
+  var btn = event && event.target ? event.target : null;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ ...'; }
+
+  try {
+    var res = await fetch('/api/admin/pesanan/' + encodeURIComponent(id) + '/status', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    await loadOrders();
+  } catch (err) {
+    alert('Gagal: ' + err.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Coba Lagi'; }
+  }
+}
+
+// ── Load Data ──
+async function loadOrders() {
+  try {
+    var res = await fetch('/api/admin/kelola-pesanan');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    allOrders = await res.json();
+    if (!Array.isArray(allOrders)) allOrders = [];
+
+    // Update stats
+    var total = allOrders.length;
+    var menunggu = allOrders.filter(function(o) { return (o.status||'') === 'menunggu'; }).length;
+    var diproses = allOrders.filter(function(o) { return (o.status||'') === 'diproses'; }).length;
+    var dalamPerjalanan = allOrders.filter(function(o) {
+      var s = (o.status||'');
+      return s === 'ditugaskan' || s === 'menuju_lokasi' || s === 'dimulai';
+    }).length;
+
+    document.getElementById('statMenunggu').textContent = menunggu;
+    document.getElementById('statDiproses').textContent = diproses;
+    document.getElementById('statDalamPerjalanan').textContent = dalamPerjalanan;
+    document.getElementById('statTotal').textContent = total;
+
+    // Update tab counts
+    document.getElementById('countSemua').textContent = total;
+    document.getElementById('countMenunggu').textContent = menunggu;
+    document.getElementById('countDiproses').textContent = diproses;
+    document.getElementById('countDitugaskan').textContent = allOrders.filter(function(o) { return (o.status||'') === 'ditugaskan'; }).length;
+    document.getElementById('countMenujuLokasi').textContent = allOrders.filter(function(o) { return (o.status||'') === 'menuju_lokasi'; }).length;
+    document.getElementById('countDimulai').textContent = allOrders.filter(function(o) { return (o.status||'') === 'dimulai'; }).length;
+
+    renderOrders();
+  } catch (err) {
+    document.getElementById('kelolaOrders').innerHTML =
+      '<div class="empty-kelola"><div class="empty-kelola-icon">😕</div><h3>Gagal Memuat Data</h3><p>' + err.message + '</p></div>';
+  }
+}
+
+// ── Tabs ──
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('tabBar').addEventListener('click', function(e) {
+    var tab = e.target.closest('.kelola-tab');
+    if (!tab) return;
+    document.querySelectorAll('.kelola-tab').forEach(function(t) { t.classList.remove('active'); });
+    tab.classList.add('active');
+    currentTab = tab.dataset.filter;
+    renderOrders();
+  });
+  loadOrders();
+});
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' });
+  }
+</script>
+</body>
+</html>

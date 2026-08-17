@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesanan — Admin BantuDulu</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="apple-touch-icon" href="/static/images/pwa/apple-touch-icon.png" />
+  <meta name="theme-color" content="#042544" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BantuDulu" />
+  <meta name="description" content="Layanan jasa on-demand langsung ke rumah Anda. Bersih rumah, cuci AC, les privat, pijat, salon, bantu belanja." />
+  <meta name="application-name" content="BantuDulu" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://app.kazza.id">
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <img src="/static/images/logo.png?v=3" alt="BantuDulu" style="height:32px; width:auto;">
+    <h2>Bantu<span>Dulu</span></h2>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Menu</div>
+    <a href="/admin/dashboard" class="nav-item">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a href="/admin/pesanan" class="nav-item active">
+      <span class="nav-icon">📋</span> Pesanan
+    </a>
+    <a href="/admin/layanan" class="nav-item">
+      <span class="nav-icon">🧹</span> Layanan
+    </a>
+    <a href="/admin/laporan" class="nav-item">
+      <span class="nav-icon">📈</span> Laporan
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/" class="nav-item">
+      <span class="nav-icon">←</span> Kembali ke Situs
+    </a>
+  </div>
+</aside>
+
+<!-- ===== Main Wrapper ===== -->
+<div class="main-wrapper">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <img src="/static/images/logo.png?v=3" style="height:28px;">
+      <h1>Pesanan</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="admin-info">
+        <div class="admin-avatar">A</div>
+        <div>
+          <div class="admin-name">Admin BantuDulu</div>
+          <div class="admin-role">Administrator</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <!-- Filter Row -->
+    <div class="filter-row">
+      <label for="statusFilter" style="font-size:13px;font-weight:600;color:var(--gray-600);">Filter Status:</label>
+      <select id="statusFilter" class="form-control" onchange="filterOrders()">
+        <option value="">Semua Status</option>
+        <option value="menunggu">Menunggu</option>
+        <option value="diproses">Diproses</option>
+        <option value="selesai">Selesai</option>
+        <option value="dibatalkan">Dibatalkan</option>
+      </select>
+      <button class="btn btn-outline btn-sm" onclick="loadOrders()">🔄 Refresh</button>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Daftar Pesanan</h3>
+        <span id="orderCount" style="font-size:13px;color:var(--gray-400);"></span>
+      </div>
+      <div class="card-body">
+        <table class="table-responsive">
+          <thead>
+            <tr>
+              <th>Kode</th>
+              <th>Pelanggan</th>
+              <th>Layanan</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>No. WA</th>
+              <th>Form</th>
+              <th>Tanggal</th>
+              <th style="text-align:center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody">
+            <tr><td colspan="9" class="text-center text-muted" style="padding:32px;">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== Status Update Modal ===== -->
+<div class="modal-overlay" id="statusModal">
+  <div class="modal">
+    <h3>Ubah Status Pesanan</h3>
+    <p style="font-size:14px;color:var(--gray-500);margin-bottom:16px;">
+      Kode: <strong id="modalKode">—</strong>
+    </p>
+    <div class="form-group">
+      <label for="newStatus">Status Baru</label>
+      <select id="newStatus" class="form-control" style="width:100%;">
+        <option value="menunggu">Menunggu</option>
+        <option value="diproses">Diproses</option>
+        <option value="selesai">Selesai</option>
+        <option value="dibatalkan">Dibatalkan</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" onclick="updateStatus()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allOrders = [];
+let selectedOrderId = null;
+
+function getStatusBadge(status) {
+  const s = (status || '').toLowerCase();
+  const map = {
+    'menunggu': 'badge-warning',
+    'pending': 'badge-warning',
+    'diproses': 'badge-info',
+    'processing': 'badge-info',
+    'selesai': 'badge-success',
+    'completed': 'badge-success',
+    'dibatalkan': 'badge-danger',
+    'cancelled': 'badge-danger'
+  };
+  return map[s] || 'badge-secondary';
+}
+
+function formatRupiah(val) {
+  if (val == null) return '—';
+  return 'Rp ' + Number(val).toLocaleString('id-ID');
+}
+
+// ── Toast Notification ──
+function showToast(type, message) {
+  let c = document.getElementById('toastContainer');
+  if (!c) { c = document.createElement('div'); c.id = 'toastContainer'; c.className = 'toast-container'; document.body.appendChild(c); }
+  const icons = {error:'❌', warning:'⚠️', success:'✅', info:'ℹ️'};
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || 'info');
+  el.innerHTML = '<span class="toast-icon">' + (icons[type]||'ℹ️') + '</span> ' + message;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+// ── /Toast ──
+
+async function loadOrders() {
+  const tbody = document.getElementById('ordersBody');
+  tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding:32px;"><div class="spinner"></div> Memuat...</td></tr>';
+
+  try {
+    const res = await fetch('/api/admin/pesanan');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    // Handle both array response and { pesanan: [...] } response
+    allOrders = Array.isArray(data) ? data : (data.pesanan || data.orders || []);
+    renderOrders();
+  } catch (err) {
+    console.error('Gagal memuat pesanan:', err);
+    showToast('error', 'Gagal memuat pesanan.');
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding:32px;color:#ef4444;">Gagal memuat data pesanan. Pastikan server berjalan.</td></tr>';
+  }
+}
+
+function renderOrders() {
+  const filterVal = document.getElementById('statusFilter').value.toLowerCase();
+  const filtered = filterVal
+    ? allOrders.filter(o => (o.status || '').toLowerCase() === filterVal)
+    : allOrders;
+
+  document.getElementById('orderCount').textContent = filtered.length + ' pesanan';
+
+  const tbody = document.getElementById('ordersBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted" style="padding:32px;">Tidak ada pesanan ditemukan</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(o => {
+    const statusBadge = getStatusBadge(o.status);
+
+    // Extract no_wa from form_data if no_wa field not directly present
+    let noWa = o.no_wa || '—';
+    if (noWa === '—' && o.form_data) {
+      try {
+        const fd = typeof o.form_data === 'string' ? JSON.parse(o.form_data) : o.form_data;
+        noWa = fd.no_wa || fd.noWa || fd.no_hp || fd.telepon || '—';
+      } catch(e) { noWa = '—'; }
+    }
+
+    // Format form_data for display
+    let formDisplay = '—';
+    if (o.form_data) {
+      try {
+        const fd = typeof o.form_data === 'string' ? JSON.parse(o.form_data) : o.form_data;
+        const entries = Object.entries(fd).filter(([k]) => !['no_wa','noWa','no_hp','telepon'].includes(k));
+        if (entries.length === 0) {
+          formDisplay = '✓ (data terisi)';
+        } else {
+          formDisplay = entries.map(([k, v]) => `<strong>${k}:</strong> ${v}`).join('<br>');
+        }
+      } catch(e) { formDisplay = o.form_data.substring(0, 60) + (o.form_data.length > 60 ? '…' : ''); }
+    }
+
+    return `<tr>
+      <td><strong>${o.kode || o.code || '—'}</strong></td>
+      <td>${o.pelanggan || o.customer || o.pelanggan_nama || '—'}</td>
+      <td>${o.layanan || o.service || '—'}</td>
+      <td><span class="badge ${statusBadge}">${o.status || '—'}</span></td>
+      <td>${formatRupiah(o.total_harga)}</td>
+      <td style="white-space:nowrap;">${noWa}</td>
+      <td style="font-size:12px;max-width:200px;word-break:break-word;">${formDisplay}</td>
+      <td>${o.tanggal || o.date || o.created_at || '—'}</td>
+      <td style="text-align:center;white-space:nowrap;">
+        <a href="/admin/pesanan/${o.id || o.kode || o.code}" class="btn btn-outline btn-sm" style="margin-right:4px;text-decoration:none;">
+          👁️ Detail
+        </a>
+        <button class="btn btn-primary btn-sm" onclick="openModal('${o.id || o.kode || o.code}', '${(o.status || '').replace(/'/g, "\\'")}')">
+          ✏️ Ubah Status
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterOrders() {
+  renderOrders();
+}
+
+function openModal(id, currentStatus) {
+  selectedOrderId = id;
+  document.getElementById('modalKode').textContent = id;
+  document.getElementById('newStatus').value = currentStatus.toLowerCase();
+  document.getElementById('statusModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('statusModal').classList.remove('show');
+  selectedOrderId = null;
+}
+
+async function updateStatus() {
+  const newStatus = document.getElementById('newStatus').value;
+  if (!selectedOrderId || !newStatus) return;
+
+  const btn = document.querySelector('#statusModal .btn-primary');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+
+  try {
+    const res = await fetch('/api/admin/pesanan/' + encodeURIComponent(selectedOrderId) + '/status', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    closeModal();
+    await loadOrders();
+  } catch (err) {
+    console.error('Gagal update status:', err);
+    showToast('error', 'Gagal mengubah status pesanan.');
+    alert('Gagal mengubah status. Coba lagi.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Simpan';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadOrders);
+</script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    }
+  </script>
+</body>
+</html>
