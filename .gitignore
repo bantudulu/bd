@@ -4,11 +4,31 @@ __pycache__/
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Virtual environments
-.venv
+.venv/
+venv/
 
-# Environment files
+# Environment / secrets
 .env
-.env.*.local
+.env.*
+!.env.example
+
+# Runtime databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs / runtime files
+*.log
+*.pid
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
