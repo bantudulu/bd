@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifikasi — BantuDulu</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body{margin:0;background:#f6f8fb;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#172033}.wrap{max-width:520px;margin:0 auto;min-height:100vh;background:#fff}.head{padding:18px 18px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eef2f7;position:sticky;top:0;background:#fff;z-index:5}.head h1{font-size:20px;margin:0;color:#042544}.head a{color:#042544;text-decoration:none;font-size:14px;font-weight:700}.actions{padding:10px 18px;display:flex;justify-content:flex-end}.actions button{border:0;background:none;color:#0a5098;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.list{padding:0 14px 90px}.item{display:block;text-decoration:none;color:inherit;border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin:10px 0;background:#fff}.item.unread{background:#f7fbff;border-color:#cfe4f5}.item-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.title{font-weight:800;font-size:14px;color:#042544}.dot{width:8px;height:8px;border-radius:50%;background:#EAAE24;flex:none;margin-top:4px}.msg{font-size:13px;color:#64748b;line-height:1.5;margin-top:5px}.meta{font-size:11px;color:#94a3b8;margin-top:8px}.empty{padding:60px 24px;text-align:center;color:#64748b}.bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e7eb}.bottom-inner{max-width:520px;margin:0 auto;display:flex}.bottom a{flex:1;text-align:center;text-decoration:none;color:#64748b;padding:13px 4px;font-size:12px;font-weight:700}.bottom a.active{color:#042544}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head"><h1>Notifikasi</h1><a href="/beranda">Kembali</a></div>
+    <div class="actions"><button onclick="markAll()">Tandai semua dibaca</button></div>
+    <div class="list" id="list"><div class="empty">Memuat notifikasi...</div></div>
+  </div>
+  <nav class="bottom"><div class="bottom-inner"><a href="/beranda">Beranda</a><a href="/pesanan">Pesanan</a><a class="active" href="/notifikasi">Notifikasi</a><a href="/profil">Profil</a></div></nav>
+  <script>
+    const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    function fmt(v){if(!v)return'';try{return new Date(v).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})}catch(e){return v}}
+    async function load(){const r=await fetch('/api/notifikasi');const d=await r.json();const box=document.getElementById('list');if(!r.ok){box.innerHTML='<div class="empty">Gagal memuat notifikasi.</div>';return}if(!d.data.length){box.innerHTML='<div class="empty">Belum ada notifikasi.</div>';return}box.innerHTML=d.data.map(n=>`<a class="item ${n.dibaca?'':'unread'}" href="${esc(n.action_url||'#')}" onclick="readOne('${n.id}')"><div class="item-top"><div class="title">${esc(n.judul)}</div>${n.dibaca?'':'<span class="dot"></span>'}</div><div class="msg">${esc(n.pesan)}</div><div class="meta">${esc(fmt(n.created_at))}</div></a>`).join('')}
+    async function readOne(id){try{await fetch('/api/notifikasi/'+id+'/read',{method:'PUT'})}catch(e){}}
+    async function markAll(){await fetch('/api/notifikasi/read-all',{method:'PUT'});load()}
+    load();
+  </script>
+</body>
+</html>
