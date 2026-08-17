@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
@@ -49,6 +50,40 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, https_only=APP_ENV 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    if request.url.path.startswith("/api/v1/"):
+        code = {
+            400: "bad_request",
+            401: "unauthorized",
+            403: "forbidden",
+            404: "not_found",
+            409: "conflict",
+            422: "validation_error",
+            429: "rate_limited",
+        }.get(exc.status_code, "request_error")
+        return JSONResponse(
+            {"ok": False, "error": {"code": code, "message": str(exc.detail)}},
+            status_code=exc.status_code,
+            headers=exc.headers,
+        )
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code, headers=exc.headers)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    if request.url.path.startswith("/api/v1/"):
+        fields = []
+        for item in exc.errors():
+            loc = [str(part) for part in item.get("loc", []) if part not in {"body", "query", "path", "header"}]
+            fields.append({"field": ".".join(loc) or None, "message": item.get("msg", "Invalid value")})
+        return JSONResponse(
+            {"ok": False, "error": {"code": "validation_error", "message": "Data request tidak valid.", "fields": fields}},
+            status_code=422,
+        )
+    return JSONResponse({"detail": exc.errors()}, status_code=422)
+
+
 async def _get_order_for_access(identifier: str):
     async with async_session() as db:
         result = await db.execute(select(Pesanan).where((Pesanan.id == identifier) | (Pesanan.kode == identifier)))
@@ -91,7 +126,7 @@ async def security_and_user_context(request: Request, call_next):
     return await call_next(request)
 
 
-from app.routers import admin, admin_assignment, api, api_pesanan, auth, customer, notification_pages, notifications
+from app.routers import admin, admin_assignment, api, api_pesanan, auth, customer, mobile_v1, notification_pages, notifications
 
 app.include_router(auth.router)
 app.include_router(customer.router)
@@ -101,6 +136,7 @@ app.include_router(api.router)
 app.include_router(api_pesanan.router)
 app.include_router(admin_assignment.router)
 app.include_router(notifications.router)
+app.include_router(mobile_v1.router)
 
 
 @app.get("/sw.js")
