@@ -1,8 +1,11 @@
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 BASE_DIR = Path(__file__).resolve().parent
 APP_ENV = os.getenv("APP_ENV", "development").strip().lower()
+if APP_ENV not in {"development", "test", "staging", "production"}:
+    raise RuntimeError("APP_ENV harus development, test, staging, atau production.")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
@@ -50,3 +53,12 @@ else:
 # Explicit DATABASE_URL always wins.
 if os.getenv("DATABASE_URL"):
     DATABASE_URL = os.environ["DATABASE_URL"]
+
+if APP_ENV == "production":
+    if ENABLE_DEV_SEED:
+        raise RuntimeError("ENABLE_DEV_SEED tidak boleh aktif di production.")
+    scheme = urlparse(DATABASE_URL).scheme.lower()
+    if scheme.startswith("sqlite"):
+        raise RuntimeError("SQLite tidak diizinkan untuk production. Gunakan database server production.")
+    if not scheme.startswith("mysql"):
+        raise RuntimeError("Production saat ini hanya mendukung DATABASE_URL MySQL/MariaDB async.")

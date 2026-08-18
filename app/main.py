@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 load_dotenv()
 
@@ -14,6 +14,7 @@ from app.auth import get_user_from_request
 from app.config import APP_ENV, ENABLE_DEV_SEED, SECRET_KEY
 from app.database import async_session, init_db
 from app.models import Pesanan, User
+from app.schema_migrations import LATEST_SCHEMA_VERSION, assert_schema_current
 from app.seed import seed_data
 
 LEGACY_DEMO_EMAILS = {"admin@bantudulu.id", "user@bantudulu.id"}
@@ -36,11 +37,17 @@ async def _assert_no_legacy_demo_accounts():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
-    if APP_ENV == "production" and ENABLE_DEV_SEED:
-        raise RuntimeError("ENABLE_DEV_SEED tidak boleh aktif di production.")
-    if ENABLE_DEV_SEED:
-        await seed_data()
+    if APP_ENV == "production":
+        if ENABLE_DEV_SEED:
+            raise RuntimeError("ENABLE_DEV_SEED tidak boleh aktif di production.")
+        # Production schema changes must happen as a deployment step, never implicitly
+        # while the web process is starting.
+        await assert_schema_current()
+    else:
+        await init_db()
+        if ENABLE_DEV_SEED:
+            await seed_data()
+
     await _assert_no_legacy_demo_accounts()
     yield
 
@@ -48,6 +55,33 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="BantuDulu", lifespan=lifespan)
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, https_only=APP_ENV == "production", same_site="lax")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+
+@app.get("/health/live", include_in_schema=False)
+async def health_live():
+    return {"ok": True, "service": "bantudulu", "status": "live"}
+
+
+@app.get("/health/ready", include_in_schema=False)
+async def health_ready():
+    try:
+        async with async_session() as db:
+            await db.execute(text("SELECT 1"))
+        if APP_ENV == "production":
+            version = await assert_schema_current()
+        else:
+            version = LATEST_SCHEMA_VERSION
+    except Exception:
+        return JSONResponse(
+            {"ok": False, "service": "bantudulu", "status": "not_ready"},
+            status_code=503,
+        )
+    return {
+        "ok": True,
+        "service": "bantudulu",
+        "status": "ready",
+        "schema_version": version,
+    }
 
 
 @app.exception_handler(HTTPException)
