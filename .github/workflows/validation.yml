@@ -40,7 +40,7 @@ jobs:
         run: uv pip install --python .venv/bin/python pytest pytest-asyncio
 
       - name: Dependency consistency
-        run: .venv/bin/python -m pip check
+        run: uv pip check --python .venv/bin/python
 
       - name: Compile validation
         run: .venv/bin/python -m compileall -q app tests
