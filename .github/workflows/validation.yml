@@ -17,7 +17,7 @@ jobs:
     env:
       APP_ENV: test
       ENABLE_DEV_SEED: "false"
-      SECRET_KEY: phase-11-ci-secret-key-that-is-long-enough-2026
+      SECRET_KEY: phase-12-ci-secret-key-that-is-long-enough-2026
       DATABASE_URL: sqlite+aiosqlite:///./.pytest-bantudulu.db
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
@@ -43,7 +43,14 @@ jobs:
         run: uv pip check --python .venv/bin/python
 
       - name: Compile validation
-        run: .venv/bin/python -m compileall -q app tests
+        run: .venv/bin/python -m compileall -q app scripts tests
+
+      - name: Migration smoke test
+        env:
+          DATABASE_URL: sqlite+aiosqlite:///./.migration-smoke.db
+        run: |
+          .venv/bin/python -m scripts.migrate
+          rm -f .migration-smoke.db
 
       - name: Test suite
         run: .venv/bin/python -m pytest -q
