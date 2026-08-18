@@ -14,10 +14,10 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./.pytest-bantudulu.db"
 
 from app.auth import create_token, hash_password  # noqa: E402
 from app.database import Base, async_session, engine  # noqa: E402
-from app.main import app  # noqa: E402
+from app.main import app as fastapi_app  # noqa: E402
 from app.models import Kategori, Layanan, LayananVarian, Pesanan, Petugas, User  # noqa: E402
-import app.models_mobile  # noqa: F401,E402
-import app.models_push  # noqa: F401,E402
+import app.models_mobile as _models_mobile  # noqa: F401,E402
+import app.models_push as _models_push  # noqa: F401,E402
 
 
 @pytest_asyncio.fixture(autouse=True)
@@ -30,7 +30,7 @@ async def clean_database():
 
 @pytest_asyncio.fixture
 async def client():
-    transport = ASGITransport(app=app)
+    transport = ASGITransport(app=fastapi_app)
     async with AsyncClient(
         transport=transport,
         base_url="http://testserver",
