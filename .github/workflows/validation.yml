@@ -1,0 +1,45 @@
+name: BantuDulu Validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "phase-*"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      APP_ENV: test
+      ENABLE_DEV_SEED: "false"
+      SECRET_KEY: phase-11-ci-secret-key-that-is-long-enough-2026
+      DATABASE_URL: sqlite+aiosqlite:///./.pytest-bantudulu.db
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+          cache: pip
+
+      - name: Install project and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest pytest-asyncio
+
+      - name: Dependency consistency
+        run: python -m pip check
+
+      - name: Compile validation
+        run: python -m compileall -q app tests
+
+      - name: Test suite
+        run: python -m pytest -q
