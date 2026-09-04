@@ -2,12 +2,12 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Daftar · BantuDulu</title>
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
   <link rel="apple-touch-icon" href="/static/images/pwa/apple-touch-icon.png" />
-  <meta name="theme-color" content="#042544" />
+  <meta name="theme-color" content="#28758b" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="BantuDulu" />
@@ -16,331 +16,199 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #e0f2fe 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+    :root{--brand:#28758b;--deep:#205e70;--ink:#172126;--muted:#74838a;--white:#fff;--line:#e1e8eb}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{width:100%;min-height:100%}
+    body{
+      min-height:100vh;
+      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 18% 20%,rgba(255,255,255,.16),transparent 24%),
+        radial-gradient(circle at 82% 78%,rgba(255,255,255,.10),transparent 26%),
+        linear-gradient(145deg,#2f8197 0%,var(--brand) 52%,#205e70 100%);
+      color:var(--ink);
+      overflow-x:hidden;
     }
-    .auth-card {
-      width: 100%;
-      max-width: 420px;
-      background: #ffffff;
-      border-radius: 24px;
-      box-shadow: 0 8px 32px rgba(13, 148, 136, 0.10);
-      overflow: hidden;
+    body:before,body:after{content:"";position:fixed;border-radius:50%;background:rgba(255,255,255,.055);pointer-events:none;z-index:0}
+    body:before{width:280px;height:280px;top:-80px;right:-100px}
+    body:after{width:220px;height:220px;bottom:-70px;left:-80px}
+
+    .login-page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 18px calc(24px + env(safe-area-inset-bottom))}
+    .login-box{width:100%;max-width:390px}
+    .brand{text-align:center;color:#fff;font-size:32px;line-height:1;font-weight:800;letter-spacing:-1.2px;margin-bottom:22px;text-shadow:0 8px 28px rgba(16,59,71,.18)}
+    .card{background:rgba(255,255,255,.97);border:1px solid rgba(255,255,255,.56);border-radius:24px;padding:22px;box-shadow:0 22px 60px rgba(18,62,74,.20);backdrop-filter:blur(12px)}
+    .card h1{margin:0 0 5px;font-size:20px;letter-spacing:-.45px}
+    .card .intro{margin:0 0 20px;color:var(--muted);font-size:11px;line-height:1.5}
+
+    .field{margin-top:13px}
+    .field label{display:block;margin:0 0 7px;font-size:10px;font-weight:700;color:#46555c}
+    .input-wrap{position:relative}
+    .input-wrap input{
+      width:100%;height:50px;border:1px solid var(--line);border-radius:15px;
+      background:#fbfcfd;color:var(--ink);padding:0 43px 0 14px;outline:none;
+      font-size:12px;font-family:inherit;transition:.18s;
     }
-    .auth-hero {
-      background: linear-gradient(135deg, #042544 0%, #063a6e 50%, #0a5098 100%);
-      padding: 16px 20px 0;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .auth-hero-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-    .auth-hero-logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .auth-hero-logo-icon {
-      width: 30px; height: 30px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 8px;
-      display: flex;
-      align-items: center; justify-content: center;
-      font-size: 16px;
-    }
-    .auth-hero-logo-text {
-      font-size: 20px; font-weight: 800;
-      color: #ffffff;
-      letter-spacing: -0.3px;
-    }
-    .auth-hero-image {
-      width: 100%;
-      max-width: 280px;
-      height: auto;
-      display: block;
-      margin: 0 auto;
-    }
-    .auth-hero-tagline {
-      color: rgba(255,255,255,0.9);
-      font-size: 13px;
-      font-weight: 500;
-      padding: 4px 0 12px;
-      letter-spacing: 0.2px;
-    }
-    .auth-body {
-      padding: 24px 24px 20px;
-    }
-    .form-group {
-      margin-bottom: 18px;
-    }
-    .form-label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 6px;
-    }
-    .input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-    .input-icon {
-      position: absolute;
-      left: 14px;
-      color: #9ca3af;
-      font-size: 18px;
-      pointer-events: none;
-      line-height: 1;
-    }
-    .input-field {
-      width: 100%;
-      padding: 14px 14px 14px 44px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 12px;
-      font-size: 15px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      color: #1f2937;
-      background: #f9fafb;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none;
-    }
-    .input-field:focus {
-      border-color: #EAAE24;
-      box-shadow: 0 0 0 3px rgba(234, 174, 36, 0.12);
-      background: #ffffff;
-    }
-    .input-field::placeholder {
-      color: #9ca3af;
-      font-size: 14px;
-    }
-    .btn-primary {
-      width: 100%;
-      padding: 15px;
-      background: #042544;
-      color: #ffffff;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-      margin-top: 6px;
-    }
-    .btn-primary:hover {
-      background: #031a30;
-    }
-    .btn-primary:active {
-      transform: scale(0.98);
-    }
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .auth-footer {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 14px;
-      color: #6b7280;
-    }
-    .auth-footer a {
-      color: #EAAE24;
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .auth-footer a:hover {
-      text-decoration: underline;
-    }
-    .error-msg {
-      background: #fef2f2;
-      color: #dc2626;
-      font-size: 13px;
-      font-weight: 500;
-      padding: 10px 14px;
-      border-radius: 10px;
-      margin-bottom: 18px;
-      display: none;
-    }
-    .error-msg.visible { display: block; }
-    @media (max-width: 480px) {
-      body { padding: 12px; }
-      .auth-card { border-radius: 20px; }
-      .auth-hero { padding: 14px 16px 0; }
-      .auth-body { padding: 20px 16px 18px; }
+    .input-wrap input:focus{background:#fff;border-color:#a3cad4;box-shadow:0 0 0 4px rgba(40,117,139,.08)}
+    .input-wrap input::placeholder{color:#9ba7ac;font-size:11px}
+    .toggle{
+      position:absolute;right:7px;top:50%;transform:translateY(-50%);
+      width:36px;height:36px;border:0;border-radius:11px;background:transparent;
+      color:#74868e;font-size:11px;font-weight:700;cursor:pointer;
     }
 
+    .primary{
+      width:100%;height:50px;border-radius:15px;font-weight:800;font-size:11.5px;
+      cursor:pointer;border:0;margin-top:18px;color:#fff;
+      background:linear-gradient(135deg,#2f8197,#205e70);
+      box-shadow:0 10px 22px rgba(32,94,112,.22);
+      transition:transform .12s;
+    }
+    .primary:active{transform:scale(.985)}
+    .primary:disabled{opacity:.55;cursor:not-allowed}
+
+    .signup{text-align:center;margin-top:17px;color:var(--muted);font-size:10px}
+    .signup a{color:var(--deep);font-weight:700;text-decoration:none}
+
+    .error-msg{
+      background:#fef2f2;color:#dc2626;font-size:11px;font-weight:500;
+      padding:10px 14px;border-radius:10px;margin-bottom:14px;display:none;
+    }
+    .error-msg.visible{display:block}
+
     /* ── Store Badges & Footer ── */
-    .auth-store-section {
-      padding: 0 24px 24px;
-      text-align: center;
+    .store-section{padding:0 2px;text-align:center;margin-top:20px}
+    .store-divider{
+      display:flex;align-items:center;gap:10px;margin:0 0 14px;
+      font-size:9px;font-weight:600;color:rgba(255,255,255,.55);
+      text-transform:uppercase;letter-spacing:.5px;
     }
-    .store-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 8px 0 14px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .store-divider:before,.store-divider:after{content:"";height:1px;flex:1;background:rgba(255,255,255,.18)}
+    .store-badges{display:flex;gap:10px;margin-bottom:14px}
+    .store-badge{
+      flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 8px;background:rgba(15,23,42,.65);border-radius:12px;
+      text-decoration:none;transition:background .2s,transform .1s;
     }
-    .store-divider::before,
-    .store-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: #e5e7eb;
+    .store-badge:active{transform:scale(.97);background:rgba(30,41,59,.8)}
+    .store-svg{width:22px;height:22px;display:block;flex-shrink:0}
+    .store-text{display:flex;flex-direction:column;align-items:flex-start}
+    .store-sub{font-size:8px;color:#94a3b8;font-weight:500;line-height:1.2}
+    .store-name{font-size:11px;color:#fff;font-weight:700;line-height:1.3}
+    .footer-links{
+      display:flex;align-items:center;justify-content:center;gap:6px;
+      font-size:10px;color:rgba(255,255,255,.45);
     }
-    .store-badges {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .store-badge {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 8px;
-      background: #0f172a;
-      border-radius: 12px;
-      text-decoration: none;
-      transition: background 0.2s, transform 0.1s;
-    }
-    .store-badge:active { transform: scale(0.97); background: #1e293b; }
-    .store-icon { font-size: 22px; line-height: 1; }
-    .store-text { display: flex; flex-direction: column; align-items: flex-start; }
-    .store-sub { font-size: 9px; color: #94a3b8; font-weight: 500; line-height: 1.2; }
-    .store-name { font-size: 13px; color: #fff; font-weight: 700; line-height: 1.3; }
-    .auth-footer-links {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      font-size: 12px;
-      color: #9ca3af;
-    }
-    .auth-footer-links a {
-      color: #6b7280;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.15s;
-    }
-    .auth-footer-links a:hover { color: #EAAE24; }
-    .dot { color: #d1d5db; font-size: 8px; }
-    @media (max-width: 480px) {
-      .auth-store-section { padding: 0 16px 20px; }
-      .store-badges { gap: 8px; }
-      .store-badge { padding: 8px 6px; }
+    .footer-links a{color:rgba(255,255,255,.6);text-decoration:none;font-weight:500;transition:color .15s}
+    .footer-links a:hover{color:#fff}
+    .dot{color:rgba(255,255,255,.3);font-size:7px}
+
+    @media(max-width:360px){
+      .card{padding:19px}
+      .brand{font-size:29px;margin-bottom:18px}
+      .store-badge{padding:8px 6px}
     }
   </style>
 </head>
 <body>
-  <div class="auth-card">
-    <div class="auth-hero">
-      <div class="auth-hero-top">
-        <div class="auth-hero-logo">
-          <span class="auth-hero-logo-icon">🤝</span>
-          <span class="auth-hero-logo-text">BantuDulu</span>
-        </div>
-        <a href="/masuk" style="color:rgba(255,255,255,0.85);font-size:13px;font-weight:600;text-decoration:none;">Masuk</a>
-      </div>
-      <img src="/static/images/hero-ilustrasi.svg" alt="BantuDulu Hero" class="auth-hero-image" />
-      <div class="auth-hero-tagline">Layanan jasa on-demand — langsung ke rumah Anda ✨</div>
-    </div>
+  <main class="login-page">
+    <div class="login-box">
+      <div class="brand">Bantudulu</div>
+      <section class="card">
+        <h1>Daftar</h1>
+        <p class="intro">Buat akun Bantudulu untuk mulai memesan layanan.</p>
 
-    <div class="auth-body">
-      <div class="error-msg" id="errorMsg"></div>
+        <div class="error-msg" id="errorMsg"></div>
 
-      <form id="registerForm" novalidate>
-        <div class="form-group">
-          <label class="form-label" for="nama">Nama</label>
-          <div class="input-wrapper">
-            <span class="input-icon">👤</span>
-            <input class="input-field" type="text" id="nama" name="nama" placeholder="Nama lengkap" autocomplete="name" required>
+        <form id="registerForm" novalidate>
+          <div class="field">
+            <label for="nama">Nama Lengkap</label>
+            <div class="input-wrap">
+              <input type="text" id="nama" name="nama" placeholder="Nama lengkap Anda" autocomplete="name" required>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label class="form-label" for="email">Email</label>
-          <div class="input-wrapper">
-            <span class="input-icon">✉️</span>
-            <input class="input-field" type="email" id="email" name="email" placeholder="nama@email.com" autocomplete="email" required>
+          <div class="field">
+            <label for="email">Email</label>
+            <div class="input-wrap">
+              <input type="email" id="email" name="email" placeholder="nama@email.com" autocomplete="email" required>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label class="form-label" for="no_hp">No. HP</label>
-          <div class="input-wrapper">
-            <span class="input-icon">📱</span>
-            <input class="input-field" type="tel" id="no_hp" name="no_hp" placeholder="08xxxxxxxxxx" autocomplete="tel" required>
+          <div class="field">
+            <label for="no_hp">Nomor HP</label>
+            <div class="input-wrap">
+              <input type="tel" id="no_hp" name="no_hp" placeholder="08xxxxxxxxxx" autocomplete="tel" required>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label class="form-label" for="password">Kata Sandi</label>
-          <div class="input-wrapper">
-            <span class="input-icon">🔒</span>
-            <input class="input-field" type="password" id="password" name="password" placeholder="Min. 6 karakter" autocomplete="new-password" required>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <input type="password" id="password" name="password" placeholder="Min. 6 karakter" autocomplete="new-password" required>
+              <button class="toggle" id="togglePass" type="button">Lihat</button>
+            </div>
           </div>
+
+          <div class="field">
+            <label for="confirmPassword">Konfirmasi Password</label>
+            <div class="input-wrap">
+              <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Ulangi password" autocomplete="new-password" required>
+              <button class="toggle" id="toggleConfirm" type="button">Lihat</button>
+            </div>
+          </div>
+
+          <button class="primary" type="submit" id="submitBtn">Daftar</button>
+        </form>
+
+        <div class="signup">Sudah punya akun? <a href="/masuk">Masuk</a></div>
+      </section>
+
+      <div class="store-section">
+        <div class="store-divider"><span>Download Aplikasi</span></div>
+        <div class="store-badges">
+          <a href="#" class="store-badge" target="_blank" rel="noopener">
+            <img src="/static/logo-app-store.svg" alt="App Store" class="store-svg" />
+            <span class="store-text">
+              <span class="store-sub">Download di</span>
+              <span class="store-name">App Store</span>
+            </span>
+          </a>
+          <a href="#" class="store-badge" target="_blank" rel="noopener">
+            <img src="/static/logo-googleplay.svg" alt="Google Play" class="store-svg" />
+            <span class="store-text">
+              <span class="store-sub">Dapatkan di</span>
+              <span class="store-name">Google Play</span>
+            </span>
+          </a>
         </div>
-
-        <button class="btn-primary" type="submit" id="submitBtn">Daftar</button>
-      </form>
-
-      <div class="auth-footer">
-        Sudah punya akun? <a href="/masuk">Masuk di sini</a>
-      </div>
-    </div>
-
-    <!-- Footer with store badges -->
-    <div class="auth-store-section">
-      <div class="store-divider"><span>Download Aplikasi</span></div>
-      <div class="store-badges">
-        <a href="#" class="store-badge" target="_blank" rel="noopener">
-          <span class="store-icon">🍎</span>
-          <span class="store-text">
-            <span class="store-sub">Download di</span>
-            <span class="store-name">App Store</span>
-          </span>
-        </a>
-        <a href="#" class="store-badge" target="_blank" rel="noopener">
-          <span class="store-icon">▶️</span>
-          <span class="store-text">
-            <span class="store-sub">Dapatkan di</span>
-            <span class="store-name">Google Play</span>
-          </span>
-        </a>
-      </div>
-      <div class="auth-footer-links">
-        <a href="#">Kebijakan Privasi</a>
-        <span class="dot">•</span>
-        <a href="#">Syarat & Ketentuan</a>
-        <span class="dot">•</span>
-        <a href="#">Tentang Kami</a>
+        <div class="footer-links">
+          <a href="#">Kebijakan Privasi</a>
+          <span class="dot">•</span>
+          <a href="#">Syarat & Ketentuan</a>
+          <span class="dot">•</span>
+          <a href="#">Tentang Kami</a>
+        </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script>
+    // Password toggle helper
+    function bindToggle(inputId, buttonId) {
+      const input = document.getElementById(inputId);
+      const button = document.getElementById(buttonId);
+      button.addEventListener('click', () => {
+        const hidden = input.type === 'password';
+        input.type = hidden ? 'text' : 'password';
+        button.textContent = hidden ? 'Tutup' : 'Lihat';
+      });
+    }
+    bindToggle('password', 'togglePass');
+    bindToggle('confirmPassword', 'toggleConfirm');
+
+    // Register form submission
     const form = document.getElementById('registerForm');
     const submitBtn = document.getElementById('submitBtn');
     const errorMsg = document.getElementById('errorMsg');
@@ -355,6 +223,7 @@
       const email = document.getElementById('email').value.trim();
       const no_hp = document.getElementById('no_hp').value.trim();
       const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
 
       if (!nama || !email || !no_hp || !password) {
         errorMsg.textContent = 'Harap isi semua bidang.';
@@ -366,6 +235,14 @@
 
       if (password.length < 6) {
         errorMsg.textContent = 'Kata sandi minimal 6 karakter.';
+        errorMsg.classList.add('visible');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Daftar';
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        errorMsg.textContent = 'Konfirmasi password tidak cocok.';
         errorMsg.classList.add('visible');
         submitBtn.disabled = false;
         submitBtn.textContent = 'Daftar';
