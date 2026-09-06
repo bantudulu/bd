@@ -32,6 +32,33 @@ if DATABASE_URL:
         DATABASE_URL = "postgresql+asyncpg://" + DATABASE_URL[len("postgresql://"):]
     elif DATABASE_URL.startswith("mysql://"):
         DATABASE_URL = "mysql+aiomysql://" + DATABASE_URL[len("mysql://"):]
+
+    # Neon/libpq URLs commonly include sslmode=require and
+    # channel_binding=require. SQLAlchemy asyncpg forwards URL query
+    # parameters to asyncpg, which expects "ssl", not "sslmode", and
+    # does not accept channel_binding as a connect argument.
+    if DATABASE_URL.startswith("postgresql+asyncpg://"):
+        from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
+        parts = urlsplit(DATABASE_URL)
+        query = []
+
+        for key, value in parse_qsl(parts.query, keep_blank_values=True):
+            if key == "channel_binding":
+                continue
+            if key == "sslmode":
+                key = "ssl"
+            query.append((key, value))
+
+        DATABASE_URL = urlunsplit(
+            (
+                parts.scheme,
+                parts.netloc,
+                parts.path,
+                urlencode(query),
+                parts.fragment,
+            )
+        )
 elif DB_ENGINE == "mysql":
     MYSQL_USER = os.getenv("MYSQL_USER", "bantudulu_admin")
     MYSQL_PASS = os.getenv("MYSQL_PASS", "")
