@@ -20,7 +20,10 @@ from app.final_catalog import ensure_final_catalog
 async def lifespan(app: FastAPI):
     await init_db()
     await seed_data()
-    await ensure_final_catalog()
+    try:
+        await ensure_final_catalog()
+    except Exception as exc:
+        print(f"[startup] final catalog sync skipped: {type(exc).__name__}: {exc}")
     yield
 
 app = FastAPI(title="BantuDulu", lifespan=lifespan)
