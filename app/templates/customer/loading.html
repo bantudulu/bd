@@ -9,92 +9,32 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{
-  --brand:#28758b;
-  --brand-deep:#216477;
-  --brand-light:#5aa2b5;
-  --white:#ffffff;
-}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%}
-body{
-  font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:
-    radial-gradient(circle at 18% 20%,rgba(255,255,255,.16),transparent 24%),
-    radial-gradient(circle at 82% 78%,rgba(255,255,255,.10),transparent 26%),
-    linear-gradient(145deg,#2f8197 0%,var(--brand) 52%,#205e70 100%);
-  overflow:hidden;
-}
-.loading-screen{
-  position:relative;
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--white);
-}
-.loading-screen:before,
-.loading-screen:after{
-  content:"";
-  position:absolute;
-  border-radius:50%;
-  background:rgba(255,255,255,.055);
-  filter:blur(.2px);
-}
-.loading-screen:before{width:280px;height:280px;top:-80px;right:-100px}
-.loading-screen:after{width:220px;height:220px;bottom:-70px;left:-80px}
-.brand-wrap{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:28px;
-  transform:translateY(-10px);
-  animation:fadeUp .75s ease both;
-}
-.brand{
-  font-size:34px;
-  line-height:1;
-  font-weight:800;
-  letter-spacing:-1.3px;
-  text-shadow:0 8px 28px rgba(16,59,71,.18);
-}
-.loader{
-  display:flex;
-  gap:7px;
-  align-items:center;
-  justify-content:center;
-  height:14px;
-}
-.loader span{
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:rgba(255,255,255,.94);
-  animation:bounce 1.15s infinite ease-in-out;
-  box-shadow:0 3px 10px rgba(255,255,255,.12);
-}
-.loader span:nth-child(2){animation-delay:.14s}
-.loader span:nth-child(3){animation-delay:.28s}
-@keyframes bounce{
-  0%,60%,100%{transform:translateY(0);opacity:.38}
-  30%{transform:translateY(-6px);opacity:1}
-}
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(4px)}
-  to{opacity:1;transform:translateY(-10px)}
-}
-@media (max-width:380px){.brand{font-size:31px}}
+:root{--brand:#28758b;--white:#fff}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%}
+body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% 20%,rgba(255,255,255,.16),transparent 24%),radial-gradient(circle at 82% 78%,rgba(255,255,255,.10),transparent 26%),linear-gradient(145deg,#2f8197 0%,var(--brand) 52%,#205e70 100%);overflow:hidden}
+.loading-screen{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--white)}.loading-screen:before,.loading-screen:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.055)}
+.loading-screen:before{width:280px;height:280px;top:-80px;right:-100px}.loading-screen:after{width:220px;height:220px;bottom:-70px;left:-80px}
+.brand-wrap{display:flex;flex-direction:column;align-items:center;gap:28px;transform:translateY(-10px);animation:fadeUp .75s ease both}.brand{font-size:34px;line-height:1;font-weight:800;letter-spacing:-1.3px;text-shadow:0 8px 28px rgba(16,59,71,.18)}
+.loader{display:flex;gap:7px;align-items:center;justify-content:center;height:14px}.loader span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.94);animation:bounce 1.15s infinite ease-in-out}.loader span:nth-child(2){animation-delay:.14s}.loader span:nth-child(3){animation-delay:.28s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.38}30%{transform:translateY(-6px);opacity:1}}@keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(-10px)}}@media(max-width:380px){.brand{font-size:31px}}
 </style>
 </head>
 <body>
-  <main class="loading-screen" aria-label="Memuat Bantudulu">
-    <div class="brand-wrap">
-      <div class="brand">Bantudulu</div>
-      <div class="loader" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </div>
-    </div>
-  </main>
+<main class="loading-screen" aria-label="Memuat Bantudulu"><div class="brand-wrap"><div class="brand">Bantudulu</div><div class="loader" aria-hidden="true"><span></span><span></span><span></span></div></div></main>
+<script>
+(async()=>{
+  const started=Date.now();
+  let destination='/masuk';
+  try{
+    const response=await fetch('/api/final/me',{cache:'no-store',credentials:'same-origin'});
+    if(response.ok){
+      const me=await response.json();
+      destination=me.role==='ADMIN'?'/admin/dashboard':'/beranda';
+    }
+  }catch(e){}
+  const minimum=950;
+  const wait=Math.max(0,minimum-(Date.now()-started));
+  setTimeout(()=>location.replace(destination),wait);
+})();
+</script>
 </body>
 </html>

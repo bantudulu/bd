@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#28758B">
+<title>BantuDulu - {{ title }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#28758b;--deep:#216477;--dark:#194f60;--ink:#111827;--muted:#6b7280;--line:#e5ecef;--bg:#edf2f4;--soft:#edf6f8;--white:#fff;--shadow:0 14px 34px rgba(24,68,82,.08)}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 14% 18%,rgba(47,129,152,.09),transparent 24%),var(--bg)}
+a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}svg{display:block}.icon{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.app{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff;position:relative;overflow:hidden;box-shadow:0 0 50px rgba(18,55,66,.08);padding-bottom:160px}
+.top{padding:calc(24px + env(safe-area-inset-top)) 18px 62px;background:radial-gradient(circle at 82% 13%,rgba(255,255,255,.14),transparent 25%),linear-gradient(135deg,#2d7186 0%,#28758b 54%,#246b82 100%);color:#fff;border-radius:0 0 28px 28px;box-shadow:0 16px 36px rgba(22,79,96,.12)}
+.title-row{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px}.icon-btn{width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:14px;background:rgba(255,255,255,.12);color:#fff;display:grid;place-items:center}.icon-btn svg{width:22px;height:22px}
+.title-copy{text-align:center}.title-copy h1{margin:0;font-size:22px;letter-spacing:-.5px}.title-copy p{margin:5px 0 0;font-size:11px;opacity:.83}.content{padding:0 16px 24px}
+.hero-card{margin-top:-38px;position:relative;z-index:3;background:#fff;border:1px solid var(--line);border-radius:24px;padding:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:13px}
+.hero-icon{width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#e8f4f7,#f8fbfc);color:var(--deep);display:grid;place-items:center;flex:0 0 auto}.hero-icon svg{width:29px;height:29px}
+.hero-copy h2{font-size:17px;margin:0;letter-spacing:-.35px}.hero-copy p{font-size:10px;line-height:1.5;color:var(--muted);margin:5px 0 0}
+.section-head{padding:24px 2px 11px}.section-head h3{margin:0;font-size:17px;letter-spacing:-.35px}.section-head p{margin:5px 0 0;font-size:10px;line-height:1.5;color:var(--muted)}
+.options{display:grid;gap:11px}.option{width:100%;border:1px solid var(--line);background:linear-gradient(145deg,#fff,#fbfcfc);border-radius:20px;padding:14px;display:flex;align-items:center;gap:12px;text-align:left;color:var(--ink);box-shadow:0 7px 22px rgba(28,68,79,.04)}
+.option.active{border-color:#bad7df;background:linear-gradient(145deg,#f6fbfc,#edf7f9);box-shadow:0 12px 28px rgba(31,100,119,.10)}
+.radio{width:21px;height:21px;border:1.5px solid #cbd5da;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:#fff}.option.active .radio{border-color:var(--brand)}.option.active .radio:after{content:"";width:10px;height:10px;border-radius:50%;background:var(--brand)}
+.option-copy{flex:1;min-width:0}.option-copy b{display:block;font-size:12.5px}.option-copy span{display:block;margin-top:4px;color:var(--muted);font-size:9.5px;line-height:1.45}.price{font-size:11px;font-weight:800;color:var(--dark);white-space:nowrap}
+.duration{margin-top:13px;border:1px solid var(--line);border-radius:19px;padding:14px;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:14px}.duration b{display:block;font-size:11.5px}.duration span{display:block;margin-top:4px;color:var(--muted);font-size:9px}
+.stepper{display:flex;align-items:center;gap:9px;background:#f4f7f8;padding:4px;border-radius:13px}.stepper button{width:31px;height:31px;border:0;border-radius:10px;background:#fff;color:var(--deep);font-weight:800;font-size:18px}.stepper strong{min-width:22px;text-align:center;font-size:12px}
+.note{margin-top:13px;border-radius:18px;padding:13px 14px;background:var(--soft);border:1px solid #dcebef;color:#55717a;font-size:9.5px;line-height:1.55}
+.sticky{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);width:min(480px,100%);padding:10px 16px;background:rgba(255,255,255,.97);backdrop-filter:blur(16px);border-top:1px solid #e6ebee;z-index:55}
+.sticky-in{display:flex;align-items:center;gap:12px}.total{min-width:120px}.total span{display:block;font-size:9px;color:var(--muted);margin-bottom:3px}.total strong{font-size:16px;color:var(--dark)}
+.cta{flex:1;border:0;border-radius:16px;height:50px;background:linear-gradient(135deg,#2d7186,#246b82);color:#fff;font-weight:800;font-size:12px;box-shadow:0 10px 22px rgba(32,94,112,.18)}
+.bottom-nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(480px,100%);height:78px;padding:10px 18px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);backdrop-filter:blur(16px);border-top:1px solid #e7ebee;display:grid;grid-template-columns:repeat(4,1fr);z-index:50}
+.nav{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:10px;color:#626a72}.nav svg{width:23px;height:23px}.nav.active{color:var(--deep);font-weight:800}.nav-pill{width:36px;height:30px;display:grid;place-items:center}.nav.active .nav-pill{border-radius:11px;background:#e9f3f6}
+@media(min-width:700px){body{padding:24px 0}.app{min-height:calc(100vh - 48px);border-radius:30px}.bottom-nav{bottom:24px;border-radius:0 0 30px 30px}.sticky{bottom:102px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="title-row"><a class="icon-btn" href="/layanan" aria-label="Kembali"><svg viewBox="0 0 24 24" class="icon"><path d="m15 18-6-6 6-6"/></svg></a><div class="title-copy"><h1>{{ title }}</h1><p>{{ subtitle }}</p></div><span></span></div></header>
+<main class="content">
+<section class="hero-card"><div class="hero-icon">{% if category_key == 'tukang' %}<svg viewBox="0 0 24 24" class="icon"><path d="m14 6 4-4 4 4-4 4M3 21l8-8M8 8l8 8M5 5l14 14"/></svg>{% else %}<svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>{% endif %}</div><div class="hero-copy"><h2>{{ title }}</h2><p>{{ description }}</p></div></section>
+<div class="section-head"><h3>{{ section_title }}</h3><p>{{ section_copy }}</p></div>
+<section class="options">
+{% for item in options %}
+<button class="option{% if loop.first %} active{% endif %}" type="button" data-service="{{ item.service }}" data-variant="{{ item.variant }}" data-price="{{ item.price }}"><span class="radio"></span><span class="option-copy"><b>{{ item.label }}</b><span>{{ item.description }}</span></span><span class="price">Rp{{ item.price|formatrupiah }}</span></button>
+{% endfor %}
+</section>
+{% if category_key == 'tukang' %}<section class="duration"><div><b>Durasi pekerjaan</b><span>Perhitungan layanan per jam.</span></div><div class="stepper"><button id="minus" type="button">-</button><strong id="hours">1</strong><button id="plus" type="button">+</button></div></section>{% endif %}
+<div class="note">Setelah memilih layanan, Anda akan masuk ke halaman jadwal dan pembayaran FINAL BantuDulu.</div>
+</main>
+<div class="sticky"><div class="sticky-in"><div class="total"><span>Total sementara</span><strong id="total">Rp0</strong></div><button class="cta" id="continueBtn" type="button">Atur Jadwal & Pembayaran</button></div></div>
+<nav class="bottom-nav"><a class="nav" href="/beranda"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></span><span>Beranda</span></a><a class="nav active" href="/layanan"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><span>Cari</span></a><a class="nav" href="/pesanan"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span><span>Pesanan</span></a><a class="nav" href="/profil"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4-8 8-8s7 3 8 8"/></svg></span><span>Profil</span></a></nav>
+</div>
+<script>
+const rupiah=n=>'Rp'+new Intl.NumberFormat('id-ID').format(Number(n||0));
+const options=[...document.querySelectorAll('.option')];let selected=options[0];let hours=1;
+function refresh(){const base=Number(selected?.dataset.price||0);document.getElementById('total').textContent=rupiah(base*hours);const h=document.getElementById('hours');if(h)h.textContent=hours;}
+options.forEach(btn=>btn.addEventListener('click',()=>{options.forEach(x=>x.classList.remove('active'));btn.classList.add('active');selected=btn;refresh()}));
+document.getElementById('minus')?.addEventListener('click',()=>{hours=Math.max(1,hours-1);refresh()});
+document.getElementById('plus')?.addEventListener('click',()=>{hours=Math.min(8,hours+1);refresh()});
+document.getElementById('continueBtn').addEventListener('click',()=>{if(!selected)return;const base=Number(selected.dataset.price||0);const p=new URLSearchParams({service_label:selected.dataset.service,variant:selected.dataset.variant,price:String(base),total:String(base*hours),duration:String(hours)});location.href='/pesan-final?'+p.toString()});
+refresh();
+</script>
+</body>
+</html>

@@ -57,4 +57,4 @@ async def manifest():
 
 @app.get("/")
 async def root():
-    return RedirectResponse(url="/masuk")
+    return RedirectResponse(url="/loading")
