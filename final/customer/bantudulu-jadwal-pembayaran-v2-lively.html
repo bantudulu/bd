@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#28758B">
+<title>BantuDulu — Atur Jadwal & Pembayaran</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#28758b;--brand-deep:#216477;--brand-dark:#194f60;--ink:#111827;--muted:#687781;
+  --line:#e5ecef;--paper:#fff;--bg:#eef3f5;--blue:#eaf5f8;--mint:#eaf8f2;--yellow:#fff6dd;
+  --lav:#f2effb;--rose:#fff0ef;--shadow:0 16px 38px rgba(24,79,96,.10)
+}
+*{box-sizing:border-box}html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(circle at 12% 10%,rgba(53,132,154,.13),transparent 28%),radial-gradient(circle at 88% 55%,rgba(141,119,192,.08),transparent 24%),var(--bg)}
+button,textarea{font:inherit}button{cursor:pointer}svg{display:block}.icon{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.app{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff;position:relative;overflow:hidden;box-shadow:0 0 50px rgba(16,55,68,.08);padding-bottom:166px}
+.top{padding:calc(16px + env(safe-area-inset-top)) 18px 74px;color:#fff;background:radial-gradient(circle at 80% 12%,rgba(255,255,255,.17),transparent 24%),linear-gradient(135deg,#2e7c93 0%,#28758b 52%,#205f73 100%);border-radius:0 0 30px 30px;position:relative;overflow:hidden}
+.top:after{content:"";position:absolute;width:145px;height:145px;border:26px solid rgba(255,255,255,.05);border-radius:50%;right:-58px;bottom:-72px}
+.status{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;margin-bottom:15px;position:relative;z-index:1}.status-icons{display:flex;gap:7px;align-items:center}.dot{width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:7px 0 0 rgba(255,255,255,.9),14px 0 0 rgba(255,255,255,.72)}
+.title-row{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;gap:9px;position:relative;z-index:1}.icon-btn{width:40px;height:40px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.11);color:#fff;display:grid;place-items:center}.icon-btn svg{width:21px;height:21px}.title-copy{text-align:center}.title-copy h1{margin:0;font-size:21px;letter-spacing:-.5px}.title-copy p{margin:4px 0 0;font-size:10.5px;opacity:.82}
+.content{padding:0 16px 28px}.order-hero{margin-top:-48px;position:relative;z-index:3;padding:15px;border-radius:25px;background:#fff;border:1px solid #e4ecef;box-shadow:var(--shadow);overflow:hidden}.order-hero:after{content:"";position:absolute;width:92px;height:92px;border-radius:50%;background:linear-gradient(145deg,#e7f4f7,#f7fbfc);right:-25px;top:-32px}.order-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1}.service-icon{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(145deg,#e7f4f7,#f8fbfc);border:1px solid #d9ebef;color:var(--brand-deep);flex:0 0 auto}.service-icon svg{width:28px;height:28px}.order-copy{flex:1;min-width:0}.tiny-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 7px;border-radius:999px;background:#edf6f8;color:var(--brand-deep);font-size:8px;font-weight:800;letter-spacing:.45px;text-transform:uppercase}.order-copy h2{font-size:16px;margin:6px 0 3px;letter-spacing:-.35px}.order-copy p{margin:0;color:var(--muted);font-size:9.3px;line-height:1.45}.hero-price{text-align:right;position:relative;z-index:1}.hero-price small{display:block;color:#839099;font-size:8px}.hero-price strong{display:block;margin-top:4px;color:var(--brand-dark);font-size:14px;letter-spacing:-.3px}
+.progress{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:15px;padding-top:13px;border-top:1px dashed #e1e8eb}.progress-step{display:flex;align-items:center;gap:6px;color:#8a969d;font-size:8px;font-weight:700}.progress-dot{width:20px;height:20px;border-radius:8px;display:grid;place-items:center;background:#f2f5f6;color:#75838b;font-size:8px;font-weight:800;flex:0 0 auto}.progress-step.active{color:var(--brand-deep)}.progress-step.active .progress-dot{background:#dfeff3;color:var(--brand-deep)}
+.feature-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.feature{padding:9px 8px;border-radius:14px;font-size:8px;font-weight:700;display:flex;align-items:center;gap:6px}.feature svg{width:14px;height:14px;flex:0 0 auto}.feature:nth-child(1){background:var(--mint);color:#39725e}.feature:nth-child(2){background:var(--yellow);color:#87671f}.feature:nth-child(3){background:var(--lav);color:#685991}
+.section{padding-top:24px}.heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:11px}.heading h3{margin:0;font-size:17px;letter-spacing:-.4px}.heading p{margin:5px 0 0;color:var(--muted);font-size:9.7px;line-height:1.45}.section-label{display:inline-flex;padding:6px 8px;border-radius:999px;background:#f1f6f8;color:var(--brand-deep);font-size:8px;font-weight:800;white-space:nowrap}
+.schedule-banner{border-radius:22px;background:linear-gradient(135deg,#1f687d,#3a8ba1);padding:14px 14px 15px;color:#fff;position:relative;overflow:hidden;margin-bottom:12px}.schedule-banner:before{content:"";position:absolute;width:120px;height:120px;border-radius:50%;border:20px solid rgba(255,255,255,.08);right:-40px;top:-50px}.schedule-banner:after{content:"";position:absolute;width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.08);right:26px;bottom:-21px;transform:rotate(18deg)}.schedule-banner .small{font-size:8.5px;opacity:.82;font-weight:700}.schedule-banner strong{display:block;margin-top:5px;font-size:15px;letter-spacing:-.25px}.schedule-banner span{display:block;margin-top:4px;font-size:8.8px;opacity:.84}.schedule-banner svg{position:absolute;right:15px;top:16px;width:29px;height:29px;opacity:.9}
+.date-strip{display:grid;grid-auto-flow:column;grid-auto-columns:71px;gap:9px;overflow-x:auto;padding:3px 1px 8px;scrollbar-width:none}.date-strip::-webkit-scrollbar{display:none}.date-card{position:relative;border:1px solid #e2e9ec;background:#fff;border-radius:20px;padding:10px 7px 11px;text-align:center;min-height:92px;color:var(--ink);transition:.18s;box-shadow:0 5px 15px rgba(28,74,88,.03)}.date-card .day{display:block;font-size:8px;font-weight:700;color:#7f8b92}.date-card b{display:block;font-size:21px;line-height:1;margin:9px 0 4px;letter-spacing:-.6px}.date-card small{font-size:8px;color:#89949a}.date-card.active{color:#fff;border-color:transparent;background:linear-gradient(155deg,#2f8299,#22677b);box-shadow:0 12px 25px rgba(37,111,132,.23);transform:translateY(-2px)}.date-card.active .day,.date-card.active small{color:rgba(255,255,255,.78)}.date-card.active:after{content:"✓";position:absolute;right:7px;top:7px;width:15px;height:15px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.18);font-size:8px;font-weight:800}
+.time-groups{display:grid;gap:10px}.time-group{border-radius:19px;border:1px solid #e4eaed;background:#fff;padding:11px 12px}.time-label{display:flex;align-items:center;gap:7px;margin-bottom:9px;font-size:9px;font-weight:800;color:#485861}.time-label span{width:26px;height:26px;border-radius:9px;display:grid;place-items:center}.time-label svg{width:15px;height:15px}.morning .time-label span{background:var(--yellow);color:#8a6a1c}.afternoon .time-label span{background:var(--blue);color:var(--brand-deep)}.evening .time-label span{background:var(--lav);color:#67568c}.time-options{display:flex;gap:7px;flex-wrap:wrap}.time-btn{min-width:72px;height:36px;padding:0 11px;border:1px solid #e2e8eb;border-radius:12px;background:#f8fafb;color:#57666e;font-size:9.5px;font-weight:800}.time-btn.active{background:#e6f2f5;color:var(--brand-dark);border-color:#b9d6de;box-shadow:0 5px 13px rgba(39,117,139,.08)}.time-btn.disabled{opacity:.35;text-decoration:line-through;pointer-events:none}
+.location-card{position:relative;overflow:hidden;border:1px solid #e3eaed;border-radius:21px;background:linear-gradient(145deg,#fbfdfe,#f4f8f9);padding:13px;display:flex;gap:11px;align-items:flex-start}.location-card:after{content:"";position:absolute;width:100px;height:70px;right:-18px;bottom:-20px;background-image:radial-gradient(#cfe2e7 1.4px,transparent 1.4px);background-size:10px 10px;opacity:.7;transform:rotate(-8deg)}.location-icon{width:42px;height:42px;border-radius:14px;background:#fff;color:var(--brand-deep);display:grid;place-items:center;box-shadow:0 7px 18px rgba(26,75,90,.07);z-index:1;flex:0 0 auto}.location-icon svg{width:21px;height:21px}.location-copy{flex:1;z-index:1}.location-copy b{display:block;font-size:11.5px}.location-copy p{margin:4px 0 0;font-size:8.8px;color:var(--muted);line-height:1.5}.change{z-index:1;border:0;padding:7px 9px;border-radius:10px;background:#e6f2f5;color:var(--brand-deep);font-size:8px;font-weight:800}.note{margin-top:9px;width:100%;min-height:72px;padding:11px 12px;border:1px solid #e3eaed;border-radius:16px;outline:0;resize:vertical;color:var(--ink);font-size:9.5px;background:#fff}.note:focus{border-color:#b9d6de;box-shadow:0 0 0 3px rgba(40,117,139,.07)}
+.payment-grid{display:grid;gap:10px}.payment{position:relative;width:100%;border:1px solid #e4eaed;border-radius:21px;padding:12px 13px;display:flex;align-items:center;gap:11px;text-align:left;background:#fff;color:var(--ink);overflow:hidden;transition:.18s}.payment:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#dfe7ea}.payment[data-pay="cod"]{background:linear-gradient(145deg,#fff,#fbf8ee)}.payment[data-pay="cod"]:before{background:#e4b85c}.payment[data-pay="bank"]{background:linear-gradient(145deg,#fff,#f1f8fb)}.payment[data-pay="bank"]:before{background:#6daac0}.payment[data-pay="qris"]{background:linear-gradient(145deg,#fff,#f5f2fb)}.payment[data-pay="qris"]:before{background:#8a75b9}.payment.active{transform:translateY(-1px);border-color:#bdd6dd;box-shadow:0 10px 25px rgba(27,85,101,.09)}.pay-icon{width:45px;height:45px;border-radius:15px;display:grid;place-items:center;background:rgba(255,255,255,.88);box-shadow:0 6px 16px rgba(22,64,78,.07);flex:0 0 auto}.payment[data-pay="cod"] .pay-icon{color:#9a7528}.payment[data-pay="bank"] .pay-icon{color:var(--brand-deep)}.payment[data-pay="qris"] .pay-icon{color:#6b5898}.pay-icon svg{width:23px;height:23px}.pay-copy{flex:1}.pay-topline{display:flex;align-items:center;gap:7px}.pay-copy b{font-size:12px}.pay-badge{padding:4px 6px;border-radius:999px;background:rgba(255,255,255,.75);font-size:7.5px;font-weight:800;color:#6d7980}.pay-copy span.desc{display:block;margin-top:4px;color:var(--muted);font-size:8.7px;line-height:1.4}.radio{width:21px;height:21px;border:1.5px solid #cbd5da;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:#fff}.payment.active .radio{border-color:var(--brand)}.payment.active .radio:after{content:"";width:10px;height:10px;border-radius:50%;background:var(--brand)}
+.pay-detail{display:none;margin-top:9px;padding:11px 12px;border-radius:16px;background:#f7fafb;border:1px solid #e4ecef;color:#5d7078;font-size:8.8px;line-height:1.55}.pay-detail.show{display:flex;gap:8px;align-items:flex-start}.pay-detail svg{width:16px;height:16px;color:var(--brand-deep);flex:0 0 auto;margin-top:1px}.pay-detail b{color:var(--brand-dark)}
+.confirm-card{border-radius:24px;padding:15px;background:linear-gradient(145deg,#eff8f5,#e7f3f6);border:1px solid #d7e9e7;position:relative;overflow:hidden}.confirm-card:after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.45);right:-48px;top:-46px}.confirm-head{display:flex;align-items:center;gap:10px;margin-bottom:11px;position:relative;z-index:1}.confirm-icon{width:38px;height:38px;border-radius:13px;background:#fff;color:#3f8069;display:grid;place-items:center;box-shadow:0 7px 18px rgba(46,110,89,.08)}.confirm-icon svg{width:20px;height:20px}.confirm-head b{font-size:12px}.confirm-head span{display:block;margin-top:3px;font-size:8.5px;color:#668078}.summary-rows{position:relative;z-index:1}.sum-row{display:flex;align-items:flex-start;justify-content:space-between;gap:13px;padding:6px 0;font-size:9px;color:#61757a}.sum-row strong{font-size:9.3px;color:#25383f;text-align:right}.sum-row.total{margin-top:5px;padding-top:11px;border-top:1px dashed #cbdedc;color:#26393e;font-weight:700}.sum-row.total strong{font-size:17px;color:var(--brand-dark);letter-spacing:-.35px}
+.security{margin-top:10px;display:flex;gap:8px;align-items:flex-start;padding:10px 11px;border-radius:14px;background:#fff;border:1px solid rgba(207,224,226,.8);color:#677d80;font-size:8.3px;line-height:1.5}.security svg{width:15px;height:15px;color:#3f8069;flex:0 0 auto}
+.sticky{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);width:min(480px,100%);z-index:55;padding:10px 16px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-top:1px solid #e4eaed}.sticky-inner{display:flex;align-items:center;gap:12px}.sticky-total{min-width:112px}.sticky-total span{display:block;font-size:8.5px;color:var(--muted);margin-bottom:3px}.sticky-total strong{font-size:16px;color:var(--brand-dark);letter-spacing:-.3px}.cta{flex:1;height:50px;border:0;border-radius:16px;background:linear-gradient(135deg,#2d7b92,#226579);color:#fff;font-weight:800;font-size:11.5px;box-shadow:0 11px 24px rgba(36,107,130,.23);display:flex;align-items:center;justify-content:center;gap:8px}.cta svg{width:18px;height:18px}
+.bottom-nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(480px,100%);height:78px;padding:10px 18px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.98);backdrop-filter:blur(16px);border-top:1px solid #e7ebee;display:grid;grid-template-columns:repeat(4,1fr);z-index:50}.nav{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:10px;color:#667078;font-weight:500;text-decoration:none}.nav svg{width:24px;height:24px}.nav.active{color:var(--brand-deep);font-weight:800}.nav-pill{width:37px;height:31px;display:grid;place-items:center}.nav.active .nav-pill{border-radius:12px;background:#e9f3f6}
+.touch{transition:transform .15s ease,filter .15s ease}.touch:active{transform:scale(.97);filter:brightness(.98)}
+@media(max-width:370px){.content{padding-left:13px;padding-right:13px}.feature-strip{grid-template-columns:1fr}.progress-step span:last-child{display:none}.time-btn{min-width:66px}.pay-badge{display:none}}
+@media(min-width:700px){body{padding:24px 0}.app{min-height:calc(100vh - 48px);border-radius:30px}.bottom-nav{bottom:24px;border-radius:0 0 30px 30px}.sticky{bottom:102px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div class="status"><span>09:41</span><div class="status-icons"><span class="dot"></span><span>5G</span><span>▰</span></div></div>
+  <div class="title-row">
+    <button class="icon-btn touch" onclick="history.back()" aria-label="Kembali"><svg viewBox="0 0 24 24" class="icon"><path d="m15 18-6-6 6-6"/></svg></button>
+    <div class="title-copy"><h1>Atur Pesanan</h1><p>Jadwal, lokasi & pembayaran</p></div>
+    <button class="icon-btn touch" aria-label="Bantuan"><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 1 1 4.4 1.4c-.8 1.1-2.2 1.4-2.2 3M12 17h.01"/></svg></button>
+  </div>
+</header>
+
+<main class="content">
+  <section class="order-hero">
+    <div class="order-top">
+      <span class="service-icon"><svg viewBox="0 0 24 24" class="icon"><path d="M7 21h8M11 21v-8M9 13h4M8 4h6l1 9H7z"/><path d="M10 4V2h2v2M16 7h3M18 5v4"/></svg></span>
+      <div class="order-copy"><span class="tiny-badge">Cleaning</span><h2 id="serviceName">Bersih Rumah</h2><p id="serviceDesc">Bersih Ringan · 1 jam</p></div>
+      <div class="hero-price"><small>Biaya</small><strong id="servicePrice">Rp60.000</strong></div>
+    </div>
+    <div class="progress">
+      <div class="progress-step active"><span class="progress-dot">1</span><span>Jadwal</span></div>
+      <div class="progress-step active"><span class="progress-dot">2</span><span>Lokasi</span></div>
+      <div class="progress-step active"><span class="progress-dot">3</span><span>Bayar</span></div>
+      <div class="progress-step"><span class="progress-dot">4</span><span>Selesai</span></div>
+    </div>
+    <div class="feature-strip">
+      <div class="feature"><svg viewBox="0 0 24 24" class="icon"><path d="m5 12 4 4L19 6"/></svg>Jadwal fleksibel</div>
+      <div class="feature"><svg viewBox="0 0 24 24" class="icon"><path d="M12 3v18M8 7h6a3 3 0 0 1 0 6H10a3 3 0 0 0 0 6h6"/></svg>Harga jelas</div>
+      <div class="feature"><svg viewBox="0 0 24 24" class="icon"><path d="M6 10V7a6 6 0 0 1 12 0v3"/><rect x="4" y="10" width="16" height="11" rx="2"/></svg>Pembayaran aman</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="heading"><div><h3>Kapan mau dibantu?</h3><p>Pilih hari dan jam yang paling nyaman untuk Anda.</p></div><span class="section-label">1 · Jadwal</span></div>
+    <div class="schedule-banner">
+      <span class="small">JADWAL PILIHANMU</span>
+      <strong id="bigSchedule">Belum memilih jadwal</strong>
+      <span>Mitra akan tiba sesuai slot waktu yang dipilih.</span>
+      <svg viewBox="0 0 24 24" class="icon"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+    </div>
+    <div class="date-strip" id="dateStrip"></div>
+  </section>
+
+  <section class="section">
+    <div class="heading"><div><h3>Pilih waktu kedatangan</h3><p>Slot dipisahkan berdasarkan waktu agar lebih cepat dipilih.</p></div><span class="section-label">Jam</span></div>
+    <div class="time-groups">
+      <div class="time-group morning">
+        <div class="time-label"><span><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2"/></svg></span>Pagi</div>
+        <div class="time-options"><button class="time-btn touch" data-time="08:00">08:00</button><button class="time-btn touch active" data-time="09:00">09:00</button><button class="time-btn touch" data-time="10:00">10:00</button><button class="time-btn touch" data-time="11:00">11:00</button></div>
+      </div>
+      <div class="time-group afternoon">
+        <div class="time-label"><span><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M3 12h2M19 12h2"/></svg></span>Siang</div>
+        <div class="time-options"><button class="time-btn touch" data-time="13:00">13:00</button><button class="time-btn touch" data-time="14:00">14:00</button><button class="time-btn touch" data-time="15:00">15:00</button></div>
+      </div>
+      <div class="time-group evening">
+        <div class="time-label"><span><svg viewBox="0 0 24 24" class="icon"><path d="M20 15.5A8 8 0 0 1 8.5 4 8.3 8.3 0 1 0 20 15.5z"/></svg></span>Sore</div>
+        <div class="time-options"><button class="time-btn touch" data-time="16:00">16:00</button><button class="time-btn touch disabled" data-time="17:00">17:00</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="heading"><div><h3>Di mana lokasinya?</h3><p>Pastikan alamat layanan mudah ditemukan mitra.</p></div><span class="section-label">2 · Lokasi</span></div>
+    <div class="location-card">
+      <span class="location-icon"><svg viewBox="0 0 24 24" class="icon"><path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z"/><circle cx="12" cy="10" r="2"/></svg></span>
+      <div class="location-copy"><b>Rumah</b><p>Jl. Contoh No. 12, Makassar<br>Patokan: dekat minimarket</p></div>
+      <button class="change touch">Ubah</button>
+    </div>
+    <textarea class="note" placeholder="Tambahkan catatan, misalnya: pagar putih, hubungi sebelum datang..."></textarea>
+  </section>
+
+  <section class="section">
+    <div class="heading"><div><h3>Mau bayar pakai apa?</h3><p>Pilih metode yang paling nyaman. Semuanya tercatat di pesanan.</p></div><span class="section-label">3 · Bayar</span></div>
+    <div class="payment-grid">
+      <button class="payment active touch" data-pay="cod">
+        <span class="pay-icon"><svg viewBox="0 0 24 24" class="icon"><path d="M4 7h16v11H4z"/><path d="M7 7V5h10v2M8 13h8M12 10v6"/></svg></span>
+        <span class="pay-copy"><span class="pay-topline"><b>COD</b><span class="pay-badge">Bayar nanti</span></span><span class="desc">Bayar setelah pekerjaan selesai.</span></span><span class="radio"></span>
+      </button>
+      <button class="payment touch" data-pay="bank">
+        <span class="pay-icon"><svg viewBox="0 0 24 24" class="icon"><path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M3 18h18M12 3l9 5H3z"/></svg></span>
+        <span class="pay-copy"><span class="pay-topline"><b>Transfer Bank</b><span class="pay-badge">Manual</span></span><span class="desc">Transfer ke rekening resmi BantuDulu.</span></span><span class="radio"></span>
+      </button>
+      <button class="payment touch" data-pay="qris">
+        <span class="pay-icon"><svg viewBox="0 0 24 24" class="icon"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M14 14h2v2h-2zM18 14h2v6h-6v-2M14 18h2"/></svg></span>
+        <span class="pay-copy"><span class="pay-topline"><b>QRIS</b><span class="pay-badge">Instan</span></span><span class="desc">Scan dengan mobile banking atau e-wallet.</span></span><span class="radio"></span>
+      </button>
+    </div>
+    <div class="pay-detail show" id="codDetail"><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg><span><b>COD:</b> pembayaran dilakukan setelah pekerjaan selesai dan Anda bisa memastikan layanan sudah diterima.</span></div>
+    <div class="pay-detail" id="bankDetail"><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span><b>Transfer Bank:</b> rekening tujuan akan tampil setelah pesanan dibuat.</span></div>
+    <div class="pay-detail" id="qrisDetail"><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span><b>QRIS:</b> kode QR akan tampil setelah pesanan dibuat untuk pembayaran instan.</span></div>
+  </section>
+
+  <section class="section">
+    <div class="heading"><div><h3>Siap dipesan</h3><p>Cek satu kali lagi sebelum membuat pesanan.</p></div><span class="section-label">4 · Selesai</span></div>
+    <div class="confirm-card">
+      <div class="confirm-head"><span class="confirm-icon"><svg viewBox="0 0 24 24" class="icon"><path d="m5 12 4 4L19 6"/></svg></span><div><b>Semua sudah siap</b><span>Jadwal dan pembayaran sudah dipilih.</span></div></div>
+      <div class="summary-rows">
+        <div class="sum-row"><span>Layanan</span><strong id="orderService">Bersih Rumah</strong></div>
+        <div class="sum-row"><span>Jadwal</span><strong id="orderSchedule">—</strong></div>
+        <div class="sum-row"><span>Pembayaran</span><strong id="orderPayment">COD</strong></div>
+        <div class="sum-row"><span>Biaya layanan</span><strong id="orderPrice">Rp60.000</strong></div>
+        <div class="sum-row total"><span>Total pembayaran</span><strong id="orderTotal">Rp60.000</strong></div>
+      </div>
+      <div class="security"><svg viewBox="0 0 24 24" class="icon"><path d="M6 10V7a6 6 0 0 1 12 0v3"/><rect x="4" y="10" width="16" height="11" rx="2"/></svg><span>Pembayaran dan detail pesanan tercatat melalui BantuDulu. Jangan melakukan pembayaran di luar instruksi resmi.</span></div>
+    </div>
+  </section>
+</main>
+
+<div class="sticky"><div class="sticky-inner"><div class="sticky-total"><span>Total</span><strong id="stickyTotal">Rp60.000</strong></div><button class="cta touch" id="submitOrder">Buat Pesanan <svg viewBox="0 0 24 24" class="icon"><path d="m9 18 6-6-6-6"/></svg></button></div></div>
+<nav class="bottom-nav">
+  <a class="nav" href="/beranda"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></span><span>Beranda</span></a>
+  <a class="nav active" href="/cari"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><span>Cari</span></a>
+  <a class="nav" href="/pesanan"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3V1h6v2M8 9h8M8 13h8M8 17h5"/></svg></span><span>Pesanan</span></a>
+  <a class="nav" href="/profil"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4-8 8-8s7 3 8 8"/></svg></span><span>Profil</span></a>
+</nav>
+</div>
+<script>
+const rupiah=n=>'Rp'+new Intl.NumberFormat('id-ID').format(n);
+const qs=new URLSearchParams(location.search);
+let service=qs.get('service')||'Bersih Rumah';
+let desc=qs.get('desc')||'Bersih Ringan · 1 jam';
+let price=Number(qs.get('price')||60000);
+let selectedDate=null, selectedTime='09:00', payment='cod';
+const $=id=>document.getElementById(id);
+$('serviceName').textContent=service;$('serviceDesc').textContent=desc;$('servicePrice').textContent=rupiah(price);
+$('orderService').textContent=service;$('orderPrice').textContent=rupiah(price);$('orderTotal').textContent=rupiah(price);$('stickyTotal').textContent=rupiah(price);
+const dayNames=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const dayLong=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const monthNames=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const strip=$('dateStrip'),start=new Date();
+for(let i=0;i<7;i++){
+ const d=new Date(start);d.setDate(start.getDate()+i);
+ const btn=document.createElement('button');btn.className='date-card touch'+(i===1?' active':'');btn.dataset.iso=d.toISOString();
+ btn.innerHTML=`<span class="day">${i===0?'Hari ini':dayNames[d.getDay()]}</span><b>${d.getDate()}</b><small>${monthNames[d.getMonth()]}</small>`;
+ btn.onclick=()=>{document.querySelectorAll('.date-card').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedDate=new Date(btn.dataset.iso);updateSchedule()};
+ strip.appendChild(btn);if(i===1)selectedDate=d;
+}
+document.querySelectorAll('.time-btn:not(.disabled)').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.time-btn').forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedTime=btn.dataset.time;updateSchedule()});
+function fmt(d){return `${dayLong[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}`}
+function updateSchedule(){const txt=`${fmt(selectedDate)} · ${selectedTime}`;$('bigSchedule').textContent=txt;$('orderSchedule').textContent=txt}
+updateSchedule();
+document.querySelectorAll('.payment').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.payment').forEach(x=>x.classList.remove('active'));btn.classList.add('active');payment=btn.dataset.pay;document.querySelectorAll('.pay-detail').forEach(x=>x.classList.remove('show'));$(payment+'Detail').classList.add('show');$('orderPayment').textContent=payment==='cod'?'COD':payment==='bank'?'Transfer Bank':'QRIS'});
+$('submitOrder').onclick=()=>{const pay=payment==='cod'?'COD':payment==='bank'?'Transfer Bank':'QRIS';alert(`Pesanan siap dibuat.\n\n${service}\n${fmt(selectedDate)} pukul ${selectedTime}\nPembayaran: ${pay}\nTotal: ${rupiah(price)}`)};
+</script>
+</body>
+</html>

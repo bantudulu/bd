@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#28758B">
+<title>BantuDulu — Jasa Antar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#28758b;--brand-deep:#216477;--brand-dark:#194f60;--ink:#111827;--muted:#6b7280;--line:#e8edf0;--soft:#f4f7f8;--soft-blue:#eaf3f6;--soft-mint:#e9f7f3;--soft-warm:#fff7e8;--white:#fff;--shadow:0 12px 34px rgba(25,72,86,.08)}
+*{box-sizing:border-box}html{background:#edf2f4}body{margin:0;color:var(--ink);font-family:"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:radial-gradient(circle at 14% 18%,rgba(47,129,152,.09),transparent 24%),radial-gradient(circle at 88% 64%,rgba(89,91,94,.06),transparent 24%),#edf2f4;min-height:100vh}
+a{color:inherit;text-decoration:none}button,input,textarea{font:inherit}button{cursor:pointer}svg{display:block}.icon{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.app-shell{width:100%;max-width:480px;min-height:100vh;margin:0 auto;background:#fff;position:relative;overflow:hidden;box-shadow:0 0 50px rgba(18,55,66,.08);padding-bottom:174px}
+.top{padding:calc(18px + env(safe-area-inset-top)) 18px 66px;background:radial-gradient(circle at 82% 13%,rgba(255,255,255,.14),transparent 25%),linear-gradient(135deg,#2d7186 0%,#28758b 54%,#246b82 100%);color:white;border-radius:0 0 28px 28px;box-shadow:0 16px 36px rgba(22,79,96,.12)}
+.status{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;margin-bottom:18px}.status-icons{display:flex;gap:7px;align-items:center}.dot{width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:7px 0 0 rgba(255,255,255,.9),14px 0 0 rgba(255,255,255,.75)}
+.title-row{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px}.icon-btn{width:40px;height:40px;border:0;border-radius:14px;display:grid;place-items:center;color:white;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}.icon-btn svg{width:22px;height:22px}.title-copy{text-align:center}.title-copy h1{margin:0;font-size:23px;line-height:1.1;letter-spacing:-.55px}.title-copy p{margin:5px 0 0;font-size:11.5px;opacity:.83}
+.content{padding:0 16px 30px}.category-card{margin-top:-38px;position:relative;z-index:3;background:#fff;border:1px solid #e5ecef;border-radius:24px;box-shadow:0 15px 36px rgba(22,73,87,.12);padding:13px;display:flex;gap:13px;align-items:center}.category-art{width:74px;height:74px;border-radius:20px;display:grid;place-items:center;color:var(--brand-deep);background:linear-gradient(145deg,#eaf5f7,#f8fbfc);border:1px solid #dcecf0;flex:0 0 auto}.category-art svg{width:40px;height:40px}.category-copy{min-width:0}.eyebrow{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:800;letter-spacing:.55px;text-transform:uppercase;color:var(--brand-deep);background:#edf6f8;border-radius:999px;padding:5px 7px}.category-copy h2{font-size:18px;margin:7px 0 3px;letter-spacing:-.35px}.category-copy p{margin:0;color:var(--muted);font-size:10.5px;line-height:1.45}
+.service-intro{position:relative;min-height:166px;margin:22px 0 14px;border-radius:24px;overflow:hidden;padding:22px 158px 22px 18px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(115deg,#eef8fa 0%,#f7fbfc 58%,#e6f3f6 100%);border:1px solid #dcebef;box-shadow:0 12px 28px rgba(25,72,86,.07)}
+.service-intro:before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='240' viewBox='0 0 520 240'%3E%3Cg fill='none' stroke='%2328758B' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' opacity='.18'%3E%3Cpath d='M300 170c45-70 100-80 160-34' stroke-dasharray='8 10'/%3E%3Ccircle cx='303' cy='170' r='8'/%3E%3Cpath d='M303 162c-10-13-10-23 0-31 10 8 10 18 0 31z'/%3E%3Ccircle cx='458' cy='136' r='8'/%3E%3Cpath d='M458 128c-10-13-10-23 0-31 10 8 10 18 0 31z'/%3E%3Cpath d='M347 102h65l18 24v25h-83z'/%3E%3Cpath d='M363 102l10-22h30l9 22M355 151a12 12 0 1 0 24 0M400 151a12 12 0 1 0 24 0'/%3E%3C/g%3E%3Cg fill='%2328758B' opacity='.07'%3E%3Ccircle cx='328' cy='48' r='11'/%3E%3Ccircle cx='478' cy='74' r='14'/%3E%3Ccircle cx='432' cy='193' r='9'/%3E%3C/g%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right center;background-size:auto 100%;pointer-events:none}.service-intro:after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-28px;top:-36px;background:rgba(255,255,255,.4)}.service-intro-copy{position:relative;z-index:2}.mini-label{display:inline-flex;align-items:center;width:max-content;margin-bottom:8px;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid rgba(40,117,139,.1);font-size:8.5px;font-weight:800;letter-spacing:.45px;text-transform:uppercase;color:var(--brand-deep)}.service-intro h3{margin:0;font-size:19px;letter-spacing:-.45px}.service-intro p{margin:6px 0 0;max-width:230px;color:#5e747c;font-size:10.5px;line-height:1.55}.spark{position:absolute;z-index:2;right:20px;bottom:18px;width:34px;height:34px;border-radius:12px;background:rgba(255,255,255,.84);display:grid;place-items:center;color:var(--brand-deep);box-shadow:0 8px 20px rgba(31,100,119,.10)}.spark svg{width:18px;height:18px}
+.service-tabs{display:grid;grid-template-columns:1fr 1fr;gap:12px}.service-tab{position:relative;border:1px solid #dfe8ec;background:linear-gradient(180deg,#fff 0%,#fbfdfe 100%);border-radius:22px;padding:14px 14px 15px;text-align:left;min-height:150px;transition:.18s ease;color:var(--ink);overflow:hidden;box-shadow:0 6px 18px rgba(20,67,81,.04)}.service-tab:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#dbe9ee,#eff5f7)}.service-tab.active{border-color:#bfd9e1;background:linear-gradient(180deg,#f5fbfd 0%,#ecf7fa 100%);box-shadow:0 14px 30px rgba(31,100,119,.12)}.service-tab.active:before{background:linear-gradient(90deg,#5a8fa1,#8fc2cf)}.tab-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}.tab-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:#f1f6f8;color:var(--brand-deep)}.service-tab.active .tab-icon{background:#fff;box-shadow:0 8px 18px rgba(31,100,119,.10)}.tab-icon svg{width:25px;height:25px}.tab-badge{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;font-size:8.4px;font-weight:800;background:#f4f7f8;color:#60717a;white-space:nowrap}.service-tab.active .tab-badge{background:#fff;color:var(--brand-deep)}.service-tab b{display:block;font-size:14px;letter-spacing:-.2px;margin-bottom:5px}.tab-desc{display:block;color:var(--muted);font-size:10px;line-height:1.45;min-height:29px}.service-tab.active .tab-desc{color:#55717a}.tab-meta{display:flex;align-items:end;justify-content:space-between;gap:8px;margin-top:12px}.tab-price{display:flex;flex-direction:column;gap:2px}.tab-price small{font-size:8.5px;color:#7b8790}.tab-price strong{font-size:11.5px;color:var(--brand-dark)}.tab-check{width:29px;height:29px;border-radius:10px;display:grid;place-items:center;background:#f2f6f8;color:#8a9aa1}.service-tab.active .tab-check{background:var(--brand);color:#fff}.tab-check svg{width:15px;height:15px}
+.section-head{padding:23px 2px 11px}.section-head h3{margin:0;font-size:17px;letter-spacing:-.35px}.section-head p{margin:5px 0 0;color:var(--muted);font-size:10.5px;line-height:1.5}
+.route-card{border:1px solid #e5ebee;border-radius:23px;background:#fff;box-shadow:0 9px 26px rgba(24,68,80,.055);padding:15px}.route-line{position:relative;padding-left:37px}.route-line:before{content:"";position:absolute;left:13px;top:30px;bottom:31px;border-left:2px dashed #d4e4e9}.location-row{position:relative;display:grid;grid-template-columns:1fr;gap:5px;padding:4px 0 13px}.location-row:last-child{padding-bottom:2px}.pin{position:absolute;left:-37px;top:10px;width:28px;height:28px;border-radius:10px;display:grid;place-items:center;background:#eaf5f7;color:var(--brand-deep);z-index:1}.location-row.destination .pin{background:#edf7f2;color:#377c66}.pin svg{width:15px;height:15px}.field-label{font-size:9px;font-weight:800;color:#52626a}.location-input{width:100%;border:1px solid #e1e8eb;background:#f9fbfc;border-radius:14px;padding:12px 13px;font-size:11px;color:var(--ink);outline:none;transition:.16s}.location-input:focus{border-color:#9fc8d4;background:#fff;box-shadow:0 0 0 4px rgba(40,117,139,.07)}.location-input::placeholder{color:#9aa5ab}.quick-loc{display:flex;gap:7px;margin-top:8px}.quick-chip{border:0;border-radius:999px;background:#edf5f7;color:#55727b;font-size:8.7px;font-weight:700;padding:7px 9px;display:inline-flex;align-items:center;gap:5px}.quick-chip svg{width:12px;height:12px}
+.pickup-note{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:10px;padding:13px 13px 12px;border-radius:17px;background:linear-gradient(135deg,#edf7f9,#f8fbfc);border:1px solid #dcecf0;margin-bottom:12px}.pickup-note .pin{position:static;width:40px;height:40px;border-radius:13px;background:#fff;color:var(--brand-deep);display:grid;place-items:center;box-shadow:0 6px 16px rgba(31,100,119,.08)}.pickup-note .pin svg{width:20px;height:20px}.pickup-copy b{display:block;font-size:10.5px;color:var(--brand-dark)}.pickup-copy span{display:block;font-size:8.8px;color:#6a7c84;line-height:1.45;margin-top:3px}.pickup-badge{font-size:7.7px;font-weight:800;color:var(--brand-deep);background:#fff;border:1px solid #d8e8ed;border-radius:999px;padding:5px 7px;white-space:nowrap}.only-destination{padding-top:4px}.only-destination:before{display:none}
+
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.detail-card{border:1px solid #e5ebee;border-radius:19px;background:#fff;padding:13px}.detail-card b{font-size:10.7px;display:block}.detail-card p{margin:4px 0 10px;color:var(--muted);font-size:8.8px;line-height:1.45}.stepper{display:flex;align-items:center;justify-content:space-between;background:#f4f7f8;border-radius:13px;padding:4px}.stepper button{width:31px;height:31px;border:0;border-radius:10px;background:#fff;color:var(--brand-deep);font-size:18px;font-weight:700;box-shadow:0 3px 8px rgba(33,80,92,.06)}.stepper strong{min-width:28px;text-align:center;font-size:12px}.small-field{width:100%;height:39px;border:1px solid #e2e8eb;background:#f9fbfc;border-radius:12px;padding:0 10px;color:var(--ink);font-size:10px;outline:none}
+.date-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;overflow:hidden}.date-card{border:1px solid #e5ebee;background:#fff;border-radius:17px;padding:10px 5px;text-align:center;color:#67727a;min-height:66px}.date-card span{display:block;font-size:8px;font-weight:700}.date-card strong{display:block;margin-top:4px;font-size:15px;color:#202a30}.date-card.active{background:linear-gradient(145deg,#2e768c,#256b81);border-color:#2a7187;color:#d9f1f6;box-shadow:0 9px 20px rgba(37,107,129,.20)}.date-card.active strong{color:#fff}.time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}.time-chip{border:1px solid #e3eaed;background:#fff;border-radius:13px;padding:10px 4px;font-size:9.5px;font-weight:700;color:#57656c;text-align:center}.time-chip.active{border-color:#b5d4dd;background:#eef7f9;color:var(--brand-deep);box-shadow:0 6px 16px rgba(31,100,119,.07)}
+.info-card{margin-top:13px;padding:13px 14px;border-radius:18px;background:var(--soft-blue);border:1px solid #dcebf0;display:flex;gap:10px;align-items:flex-start}.info-card svg{width:19px;height:19px;color:var(--brand-deep);flex:0 0 auto}.info-card p{margin:0;font-size:9.5px;line-height:1.55;color:#55717a}.info-card b{color:var(--brand-dark)}
+.sticky-checkout{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);width:min(480px,100%);padding:10px 16px;background:rgba(255,255,255,.97);backdrop-filter:blur(16px);border-top:1px solid #e6ebee;z-index:55}.checkout-box{display:flex;align-items:center;gap:12px}.total{min-width:118px}.total span{display:block;font-size:9px;color:var(--muted);margin-bottom:3px}.total strong{font-size:16px;letter-spacing:-.3px;color:var(--brand-dark)}.cta{flex:1;border:0;border-radius:16px;height:50px;background:linear-gradient(135deg,#2d7186,#246b82);color:#fff;font-weight:800;font-size:12px;box-shadow:0 10px 22px rgba(36,107,130,.22);display:flex;align-items:center;justify-content:center;gap:8px}.cta svg{width:18px;height:18px}
+.bottom-nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(480px,100%);height:78px;padding:10px 18px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.98);backdrop-filter:blur(16px);border-top:1px solid #e7ebee;display:grid;grid-template-columns:repeat(4,1fr);z-index:50}.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:10.5px;color:#626a72;font-weight:500}.nav-item svg{width:25px;height:25px}.nav-item.active{color:var(--brand-deep);font-weight:800}.nav-pill{width:37px;height:31px;display:grid;place-items:center}.nav-item.active .nav-pill{border-radius:12px;background:#e9f3f6}.touch{transition:transform .15s ease,filter .15s ease}.touch:active{transform:scale(.97);filter:brightness(.97)}
+@media(max-width:370px){.title-copy h1{font-size:21px}.category-art{width:66px;height:66px}.service-intro{min-height:176px;padding:20px 126px 20px 16px}.service-tabs{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.date-strip{grid-template-columns:repeat(4,1fr)}.time-grid{grid-template-columns:repeat(3,1fr)}.sticky-checkout{padding-left:12px;padding-right:12px}.total{min-width:108px}}@media(min-width:700px){body{padding:24px 0}.app-shell{min-height:calc(100vh - 48px);border-radius:30px}.bottom-nav{bottom:24px;border-radius:0 0 30px 30px}.sticky-checkout{bottom:102px}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+<header class="top">
+  <div class="status"><span>09:41</span><div class="status-icons"><span class="dot"></span><span>5G</span><span>▰</span></div></div>
+  <div class="title-row">
+    <a href="/layanan" class="icon-btn touch" aria-label="Kembali"><svg viewBox="0 0 24 24" class="icon"><path d="m15 18-6-6 6-6"/></svg></a>
+    <div class="title-copy"><h1>Jasa Antar</h1><p>Antar barang dengan Motor atau Mobil</p></div>
+    <button class="icon-btn touch" aria-label="Bantuan"><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="9"/><path d="M9.7 9a2.5 2.5 0 1 1 4.6 1.4c-.9 1.2-2.3 1.4-2.3 3.1M12 17h.01"/></svg></button>
+  </div>
+</header>
+<main class="content">
+  <section class="category-card">
+    <div class="category-art"><svg viewBox="0 0 24 24" class="icon"><path d="M3 15h2l2-6h8l3 3h2l1 3v3h-2"/><path d="M7 18h8M5 18a2 2 0 1 0 4 0M15 18a2 2 0 1 0 4 0M8 9V6h5v3"/></svg></div>
+    <div class="category-copy"><span class="eyebrow">Layanan perjalanan</span><h2>Bantuan Jasa Antar</h2><p>Pilih kendaraan, tentukan penjemputan dan tujuan, lalu atur jadwal keberangkatan.</p></div>
+  </section>
+
+  <section class="service-intro">
+    <div class="service-intro-copy">
+      <span class="mini-label">Pilih kendaraan</span>
+      <h3>Mau diantar pakai apa?</h3>
+      <p>Pilih Motor untuk kebutuhan praktis atau Mobil untuk barang yang lebih besar dan perjalanan yang lebih nyaman.</p>
+    </div>
+    <span class="spark"><svg viewBox="0 0 24 24" class="icon"><path d="M5 12h14M14 7l5 5-5 5"/></svg></span>
+  </section>
+
+  <div class="service-tabs">
+    <button class="service-tab active touch vehicle-option" data-type="motor" data-price="50000">
+      <div class="tab-top">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" class="icon"><circle cx="6" cy="17" r="2.5"/><circle cx="18" cy="17" r="2.5"/><path d="M8.5 17h5l2-5h-5l-2-3h-3M13 12h5l2 3M13 8h3"/></svg></span>
+        <span class="tab-badge">Praktis</span>
+      </div>
+      <b>Motor</b><span class="tab-desc">Cocok untuk dokumen, paket kecil, dan perjalanan cepat.</span>
+      <div class="tab-meta"><span class="tab-price"><small>Tarif</small><strong>Rp50.000 / jam</strong></span><span class="tab-check"><svg viewBox="0 0 24 24" class="icon"><path d="m7 12 3 3 7-7"/></svg></span></div>
+    </button>
+    <button class="service-tab touch vehicle-option" data-type="mobil" data-price="100000">
+      <div class="tab-top">
+        <span class="tab-icon"><svg viewBox="0 0 24 24" class="icon"><path d="M3 16v-3l2-5h12l4 5v3"/><path d="M5 16h14M7 16a2 2 0 1 0 4 0M15 16a2 2 0 1 0 4 0M7 8l1-3h7l2 3"/></svg></span>
+        <span class="tab-badge">Lebih lega</span>
+      </div>
+      <b>Mobil</b><span class="tab-desc">Untuk barang lebih besar, jumlah lebih banyak, atau perjalanan lebih nyaman.</span>
+      <div class="tab-meta"><span class="tab-price"><small>Tarif</small><strong>Rp100.000 / jam</strong></span><span class="tab-check"><svg viewBox="0 0 24 24" class="icon"><path d="m7 12 3 3 7-7"/></svg></span></div>
+    </button>
+  </div>
+
+  <div class="section-head"><h3>Tujuan pengantaran</h3><p>Masukkan alamat tujuan. Titik jemput akan menggunakan Lokasi Rumah pada langkah berikutnya.</p></div>
+  <section class="route-card">
+    <div class="pickup-note">
+      <span class="pin"><svg viewBox="0 0 24 24" class="icon"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21v-7h6v7"/></svg></span>
+      <div class="pickup-copy"><b>Titik jemput: Lokasi Rumah</b><span>Alamat rumah Anda akan dikonfirmasi saat memilih jadwal.</span></div>
+      <span class="pickup-badge">Langkah berikutnya</span>
+    </div>
+    <div class="location-row destination only-destination">
+      <span class="pin"><svg viewBox="0 0 24 24" class="icon"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11z"/><circle cx="12" cy="10" r="2"/></svg></span>
+      <label class="field-label" for="destination">Alamat tujuan</label>
+      <input class="location-input" id="destination" placeholder="Contoh: Jl. Boulevard No. 25, Makassar">
+      <div class="quick-loc"><button class="quick-chip touch" type="button">Pilih di peta</button><button class="quick-chip touch" type="button">Alamat tersimpan</button></div>
+    </div>
+  </section>
+
+  <div class="section-head"><h3>Estimasi kebutuhan</h3><p>Tarif Jasa Antar dihitung berdasarkan kendaraan × durasi penggunaan.</p></div>
+  <div class="detail-grid">
+    <div class="detail-card"><b>Durasi penggunaan</b><p>Atur estimasi berapa jam kendaraan dibutuhkan.</p><div class="stepper"><button id="minus" type="button">−</button><strong id="hours">1 jam</strong><button id="plus" type="button">+</button></div></div>
+    <div class="detail-card"><b>Catatan barang</b><p>Opsional, bantu mitra memahami barang yang diantar.</p><input class="small-field" id="note" placeholder="Contoh: 2 dus kecil"></div>
+  </div>
+
+  <div class="info-card"><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><p>Total sementara dihitung dari <b>tarif kendaraan × durasi</b>. Setelah ini Anda memilih <b>tanggal, jam, titik jemput (Lokasi Rumah), dan metode pembayaran</b>.</p></div>
+</main>
+
+<div class="sticky-checkout">
+  <div class="checkout-box"><div class="total"><span>Total sementara</span><strong id="total">Rp50.000</strong></div><button class="cta touch" id="continueBtn">Lanjut pilih jadwal <svg viewBox="0 0 24 24" class="icon"><path d="m9 18 6-6-6-6"/></svg></button></div>
+</div>
+<nav class="bottom-nav" aria-label="Navigasi utama">
+  <a class="nav-item" href="/beranda"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></span><span>Beranda</span></a>
+  <a class="nav-item active" href="/cari"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><span>Cari</span></a>
+  <a class="nav-item" href="/pesanan"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3V1h6v2M8 9h8M8 13h8M8 17h5"/></svg></span><span>Pesanan</span></a>
+  <a class="nav-item" href="/profil"><span class="nav-pill"><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4-8 8-8s7 3 8 8"/></svg></span><span>Profil</span></a>
+</nav>
+</div>
+<script>
+const rupiah=n=>'Rp'+new Intl.NumberFormat('id-ID').format(n);
+let vehicle='motor', rate=50000, hours=1;
+const totalEl=document.getElementById('total');
+function updateTotal(){ totalEl.textContent=rupiah(rate*hours); }
+document.querySelectorAll('.vehicle-option').forEach(card=>card.addEventListener('click',()=>{
+  document.querySelectorAll('.vehicle-option').forEach(x=>x.classList.remove('active'));
+  card.classList.add('active');
+  vehicle=card.dataset.type;
+  rate=Number(card.dataset.price);
+  updateTotal();
+}));
+document.getElementById('minus').addEventListener('click',()=>{
+  hours=Math.max(1,hours-1);
+  document.getElementById('hours').textContent=hours+' jam';
+  updateTotal();
+});
+document.getElementById('plus').addEventListener('click',()=>{
+  hours=Math.min(12,hours+1);
+  document.getElementById('hours').textContent=hours+' jam';
+  updateTotal();
+});
+document.getElementById('continueBtn').addEventListener('click',()=>{
+  const destination=document.getElementById('destination').value.trim();
+  const note=document.getElementById('note').value.trim();
+  if(!destination){
+    alert('Masukkan tujuan pengantaran terlebih dahulu.');
+    document.getElementById('destination').focus();
+    return;
+  }
+  const params=new URLSearchParams({
+    service:'jasa-antar',
+    vehicle:vehicle,
+    vehicle_label:vehicle==='motor'?'Motor':'Mobil',
+    rate:String(rate),
+    hours:String(hours),
+    destination:destination,
+    note:note,
+    total:String(rate*hours),
+    pickup_source:'home'
+  });
+  window.location.href='bantudulu-jadwal-pembayaran-FINAL.html?'+params.toString();
+});
+updateTotal();
+</script>
+</body>
+</html>

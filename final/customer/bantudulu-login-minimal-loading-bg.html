@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#28758b">
+<title>Bantudulu — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#28758b;--deep:#205e70;--ink:#172126;--muted:#74838a;--white:#fff;--line:#e1e8eb}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%}
+body{
+  min-height:100vh;
+  font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 18% 20%,rgba(255,255,255,.16),transparent 24%),
+    radial-gradient(circle at 82% 78%,rgba(255,255,255,.10),transparent 26%),
+    linear-gradient(145deg,#2f8197 0%,var(--brand) 52%,#205e70 100%);
+  color:var(--ink);
+  overflow-x:hidden;
+}
+body:before,body:after{content:"";position:fixed;border-radius:50%;background:rgba(255,255,255,.055);pointer-events:none}
+body:before{width:280px;height:280px;top:-80px;right:-100px}
+body:after{width:220px;height:220px;bottom:-70px;left:-80px}
+.login-page{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 18px calc(28px + env(safe-area-inset-bottom))}
+.login-box{width:100%;max-width:390px}
+.brand{text-align:center;color:#fff;font-size:32px;line-height:1;font-weight:800;letter-spacing:-1.2px;margin-bottom:26px;text-shadow:0 8px 28px rgba(16,59,71,.18)}
+.card{background:rgba(255,255,255,.97);border:1px solid rgba(255,255,255,.56);border-radius:24px;padding:22px;box-shadow:0 22px 60px rgba(18,62,74,.20);backdrop-filter:blur(12px)}
+.card h1{margin:0 0 5px;font-size:20px;letter-spacing:-.45px}.card .intro{margin:0 0 20px;color:var(--muted);font-size:11px;line-height:1.5}
+.field{margin-top:13px}.field label{display:block;margin:0 0 7px;font-size:10px;font-weight:700;color:#46555c}.input-wrap{position:relative}.input-wrap input{width:100%;height:50px;border:1px solid var(--line);border-radius:15px;background:#fbfcfd;color:var(--ink);padding:0 43px 0 14px;outline:none;font-size:12px;transition:.18s}.input-wrap input:focus{background:#fff;border-color:#a3cad4;box-shadow:0 0 0 4px rgba(40,117,139,.08)}
+.toggle{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:11px;background:transparent;color:#74868e;font-size:11px;font-weight:700;cursor:pointer}.forgot-row{text-align:right;margin-top:8px}.forgot-row a,.signup a{color:var(--deep);font-weight:700;text-decoration:none}.forgot-row a{font-size:9.5px}
+.primary,.google{width:100%;height:50px;border-radius:15px;font-weight:800;font-size:11.5px;cursor:pointer}.primary{border:0;margin-top:18px;color:#fff;background:linear-gradient(135deg,#2f8197,#205e70);box-shadow:0 10px 22px rgba(32,94,112,.22)}.primary:active,.google:active{transform:scale(.985)}
+.divider{display:flex;align-items:center;gap:10px;margin:17px 0;color:#9ba7ac;font-size:9px}.divider:before,.divider:after{content:"";height:1px;flex:1;background:#e8edef}.google{border:1px solid #dfe7ea;background:#fff;color:#3f4d53;display:flex;align-items:center;justify-content:center;gap:9px}.g{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#f5f7f8;color:#4285f4;font-size:12px;font-weight:800}.signup{text-align:center;margin-top:17px;color:var(--muted);font-size:10px}
+@media(max-width:360px){.card{padding:19px}.brand{font-size:29px;margin-bottom:22px}}
+</style>
+</head>
+<body>
+<main class="login-page">
+  <div class="login-box">
+    <div class="brand">Bantudulu</div>
+    <section class="card">
+      <h1>Masuk</h1>
+      <p class="intro">Masukkan akun Bantudulu Anda.</p>
+
+      <div class="field">
+        <label for="identity">Nomor HP atau Email</label>
+        <div class="input-wrap">
+          <input id="identity" autocomplete="username" placeholder="08xxxxxxxxxx atau email">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <input id="password" type="password" autocomplete="current-password" placeholder="Masukkan password">
+          <button class="toggle" id="togglePass" type="button">Lihat</button>
+        </div>
+      </div>
+
+      <div class="forgot-row"><a href="#">Lupa password?</a></div>
+      <button class="primary" type="button">Masuk</button>
+
+      <div class="divider">atau</div>
+      <button class="google" type="button"><span class="g">G</span>Masuk dengan Google</button>
+
+      <div class="signup">Belum punya akun? <a href="#">Daftar</a></div>
+    </section>
+  </div>
+</main>
+<script>
+const pass=document.getElementById('password');
+const toggle=document.getElementById('togglePass');
+toggle.addEventListener('click',()=>{
+  const hidden=pass.type==='password';
+  pass.type=hidden?'text':'password';
+  toggle.textContent=hidden?'Tutup':'Lihat';
+});
+</script>
+</body>
+</html>
