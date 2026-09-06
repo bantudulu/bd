@@ -14,11 +14,13 @@ from app.config import SECRET_KEY
 from app.database import init_db
 from app.auth import get_user_from_request
 from app.seed import seed_data
+from app.final_catalog import ensure_final_catalog
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
     await seed_data()
+    await ensure_final_catalog()
     yield
 
 app = FastAPI(title="BantuDulu", lifespan=lifespan)
@@ -33,8 +35,10 @@ async def add_user_context(request: Request, call_next):
     return response
 
 # Import routes AFTER app creation
-from app.routers import auth, customer, admin, api, api_pesanan
+from app.routers import final_pages, final_api, auth, customer, admin, api, api_pesanan
 
+app.include_router(final_pages.router)
+app.include_router(final_api.router)
 app.include_router(auth.router)
 app.include_router(customer.router)
 app.include_router(admin.router)

@@ -107,7 +107,7 @@ KATEGORI_IMAGES = {
     "belanja": "bg-belanja.png",
 }
 
-@router.get("/kategori/{slug}")
+@router.get("/kategori-lama/{slug}")
 async def kategori_page(request: Request, slug: str, db: AsyncSession = Depends(get_db)):
     user = require_auth(request)
     if not user:
