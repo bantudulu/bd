@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
+
+from app.config import PAYMENT_BANK_ENABLED, PAYMENT_QRIS_ENABLED
 from app.templates import render
 
 router = APIRouter(tags=["final-pages"])
@@ -25,7 +27,12 @@ async def layanan(request: Request):
 async def pesan_final(request: Request):
     if not user_required(request):
         return RedirectResponse("/masuk")
-    return render("customer/jadwal_pembayaran.html", user=request.state.user)
+    return render(
+        "customer/jadwal_pembayaran.html",
+        user=request.state.user,
+        payment_bank_enabled=PAYMENT_BANK_ENABLED,
+        payment_qris_enabled=PAYMENT_QRIS_ENABLED,
+    )
 
 
 @router.get("/loading")
@@ -60,8 +67,20 @@ async def kategori_final(request: Request, slug: str):
             section_title="Pilih jenis perbaikan",
             section_copy="Harga jasa dihitung per jam. Material atau onderdil tidak termasuk.",
             options=[
-                {"service":"Tukang","variant":"Kelistrikan","label":"Kelistrikan","description":"Perbaikan dan instalasi listrik, lampu, saklar, stop kontak, dan panel.","price":70000},
-                {"service":"Tukang","variant":"Perpipaan","label":"Perpipaan","description":"Perbaikan pipa, kran bocor, saluran mampet, toilet, dan instalasi air.","price":70000},
+                {
+                    "service": "Tukang",
+                    "variant": "Kelistrikan",
+                    "label": "Kelistrikan",
+                    "description": "Perbaikan dan instalasi listrik, lampu, saklar, stop kontak, dan panel.",
+                    "price": 70000,
+                },
+                {
+                    "service": "Tukang",
+                    "variant": "Perpipaan",
+                    "label": "Perpipaan",
+                    "description": "Perbaikan pipa, kran bocor, saluran mampet, toilet, dan instalasi air.",
+                    "price": 70000,
+                },
             ],
         )
 
@@ -76,8 +95,20 @@ async def kategori_final(request: Request, slug: str):
             section_title="Pilih layanan website",
             section_copy="Harga awal mengikuti paket. Kebutuhan tambahan dapat dibahas setelah pesanan dibuat.",
             options=[
-                {"service":"Website Biasa","variant":"Standar","label":"Website Biasa","description":"Landing page atau profil usaha sederhana, maksimal 5 halaman.","price":500000},
-                {"service":"Website Company","variant":"Mulai","label":"Website Company","description":"Website perusahaan profesional dengan beberapa halaman dan fitur bisnis.","price":1000000},
+                {
+                    "service": "Website Biasa",
+                    "variant": "Standar",
+                    "label": "Website Biasa",
+                    "description": "Landing page atau profil usaha sederhana, maksimal 5 halaman.",
+                    "price": 500000,
+                },
+                {
+                    "service": "Website Company",
+                    "variant": "Mulai",
+                    "label": "Website Company",
+                    "description": "Website perusahaan profesional dengan beberapa halaman dan fitur bisnis.",
+                    "price": 1000000,
+                },
             ],
         )
 

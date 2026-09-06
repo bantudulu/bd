@@ -37,6 +37,9 @@ body:after{width:220px;height:220px;bottom:-70px;left:-80px}
 .divider{display:flex;align-items:center;gap:10px;margin:17px 0;color:#9ba7ac;font-size:9px}.divider:before,.divider:after{content:"";height:1px;flex:1;background:#e8edef}.google{border:1px solid #dfe7ea;background:#fff;color:#3f4d53;display:flex;align-items:center;justify-content:center;gap:9px}.g{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#f5f7f8;color:#4285f4;font-size:12px;font-weight:800}.signup{text-align:center;margin-top:17px;color:var(--muted);font-size:10px}
 @media(max-width:360px){.card{padding:19px}.brand{font-size:29px;margin-bottom:22px}}
 </style>
+{% if google_client_id %}<script src="https://accounts.google.com/gsi/client" async defer></script>{% endif %}
+{% if turnstile_site_key %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}
+<!-- BD-AUTH-HARDENING -->
 </head>
 <body>
 <main class="login-page">
@@ -76,10 +79,12 @@ body:after{width:220px;height:220px;bottom:-70px;left:-80px}
         </div>
       </div>
 
+      <input id="website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;opacity:0">
+      {% if turnstile_site_key %}<div style="margin-top:14px;display:flex;justify-content:center"><div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div></div>{% endif %}
       <button class="primary" id="registerBtn" type="button">Daftar</button>
 
       <div class="divider">atau</div>
-      <button class="google" type="button"><span class="g">G</span>Daftar dengan Google</button>
+      {% if google_client_id %}<button class="google" id="googleBtn" type="button"><span class="g">G</span>Daftar dengan Google</button>{% else %}<button class="google" type="button" disabled title="Google Login belum dikonfigurasi"><span class="g">G</span>Daftar dengan Google</button>{% endif %}
 
       <div class="signup">Sudah punya akun? <a href="/masuk">Masuk</a></div>
     </section>
@@ -98,18 +103,27 @@ async function doRegister(){
   const password=document.getElementById('password').value;
   const confirm=document.getElementById('confirmPassword').value;
   if(!nama||!identity||!password){alert('Lengkapi data pendaftaran.');return;}
-  if(password.length<6){alert('Password minimal 6 karakter.');return;}
+  if(password.length<8){alert('Password minimal 8 karakter.');return;}
   if(password!==confirm){alert('Konfirmasi password tidak sama.');return;}
   registerBtn.disabled=true;registerBtn.textContent='Memproses...';
   try{
-    const r=await fetch('/api/final/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nama,identity,password})});
+    const r=await fetch('/api/final/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nama,identity,password,website:document.getElementById('website')?.value||'',turnstile_token:window.turnstile?turnstile.getResponse():''})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok) throw new Error(d.error||d.detail||'Pendaftaran gagal');
     location.href=d.redirect||'/beranda';
-  }catch(e){alert(e.message)}finally{registerBtn.disabled=false;registerBtn.textContent='Daftar';}
+  }catch(e){alert(e.message);if(window.turnstile)turnstile.reset()}finally{registerBtn.disabled=false;registerBtn.textContent='Daftar';}
 }
 registerBtn.addEventListener('click',doRegister);
-document.querySelector('.google')?.addEventListener('click',()=>alert('Daftar dengan Google belum diaktifkan.'));
+{% if google_client_id %}
+async function handleGoogleCredential(response){
+  try{
+    const r=await fetch('/api/final/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:response.credential,website:document.getElementById('website')?.value||'',turnstile_token:window.turnstile?turnstile.getResponse():''})});
+    const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||d.detail||'Daftar dengan Google gagal');location.href=d.redirect||'/beranda';
+  }catch(e){alert(e.message);if(window.turnstile)turnstile.reset();}
+}
+window.addEventListener('load',()=>{google.accounts.id.initialize({client_id:'{{ google_client_id }}',callback:handleGoogleCredential});});
+document.getElementById('googleBtn')?.addEventListener('click',()=>google.accounts.id.prompt());
+{% endif %}
 </script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 from app.database import async_session
 from app.models import Kategori, Layanan, LayananVarian, User, FormField
 from app.auth import hash_password
+from app.config import ENABLE_DEMO_SEED
 from sqlalchemy import select
 import json
 
@@ -290,6 +291,8 @@ CUSTOMER_DEFAULT = {
 }
 
 async def seed_data():
+    if not ENABLE_DEMO_SEED:
+        return
     async with async_session() as db:
         # Cek apakah sudah ada data
         result = await db.execute(select(Kategori).limit(1))

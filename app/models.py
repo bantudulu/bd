@@ -165,3 +165,81 @@ class Notifikasi(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
     pesanan: Mapped["Pesanan"] = relationship("Pesanan", back_populates="notifikasi")
+
+# ── Production marketplace extensions ──
+
+class ExternalIdentity(Base):
+    __tablename__ = "external_identities"
+
+    id: Mapped[str] = mapped_column(String(12), primary_key=True, default=gen_id)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    provider: Mapped[str] = mapped_column(String(30), index=True)
+    subject: Mapped[str] = mapped_column(String(255), index=True)
+    provider_subject: Mapped[str] = mapped_column(String(320), unique=True, index=True)
+    email: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class Mitra(Base):
+    __tablename__ = "mitra"
+
+    id: Mapped[str] = mapped_column(String(12), primary_key=True, default=gen_id)
+    nama: Mapped[str] = mapped_column(String(120))
+    no_hp: Mapped[str] = mapped_column(String(20), index=True)
+    email: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    status: Mapped[str] = mapped_column(String(30), default="tersedia", index=True)
+    aktif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    rating: Mapped[float] = mapped_column(Float, default=0)
+    total_jobs: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
+
+
+class MitraLayanan(Base):
+    __tablename__ = "mitra_layanan"
+
+    id: Mapped[str] = mapped_column(String(12), primary_key=True, default=gen_id)
+    key: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    mitra_id: Mapped[str] = mapped_column(ForeignKey("mitra.id"), index=True)
+    layanan_id: Mapped[str] = mapped_column(ForeignKey("layanan.id"), index=True)
+    aktif: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class PenugasanMitra(Base):
+    __tablename__ = "penugasan_mitra"
+
+    id: Mapped[str] = mapped_column(String(12), primary_key=True, default=gen_id)
+    pesanan_id: Mapped[str] = mapped_column(ForeignKey("pesanan.id"), index=True)
+    mitra_id: Mapped[str] = mapped_column(ForeignKey("mitra.id"), index=True)
+    assigned_by_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(30), default="ditugaskan", index=True)
+    aktif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    assigned_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class OrderStatusHistory(Base):
+    __tablename__ = "order_status_history"
+
+    id: Mapped[str] = mapped_column(String(12), primary_key=True, default=gen_id)
+    pesanan_id: Mapped[str] = mapped_column(ForeignKey("pesanan.id"), index=True)
+    status_from: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    status_to: Mapped[str] = mapped_column(String(30), index=True)
+    changed_by_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    catatan: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class PaymentTransaction(Base):
+    __tablename__ = "payment_transactions"
+
+    id: Mapped[str] = mapped_column(String(12), primary_key=True, default=gen_id)
+    pesanan_id: Mapped[str] = mapped_column(ForeignKey("pesanan.id"), index=True)
+    method: Mapped[str] = mapped_column(String(30), index=True)
+    status: Mapped[str] = mapped_column(String(30), default="pending", index=True)
+    amount: Mapped[int] = mapped_column(Integer)
+    provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    reference_id: Mapped[str | None] = mapped_column(String(120), nullable=True, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

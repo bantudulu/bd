@@ -275,6 +275,8 @@ async def pesanan_detail_page(request: Request, pesanan_id: str, db: AsyncSessio
         )
     )
     p = result.scalar_one_or_none()
+    if p and user.get("role") != "ADMIN" and p.user_id != user.get("id"):
+        p = None
 
     order = None
     if p:

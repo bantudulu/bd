@@ -42,6 +42,9 @@ body:after{width:220px;height:220px;bottom:-70px;left:-80px}
 .brand img{width:46px;height:46px;object-fit:contain;display:block;flex:0 0 auto}
 .brand span{display:block}
 </style>
+{% if google_client_id %}<script src="https://accounts.google.com/gsi/client" async defer></script>{% endif %}
+{% if turnstile_site_key %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}
+<!-- BD-AUTH-HARDENING -->
 </head>
 <body>
 <main class="login-page">
@@ -67,10 +70,12 @@ body:after{width:220px;height:220px;bottom:-70px;left:-80px}
       </div>
 
       <div class="forgot-row"><a href="#" onclick="alert('Fitur reset password segera tersedia.');return false">Lupa password?</a></div>
+      <input id="website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;opacity:0">
+      {% if turnstile_site_key %}<div style="margin-top:14px;display:flex;justify-content:center"><div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div></div>{% endif %}
       <button class="primary" id="loginBtn" type="button">Masuk</button>
 
       <div class="divider">atau</div>
-      <button class="google" type="button"><span class="g">G</span>Masuk dengan Google</button>
+      {% if google_client_id %}<button class="google" id="googleBtn" type="button"><span class="g">G</span>Masuk dengan Google</button>{% else %}<button class="google" type="button" disabled title="Google Login belum dikonfigurasi"><span class="g">G</span>Masuk dengan Google</button>{% endif %}
 
       <div class="signup">Belum punya akun? <a href="/daftar">Daftar</a></div>
     </section>
@@ -89,15 +94,24 @@ async function doLogin(){
   if(!id||!password){alert('Masukkan nomor HP/email dan password.');return;}
   loginBtn.disabled=true; loginBtn.textContent='Memproses...';
   try{
-    const r=await fetch('/api/final/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identity:id,password})});
+    const r=await fetch('/api/final/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identity:id,password,website:document.getElementById('website')?.value||'',turnstile_token:window.turnstile?turnstile.getResponse():''})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok) throw new Error(d.error||d.detail||'Login gagal');
     location.href=d.redirect||'/beranda';
-  }catch(e){alert(e.message)}finally{loginBtn.disabled=false;loginBtn.textContent='Masuk';}
+  }catch(e){alert(e.message);if(window.turnstile)turnstile.reset()}finally{loginBtn.disabled=false;loginBtn.textContent='Masuk';}
 }
 loginBtn.addEventListener('click',doLogin);
 [identity,pass].forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()}));
-document.querySelector('.google')?.addEventListener('click',()=>alert('Login Google belum diaktifkan.'));
+{% if google_client_id %}
+async function handleGoogleCredential(response){
+  try{
+    const r=await fetch('/api/final/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:response.credential,website:document.getElementById('website')?.value||'',turnstile_token:window.turnstile?turnstile.getResponse():''})});
+    const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||d.detail||'Login Google gagal');location.href=d.redirect||'/beranda';
+  }catch(e){alert(e.message);if(window.turnstile)turnstile.reset();}
+}
+window.addEventListener('load',()=>{google.accounts.id.initialize({client_id:'{{ google_client_id }}',callback:handleGoogleCredential});});
+document.getElementById('googleBtn')?.addEventListener('click',()=>google.accounts.id.prompt());
+{% endif %}
 </script>
 </body>
 </html>

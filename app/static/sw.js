@@ -1,9 +1,8 @@
-const CACHE_NAME = 'bantudulu-v1';
-const STATIC_CACHE = 'bantudulu-static-v1';
-const API_CACHE = 'bantudulu-api-v1';
+const CACHE_NAME = 'bantudulu-public-v2';
+const STATIC_CACHE = 'bantudulu-static-v2';
 
 const STATIC_ASSETS = [
-  '/static/manifest.json',
+  '/manifest.json',
   '/static/images/logo.png',
   '/static/images/pwa/icon-72x72.png',
   '/static/images/pwa/icon-96x96.png',
@@ -15,77 +14,70 @@ const STATIC_ASSETS = [
   '/static/images/pwa/icon-512x512.png',
 ];
 
-const APP_SHELL = [
-  '/masuk',
-  '/daftar',
-  '/beranda',
-  '/cari',
-  '/pesanan',
-  '/profil',
-];
+const PUBLIC_PAGES = ['/masuk', '/daftar', '/loading'];
 
-/* ── Install: cache app shell & static assets ── */
 self.addEventListener('install', (event) => {
   event.waitUntil(
     Promise.all([
-      caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)),
+      caches.open(CACHE_NAME).then((cache) => cache.addAll(PUBLIC_PAGES)),
       caches.open(STATIC_CACHE).then((cache) => cache.addAll(STATIC_ASSETS)),
     ])
   );
   self.skipWaiting();
 });
 
-/* ── Activate: clean old caches ── */
 self.addEventListener('activate', (event) => {
-  const validCaches = [CACHE_NAME, STATIC_CACHE, API_CACHE];
+  const validCaches = [CACHE_NAME, STATIC_CACHE];
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => !validCaches.includes(k)).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((key) => !validCaches.includes(key)).map((key) => caches.delete(key)))
     )
   );
   self.clients.claim();
 });
 
-/* ── Fetch: smart strategy ── */
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-
-  // Only handle same-origin requests
   if (url.origin !== self.location.origin) return;
 
   const path = url.pathname;
 
-  // ── API calls: Network First, fallback to cache ──
+  // Never cache API responses or authenticated/private data.
   if (path.startsWith('/api/')) {
-    event.respondWith(networkFirst(event.request, API_CACHE));
+    event.respondWith(fetch(event.request, { cache: 'no-store' }));
     return;
   }
 
-  // ── Static assets (images, css, fonts): Cache First ──
   if (path.startsWith('/static/') || path.match(/\.(png|jpg|jpeg|webp|svg|ico|css|js|woff2?)$/)) {
     event.respondWith(cacheFirst(event.request, STATIC_CACHE));
     return;
   }
 
-  // ── Page navigations: Network First, fallback to cache ──
   if (event.request.mode === 'navigate') {
-    event.respondWith(
-      networkFirst(event.request, CACHE_NAME).catch(() => {
-        // Ultimate fallback: serve login page
-        return caches.match('/masuk');
-      })
-    );
-    return;
+    if (PUBLIC_PAGES.includes(path)) {
+      event.respondWith(networkFirstPublic(event.request));
+    } else {
+      // Authenticated pages must always come from the network.
+      event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => caches.match('/masuk')));
+    }
   }
 });
 
-/* ── Cache Strategies ── */
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'CLEAR_PRIVATE_CACHES') {
+    event.waitUntil(
+      caches.keys().then((keys) =>
+        Promise.all(keys.filter((key) => key !== STATIC_CACHE && key !== CACHE_NAME).map((key) => caches.delete(key)))
+      )
+    );
+  }
+});
 
-async function networkFirst(request, cacheName) {
+async function networkFirstPublic(request) {
   try {
-    const response = await fetch(request);
+    const response = await fetch(request, { cache: 'no-store' });
     if (response.ok) {
-      const cache = await caches.open(cacheName);
+      const cache = await caches.open(CACHE_NAME);
       cache.put(request, response.clone());
     }
     return response;
@@ -108,7 +100,6 @@ async function cacheFirst(request, cacheName) {
     }
     return response;
   } catch (err) {
-    // Return a transparent pixel for images on fail
     if (request.destination === 'image') {
       return new Response(
         '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect fill="#eee" width="1" height="1"/></svg>',

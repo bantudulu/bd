@@ -1,64 +1,101 @@
 import json
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, Query, HTTPException, Request
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
+from app.auth import get_user_from_request
+from app.config import MARKETPLACE_SCHEMA_ENABLED
 from app.database import get_db
-from app.models import Kategori, Layanan, LayananVarian, Pesanan, FormField, User
+from app.models import (
+    FormField,
+    Kategori,
+    Layanan,
+    LayananVarian,
+    OrderStatusHistory,
+    Pesanan,
+    User,
+)
 
-router = APIRouter(prefix="/api", tags=["api"])
+router = APIRouter(prefix="/api", tags=["api-compat"])
 
-# ── Kategori ──
+
+async def require_user_api(request: Request, db: AsyncSession) -> User:
+    auth = get_user_from_request(request)
+    if not auth or not auth.get("id"):
+        raise HTTPException(401, "Silakan login terlebih dahulu")
+    user = await db.get(User, auth["id"])
+    if not user:
+        raise HTTPException(401, "Session tidak valid")
+    return user
+
+
+async def require_admin_api(request: Request, db: AsyncSession) -> User:
+    user = await require_user_api(request, db)
+    if user.role != "ADMIN":
+        raise HTTPException(status_code=403, detail="Akses ditolak. Hanya admin.")
+    return user
+
+
+# ── Public catalog read APIs ──
 
 @router.get("/kategori")
 async def get_kategori(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Kategori).order_by(Kategori.urutan))
-    kat = result.scalars().all()
-    return [{"id": k.id, "nama": k.nama, "icon": k.icon, "slug": k.slug, "warna": k.warna} for k in kat]
+    return [
+        {"id": k.id, "nama": k.nama, "icon": k.icon, "slug": k.slug, "warna": k.warna}
+        for k in result.scalars().all()
+    ]
 
-# ── Layanan ──
 
 @router.get("/layanan")
 async def get_layanan(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Layanan).where(Layanan.aktif == True))
-    layanan = result.scalars().all()
+    result = await db.execute(select(Layanan).where(Layanan.aktif == True))  # noqa: E712
     data = []
-    for l in layanan:
+    for layanan in result.scalars().all():
         varian_res = await db.execute(
-            select(LayananVarian.harga).where(LayananVarian.layanan_id == l.id).order_by(LayananVarian.harga).limit(1)
+            select(LayananVarian.harga)
+            .where(LayananVarian.layanan_id == layanan.id)
+            .order_by(LayananVarian.harga)
+            .limit(1)
         )
-        min_price = varian_res.scalar() or 0
-        data.append({
-            "id": l.id,
-            "kategori_id": l.kategori_id,
-            "nama": l.nama,
-            "deskripsi": l.deskripsi,
-            "jenis_layanan": l.jenis_layanan,
-            "tipe_hitung": l.tipe_hitung,
-            "gambar_url": l.gambar_url,
-            "harga_min": min_price,
-        })
+        data.append(
+            {
+                "id": layanan.id,
+                "kategori_id": layanan.kategori_id,
+                "nama": layanan.nama,
+                "deskripsi": layanan.deskripsi,
+                "jenis_layanan": layanan.jenis_layanan,
+                "tipe_hitung": layanan.tipe_hitung,
+                "gambar_url": layanan.gambar_url,
+                "harga_min": varian_res.scalar() or 0,
+            }
+        )
     return data
+
 
 @router.get("/layanan/{layanan_id}")
 async def get_layanan_detail(layanan_id: str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Layanan).where(Layanan.id == layanan_id))
-    layanan = result.scalar_one_or_none()
+    layanan = (
+        await db.execute(select(Layanan).where(Layanan.id == layanan_id))
+    ).scalar_one_or_none()
     if not layanan:
         raise HTTPException(404, "Layanan tidak ditemukan")
 
-    # Get varian
-    varian_result = await db.execute(select(LayananVarian).where(LayananVarian.layanan_id == layanan_id))
-    varian = varian_result.scalars().all()
-
-    # Get form fields
-    fields_result = await db.execute(select(FormField).where(FormField.layanan_id == layanan_id).order_by(FormField.urutan))
-    fields = fields_result.scalars().all()
-
-    # Get kategori
-    kat_result = await db.execute(select(Kategori).where(Kategori.id == layanan.kategori_id))
-    kat = kat_result.scalar_one()
+    varian = (
+        await db.execute(select(LayananVarian).where(LayananVarian.layanan_id == layanan_id))
+    ).scalars().all()
+    fields = (
+        await db.execute(
+            select(FormField)
+            .where(FormField.layanan_id == layanan_id)
+            .order_by(FormField.urutan)
+        )
+    ).scalars().all()
+    kategori = (
+        await db.execute(select(Kategori).where(Kategori.id == layanan.kategori_id))
+    ).scalar_one()
 
     return {
         "layanan": {
@@ -68,120 +105,149 @@ async def get_layanan_detail(layanan_id: str, db: AsyncSession = Depends(get_db)
             "catatan": layanan.catatan,
             "jenis_layanan": layanan.jenis_layanan,
             "tipe_hitung": layanan.tipe_hitung,
-            "kategori": {"nama": kat.nama, "icon": kat.icon, "warna": kat.warna},
+            "kategori": {
+                "nama": kategori.nama,
+                "icon": kategori.icon,
+                "warna": kategori.warna,
+            },
         },
-        "varian": [{"id": v.id, "nama": v.nama, "harga": v.harga, "deskripsi": v.deskripsi} for v in varian],
-        "form_fields": [{
-            "id": f.id, "label": f.label, "field_type": f.field_type,
-            "options": json.loads(f.options) if f.options else [], "required": f.required,
-            "harga_tambahan": f.harga_tambahan
-        } for f in fields],
+        "varian": [
+            {"id": v.id, "nama": v.nama, "harga": v.harga, "deskripsi": v.deskripsi}
+            for v in varian
+        ],
+        "form_fields": [
+            {
+                "id": f.id,
+                "label": f.label,
+                "field_type": f.field_type,
+                "options": json.loads(f.options) if f.options else [],
+                "required": f.required,
+                "harga_tambahan": f.harga_tambahan,
+            }
+            for f in fields
+        ],
     }
 
-# ── Pesanan ──
+
+# ── Compatibility order reads: authenticated and ownership-scoped ──
 
 @router.get("/pesanan")
-async def get_pesanan(user_id: str = Query(None), status: str = Query(None), db: AsyncSession = Depends(get_db)):
+async def get_pesanan(
+    request: Request,
+    user_id: str = Query(None),
+    status: str = Query(None),
+    db: AsyncSession = Depends(get_db),
+):
+    current = await require_user_api(request, db)
     stmt = select(Pesanan)
-    if user_id:
-        stmt = stmt.where(Pesanan.user_id == user_id)
+
+    if current.role == "ADMIN":
+        if user_id:
+            stmt = stmt.where(Pesanan.user_id == user_id)
+    else:
+        stmt = stmt.where(Pesanan.user_id == current.id)
+
     if status:
         stmt = stmt.where(Pesanan.status == status)
+
     stmt = stmt.order_by(Pesanan.created_at.desc())
-    result = await db.execute(stmt)
-    pesanan = result.scalars().all()
+    pesanan = (await db.execute(stmt)).scalars().all()
+
     data = []
     for p in pesanan:
-        l = await db.get(Layanan, p.layanan_id)
-        v = await db.get(LayananVarian, p.varian_id)
-        u = await db.get(User, p.user_id)
-        data.append({
-            "id": p.id,
-            "kode": p.kode,
-            "status": p.status,
-            "alamat": p.alamat,
-            "tanggal": p.jadwal,
-            "jadwal": p.jadwal,
-            "jam": p.jam,
-            "durasi": p.durasi,
-            "total_harga": p.total_harga,
-            "harga": p.total_harga,
-            "catatan": p.catatan,
-            "form_data": p.form_data,
-            "no_wa": u.no_hp if u else None,
-            "wa_kontak": u.no_hp if u else None,
-            "layanan_nama": l.nama if l else None,
-            "varian_nama": v.nama if v else None,
-            "created_at": p.created_at.isoformat(),
-        })
+        layanan = await db.get(Layanan, p.layanan_id)
+        varian = await db.get(LayananVarian, p.varian_id)
+        owner = await db.get(User, p.user_id)
+        data.append(
+            {
+                "id": p.id,
+                "kode": p.kode,
+                "status": p.status,
+                "alamat": p.alamat,
+                "tanggal": p.jadwal,
+                "jadwal": p.jadwal,
+                "jam": p.jam,
+                "durasi": p.durasi,
+                "total_harga": p.total_harga,
+                "harga": p.total_harga,
+                "catatan": p.catatan,
+                "form_data": p.form_data,
+                "no_wa": owner.no_hp if owner else None,
+                "wa_kontak": owner.no_hp if owner else None,
+                "layanan_nama": layanan.nama if layanan else None,
+                "varian_nama": varian.nama if varian else None,
+                "created_at": p.created_at.isoformat(),
+            }
+        )
     return data
+
 
 @router.get("/pesanan/aktif")
 async def get_pesanan_aktif(request: Request, db: AsyncSession = Depends(get_db)):
-    from app.auth import get_user_from_request
-    user = get_user_from_request(request)
-    if not user:
-        return []
-    user_id = user.get("id")
-    if not user_id:
-        return []
-
+    current = await require_user_api(request, db)
     active_statuses = ["menunggu", "diproses", "ditugaskan", "menuju_lokasi", "dimulai"]
     stmt = (
         select(Pesanan)
-        .where(Pesanan.user_id == user_id)
+        .where(Pesanan.user_id == current.id)
         .where(Pesanan.status.in_(active_statuses))
         .order_by(Pesanan.created_at.desc())
         .limit(5)
     )
-    result = await db.execute(stmt)
-    pesanan = result.scalars().all()
+    pesanan = (await db.execute(stmt)).scalars().all()
     data = []
     for p in pesanan:
-        l = await db.get(Layanan, p.layanan_id)
-        data.append({
-            "id": p.id,
-            "kode": p.kode,
-            "status": p.status,
-            "alamat": p.alamat,
-            "total_harga": p.total_harga,
-            "layanan_nama": l.nama if l else "Pesanan",
-            "created_at": p.created_at.isoformat(),
-        })
+        layanan = await db.get(Layanan, p.layanan_id)
+        data.append(
+            {
+                "id": p.id,
+                "kode": p.kode,
+                "status": p.status,
+                "alamat": p.alamat,
+                "total_harga": p.total_harga,
+                "layanan_nama": layanan.nama if layanan else "Pesanan",
+                "created_at": p.created_at.isoformat(),
+            }
+        )
     return {"data": data}
 
-@router.get("/pesanan/{pesanan_id}")
-async def get_pesanan_detail(pesanan_id: str, db: AsyncSession = Depends(get_db)):
-    import logging
-    logging.getLogger('bantudulu').info(f'get_pesanan_detail called with: {pesanan_id}')
-    # Cari berdasarkan ID atau Kode
-    result = await db.execute(
-        select(Pesanan).where(
-            (Pesanan.id == pesanan_id) | (Pesanan.kode == pesanan_id)
-        )
-    )
-    p = result.scalar_one_or_none()
-    if not p:
-        raise HTTPException(404, f"Pesanan tidak ditemukan (id/kode: {pesanan_id})")
-    l = await db.get(Layanan, p.layanan_id)
-    v = await db.get(LayananVarian, p.varian_id)
-    u = await db.get(User, p.user_id)
 
-    # ── Parse form_data jika ada ──
+@router.get("/pesanan/{pesanan_id}")
+async def get_pesanan_detail(
+    request: Request,
+    pesanan_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    current = await require_user_api(request, db)
+    p = (
+        await db.execute(
+            select(Pesanan).where(
+                or_(Pesanan.id == pesanan_id, Pesanan.kode == pesanan_id)
+            )
+        )
+    ).scalar_one_or_none()
+
+    if not p:
+        raise HTTPException(404, "Pesanan tidak ditemukan")
+    if current.role != "ADMIN" and p.user_id != current.id:
+        raise HTTPException(404, "Pesanan tidak ditemukan")
+
+    layanan = await db.get(Layanan, p.layanan_id)
+    varian = await db.get(LayananVarian, p.varian_id)
+    owner = await db.get(User, p.user_id)
+
     form_data_obj = {}
     if p.form_data:
         try:
             form_data_obj = json.loads(p.form_data) if isinstance(p.form_data, str) else p.form_data
         except (json.JSONDecodeError, TypeError):
             form_data_obj = {}
-    metode_pembayaran = form_data_obj.get("metode_pembayaran") or "cod"
 
     return {
         "id": p.id,
         "kode": p.kode,
         "status": p.status,
         "alamat": p.alamat,
-        "tanggal": p.jadwal,  # alias untuk frontend
+        "tanggal": p.jadwal,
         "jadwal": p.jadwal,
         "jam": p.jam,
         "durasi": p.durasi,
@@ -189,66 +255,65 @@ async def get_pesanan_detail(pesanan_id: str, db: AsyncSession = Depends(get_db)
         "harga": p.total_harga,
         "catatan": p.catatan,
         "form_data": p.form_data,
-        "metode_pembayaran": metode_pembayaran,
+        "metode_pembayaran": form_data_obj.get("metode_pembayaran") or "cod",
         "created_at": p.created_at.isoformat(),
-        "layanan_nama": l.nama if l else None,
-        "varian_nama": v.nama if v else None,
-        "pelanggan_nama": u.nama if u else None,
-        "no_wa": u.no_hp if u else None,
-        "wa_kontak": u.no_hp if u else None,
+        "layanan_nama": layanan.nama if layanan else None,
+        "varian_nama": varian.nama if varian else None,
+        "pelanggan_nama": owner.nama if owner else None,
+        "no_wa": owner.no_hp if owner else None,
+        "wa_kontak": owner.no_hp if owner else None,
     }
 
-# ── Admin API auth helper ──
-def require_admin_api(request: Request):
-    user = request.state.user
-    if not user or user.get("role") != "ADMIN":
-        raise HTTPException(status_code=403, detail="Akses ditolak. Hanya admin.")
-    return user
+
+# ── Admin APIs ──
 
 @router.get("/admin/pesanan")
-async def get_all_pesanan(request: Request, status: str = Query(None), db: AsyncSession = Depends(get_db)):
-    require_admin_api(request)
+async def get_all_pesanan(
+    request: Request,
+    status: str = Query(None),
+    db: AsyncSession = Depends(get_db),
+):
+    await require_admin_api(request, db)
     stmt = select(Pesanan)
     if status:
         stmt = stmt.where(Pesanan.status == status)
     stmt = stmt.order_by(Pesanan.created_at.desc())
-    result = await db.execute(stmt)
-    pesanan = result.scalars().all()
+
     data = []
-    for p in pesanan:
-        u = await db.get(User, p.user_id)
-        l = await db.get(Layanan, p.layanan_id)
-        data.append({
-            "id": p.id,
-            "kode": p.kode,
-            "status": p.status,
-            "pelanggan": u.nama if u else "Unknown",
-            "layanan": l.nama if l else "Unknown",
-            "total_harga": p.total_harga,
-            "jadwal": p.jadwal,
-            "created_at": p.created_at.isoformat(),
-            "form_data": p.form_data,
-        })
+    for p in (await db.execute(stmt)).scalars().all():
+        owner = await db.get(User, p.user_id)
+        layanan = await db.get(Layanan, p.layanan_id)
+        data.append(
+            {
+                "id": p.id,
+                "kode": p.kode,
+                "status": p.status,
+                "pelanggan": owner.nama if owner else "Unknown",
+                "layanan": layanan.nama if layanan else "Unknown",
+                "total_harga": p.total_harga,
+                "jadwal": p.jadwal,
+                "created_at": p.created_at.isoformat(),
+                "form_data": p.form_data,
+            }
+        )
     return data
 
-# ── Kelola Pesanan (unresolved orders with rich data) ──
 
 @router.get("/admin/kelola-pesanan")
 async def get_kelola_pesanan(request: Request, db: AsyncSession = Depends(get_db)):
-    require_admin_api(request)
+    await require_admin_api(request, db)
     unresolved = {"menunggu", "diproses", "ditugaskan", "menuju_lokasi", "dimulai"}
     stmt = (
         select(Pesanan)
         .where(Pesanan.status.in_(unresolved))
         .order_by(Pesanan.created_at.desc())
     )
-    result = await db.execute(stmt)
-    pesanan_list = result.scalars().all()
+
     data = []
-    for p in pesanan_list:
-        u = await db.get(User, p.user_id)
-        l = await db.get(Layanan, p.layanan_id)
-        v = await db.get(LayananVarian, p.varian_id)
+    for p in (await db.execute(stmt)).scalars().all():
+        owner = await db.get(User, p.user_id)
+        layanan = await db.get(Layanan, p.layanan_id)
+        varian = await db.get(LayananVarian, p.varian_id)
 
         form_data_obj = {}
         if p.form_data:
@@ -257,73 +322,101 @@ async def get_kelola_pesanan(request: Request, db: AsyncSession = Depends(get_db
             except (json.JSONDecodeError, TypeError):
                 form_data_obj = {}
 
-        metode_bayar = form_data_obj.get("metode_pembayaran") or "cod"
-
-        # Filter form fields: exclude metode_pembayaran
-        form_display = {k: v for k, v in form_data_obj.items() if k != "metode_pembayaran"}
-
-        data.append({
-            "id": p.id,
-            "kode": p.kode,
-            "status": p.status,
-            "pelanggan_nama": u.nama if u else "Unknown",
-            "pelanggan_wa": u.no_hp if u else None,
-            "alamat": p.alamat,
-            "catatan": p.catatan,
-            "jadwal": p.jadwal,
-            "jam": p.jam,
-            "durasi": p.durasi,
-            "layanan_nama": l.nama if l else None,
-            "varian_nama": v.nama if v else None,
-            "total_harga": p.total_harga,
-            "metode_pembayaran": metode_bayar,
-            "form_data": form_display if form_display else None,
-            "created_at": p.created_at.isoformat(),
-        })
+        data.append(
+            {
+                "id": p.id,
+                "kode": p.kode,
+                "status": p.status,
+                "pelanggan_nama": owner.nama if owner else "Unknown",
+                "pelanggan_wa": owner.no_hp if owner else None,
+                "alamat": p.alamat,
+                "catatan": p.catatan,
+                "jadwal": p.jadwal,
+                "jam": p.jam,
+                "durasi": p.durasi,
+                "layanan_nama": layanan.nama if layanan else None,
+                "varian_nama": varian.nama if varian else None,
+                "total_harga": p.total_harga,
+                "metode_pembayaran": form_data_obj.get("metode_pembayaran") or "cod",
+                "form_data": {
+                    k: v for k, v in form_data_obj.items() if k != "metode_pembayaran"
+                } or None,
+                "created_at": p.created_at.isoformat(),
+            }
+        )
     return data
 
-# ── Dashboard stats ──
 
 @router.put("/admin/pesanan/{pesanan_id}/status")
-async def update_pesanan_status(request: Request, pesanan_id: str, body: dict, db: AsyncSession = Depends(get_db)):
-    require_admin_api(request)
-    status_baru = body.get("status", "").lower().strip()
-    valid_status = {"menunggu", "diproses", "ditugaskan", "menuju_lokasi", "dimulai", "selesai", "dibatalkan"}
+async def update_pesanan_status(
+    request: Request,
+    pesanan_id: str,
+    body: dict,
+    db: AsyncSession = Depends(get_db),
+):
+    admin = await require_admin_api(request, db)
+    status_baru = str(body.get("status") or "").lower().strip()
+    valid_status = {
+        "menunggu",
+        "diproses",
+        "ditugaskan",
+        "menuju_lokasi",
+        "dimulai",
+        "selesai",
+        "dibatalkan",
+    }
     if status_baru not in valid_status:
-        raise HTTPException(400, f"Status tidak valid. Pilihan: {', '.join(sorted(valid_status))}")
+        raise HTTPException(400, "Status tidak valid")
 
-    result = await db.execute(select(Pesanan).where(
-        (Pesanan.id == pesanan_id) | (Pesanan.kode == pesanan_id)
-    ))
-    pesanan = result.scalar_one_or_none()
+    pesanan = (
+        await db.execute(
+            select(Pesanan).where(
+                or_(Pesanan.id == pesanan_id, Pesanan.kode == pesanan_id)
+            )
+        )
+    ).scalar_one_or_none()
     if not pesanan:
         raise HTTPException(404, "Pesanan tidak ditemukan")
 
+    old_status = pesanan.status
     pesanan.status = status_baru
+
+    if MARKETPLACE_SCHEMA_ENABLED:
+        db.add(
+            OrderStatusHistory(
+                pesanan_id=pesanan.id,
+                status_from=old_status,
+                status_to=status_baru,
+                changed_by_user_id=admin.id,
+                catatan="Status diperbarui admin",
+            )
+        )
+
     await db.commit()
     await db.refresh(pesanan)
-
     return {"success": True, "kode": pesanan.kode, "status": pesanan.status}
+
 
 @router.get("/admin/stats")
 async def get_admin_stats(request: Request, db: AsyncSession = Depends(get_db)):
-    require_admin_api(request)
+    await require_admin_api(request, db)
+
     users = await db.execute(select(User))
     total_customer = sum(1 for u in users.scalars().all() if u.role == "CUSTOMER")
 
-    pesanan_result = await db.execute(select(Pesanan))
-    all_pesanan = pesanan_result.scalars().all()
-    total_order = len(all_pesanan)
-    today_order = sum(1 for p in all_pesanan if p.created_at.date() == datetime.now(timezone.utc).date())
-    pending = sum(1 for p in all_pesanan if p.status == "menunggu")
+    all_pesanan = (await db.execute(select(Pesanan))).scalars().all()
+    today_utc = datetime.now(timezone.utc).date()
 
-    layanan_result = await db.execute(select(Layanan).where(Layanan.aktif == True))
-    total_layanan = len(layanan_result.scalars().all())
+    total_layanan = len(
+        (
+            await db.execute(select(Layanan).where(Layanan.aktif == True))  # noqa: E712
+        ).scalars().all()
+    )
 
     return {
         "total_customer": total_customer,
-        "total_order": total_order,
-        "today_order": today_order,
-        "pending_order": pending,
+        "total_order": len(all_pesanan),
+        "today_order": sum(1 for p in all_pesanan if p.created_at.date() == today_utc),
+        "pending_order": sum(1 for p in all_pesanan if p.status == "menunggu"),
         "total_layanan": total_layanan,
     }

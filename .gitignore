@@ -4,11 +4,32 @@ __pycache__/
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
 
 # Virtual environments
-.venv
+.venv/
+venv/
 
-# Environment files
+# Environment files / secrets
 .env
-.env.*.local
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local databases / runtime data
+*.db
+*.sqlite
+*.sqlite3
+
+# Local generated security material
+.bantudulu-secrets/
+production-env-*.txt
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

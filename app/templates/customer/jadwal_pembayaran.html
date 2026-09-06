@@ -119,13 +119,13 @@ button,textarea{font:inherit}button{cursor:pointer}svg{display:block}.icon{fill:
         <span class="pay-icon"><svg viewBox="0 0 24 24" class="icon"><path d="M4 7h16v11H4z"/><path d="M7 7V5h10v2M8 13h8M12 10v6"/></svg></span>
         <span class="pay-copy"><span class="pay-topline"><b>COD</b><span class="pay-badge">Bayar nanti</span></span><span class="desc">Bayar setelah pekerjaan selesai.</span></span><span class="radio"></span>
       </button>
-      <button class="payment touch" data-pay="bank">
+      <button class="payment touch{% if not payment_bank_enabled %} disabled{% endif %}" data-pay="bank" {% if not payment_bank_enabled %}disabled aria-disabled="true"{% endif %}>
         <span class="pay-icon"><svg viewBox="0 0 24 24" class="icon"><path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M3 18h18M12 3l9 5H3z"/></svg></span>
-        <span class="pay-copy"><span class="pay-topline"><b>Transfer Bank</b><span class="pay-badge">Manual</span></span><span class="desc">Transfer ke rekening resmi BantuDulu.</span></span><span class="radio"></span>
+        <span class="pay-copy"><span class="pay-topline"><b>Transfer Bank</b><span class="pay-badge">{% if payment_bank_enabled %}Manual{% else %}Segera{% endif %}</span></span><span class="desc">Transfer ke rekening resmi BantuDulu.</span></span><span class="radio"></span>
       </button>
-      <button class="payment touch" data-pay="qris">
+      <button class="payment touch{% if not payment_qris_enabled %} disabled{% endif %}" data-pay="qris" {% if not payment_qris_enabled %}disabled aria-disabled="true"{% endif %}>
         <span class="pay-icon"><svg viewBox="0 0 24 24" class="icon"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M14 14h2v2h-2zM18 14h2v6h-6v-2M14 18h2"/></svg></span>
-        <span class="pay-copy"><span class="pay-topline"><b>QRIS</b><span class="pay-badge">Instan</span></span><span class="desc">Scan dengan mobile banking atau e-wallet.</span></span><span class="radio"></span>
+        <span class="pay-copy"><span class="pay-topline"><b>QRIS</b><span class="pay-badge">{% if payment_qris_enabled %}Instan{% else %}Segera{% endif %}</span></span><span class="desc">Scan dengan mobile banking atau e-wallet.</span></span><span class="radio"></span>
       </button>
     </div>
     <div class="pay-detail show" id="codDetail"><svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg><span><b>COD:</b> pembayaran dilakukan setelah pekerjaan selesai dan Anda bisa memastikan layanan sudah diterima.</span></div>
@@ -188,9 +188,10 @@ function isoDate(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,
 function updateSchedule(){const txt=`${fmt(selectedDate)} · ${selectedTime}`;$('bigSchedule').textContent=txt;$('orderSchedule').textContent=txt} updateSchedule();
 document.querySelectorAll('.payment').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.payment').forEach(x=>x.classList.remove('active'));btn.classList.add('active');payment=btn.dataset.pay;document.querySelectorAll('.pay-detail').forEach(x=>x.classList.remove('show'));$(payment+'Detail').classList.add('show');$('orderPayment').textContent=payment==='cod'?'COD':payment==='bank'?'Transfer Bank':'QRIS'});
 async function loadMe(){try{const r=await fetch('/api/final/me');if(r.ok){const me=await r.json();address=me.address?.alamat_lengkap||'';$('locationText').textContent=address||'Belum ada lokasi utama — klik Ubah';}}catch(e){$('locationText').textContent='Klik Ubah untuk mengisi alamat';}} loadMe();
-$('changeAddress').onclick=()=>{const next=prompt('Masukkan alamat layanan / titik jemput:',address||'');if(next!==null&&next.trim()){address=next.trim();$('locationText').textContent=address;}};
+async function persistAddress(){if(!address)return;try{await fetch('/api/final/me/address',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({label:'Rumah',alamat_lengkap:address})});}catch(e){console.warn('Alamat belum tersimpan',e);}}
+$('changeAddress').onclick=()=>{const next=prompt('Masukkan alamat layanan / titik jemput:',address||'');if(next!==null&&next.trim()){address=next.trim();$('locationText').textContent=address;persistAddress();}};
 $('submitOrder').onclick=async()=>{
-  if(!address){const next=prompt('Masukkan alamat layanan / titik jemput:','');if(!next||!next.trim())return;address=next.trim();$('locationText').textContent=address;}
+  if(!address){const next=prompt('Masukkan alamat layanan / titik jemput:','');if(!next||!next.trim())return;address=next.trim();$('locationText').textContent=address;persistAddress();}
   const btn=$('submitOrder');btn.disabled=true;const old=btn.innerHTML;btn.textContent='Membuat pesanan...';
   try{
     const body={service_name:serviceName,variant_name:variantName,price_hint:price,duration,address,jadwal:isoDate(selectedDate),jam:selectedTime,metode_pembayaran:payment,catatan:document.querySelector('.note')?.value.trim()||extras.note||'',extras};
