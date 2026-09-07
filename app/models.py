@@ -11,7 +11,9 @@ def gen_id():
     return uuid.uuid4().hex[:12]
 
 def utcnow():
-    return datetime.now(timezone.utc)
+    # PostgreSQL schema uses TIMESTAMP WITHOUT TIME ZONE. Keep UTC semantics
+    # while returning a naive datetime so asyncpg can bind it safely.
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 # ── Enums ──
 

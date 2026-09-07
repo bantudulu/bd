@@ -48,6 +48,11 @@ def _phone(value: str | None) -> str:
     return re.sub(r"\D", "", value or "")
 
 
+def _utcnow_db() -> datetime:
+    """UTC-naive datetime matching production TIMESTAMP WITHOUT TIME ZONE."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 def _public_status(status: str | None) -> dict:
     status = _norm(status)
     if status in {"menunggu", "diproses", "ditugaskan"}:
@@ -820,7 +825,7 @@ async def admin_partner_accept(
     if not assignment:
         raise HTTPException(409, "Belum ada mitra aktif untuk pesanan ini")
     assignment.status = "diterima"
-    assignment.accepted_at = datetime.now(timezone.utc)
+    assignment.accepted_at = _utcnow_db()
     await _history(
         db,
         order,
@@ -958,7 +963,7 @@ async def admin_complete_order(
 
     method = _payment_method(order)
     payment = await _latest_payment(db, order.id)
-    now = datetime.now(timezone.utc)
+    now = _utcnow_db()
     if not payment:
         payment = PaymentTransaction(
             pesanan_id=order.id,
