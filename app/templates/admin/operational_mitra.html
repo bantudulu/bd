@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>BantuDulu — Mitra</title>
+<title>BantuDulu â€” Mitra</title>
 <link rel="icon" type="image/svg+xml" href="/static/bd-favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -82,9 +82,10 @@ svg{display:block}
 .modal{position:fixed;inset:0;background:rgba(10,30,36,.48);display:none;align-items:center;justify-content:center;padding:24px;z-index:80}
 .modal.show{display:flex}
 .modal-card{width:min(760px,100%);max-height:min(88vh,780px);background:#fff;border-radius:22px;border:1px solid var(--line);box-shadow:0 30px 90px rgba(0,0,0,.24);overflow:hidden;display:flex;flex-direction:column}
-.modal-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+#partnerForm{display:flex;flex-direction:column;min-height:0;flex:1}
+.modal-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex:0 0 auto}
 .modal-head h3{margin:0;font-size:16px}.modal-head p{margin:5px 0 0;color:var(--muted);font-size:10px;line-height:1.5}
-.modal-body{padding:18px 20px;overflow:auto}
+.modal-body{padding:18px 20px;overflow:auto;min-height:0;flex:1}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
 .field{display:grid;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:10px;font-weight:750;color:#56656d}
 .field input{width:100%;height:44px;border:1px solid var(--line);background:#fff;border-radius:13px;padding:0 12px;font-size:12px;outline:0;color:var(--ink)}
@@ -96,7 +97,7 @@ svg{display:block}
 .svc-text{min-width:0}.svc-text b{display:block;font-size:10.5px;line-height:1.35}.svc-text span{display:block;font-size:8.5px;color:var(--muted);margin-top:3px}
 .form-error{display:none;padding:11px 12px;border-radius:12px;background:var(--red-bg);border:1px solid #f0d1d1;color:var(--red);font-size:10.5px;line-height:1.45;margin-bottom:13px}
 .form-error.show{display:block}
-.modal-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:9px;background:#fbfcfd}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:9px;background:#fbfcfd;flex:0 0 auto}
 .toast{position:fixed;right:20px;bottom:20px;background:#163f4c;color:#fff;padding:12px 15px;border-radius:13px;font-size:10.5px;font-weight:700;opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s;z-index:120;box-shadow:0 12px 30px rgba(0,0,0,.18)}
 .toast.show{opacity:1;transform:none}
 .mobile-menu{display:none}
@@ -198,7 +199,7 @@ svg{display:block}
 <div class="toast" id="toast"></div>
 
 <script>
-const state={partners:[],catalog:[],query:''};
+const state={partners:[],catalog:[],catalogReady:false,catalogError:'',query:''};
 const $=id=>document.getElementById(id);
 const partnerGrid=$('partnerGrid'),pageError=$('pageError'),modal=$('modal'),partnerForm=$('partnerForm');
 const namaInput=$('namaInput'),hpInput=$('hpInput'),emailInput=$('emailInput'),serviceGrid=$('serviceGrid');
@@ -269,7 +270,7 @@ function renderPartners(){
     const head=node('div','partner-head');
     const av=node('div','partner-avatar',initials(p.nama));
     const grow=node('div','grow');
-    grow.append(node('b','',p.nama),node('span','',p.no_hp+(p.email?' · '+p.email:'')));
+    grow.append(node('b','',p.nama),node('span','',p.no_hp+(p.email?' Â· '+p.email:'')));
     const badge=node('span','badge '+(!p.aktif?'off':p.sedang_bertugas?'busy':'ok'),!p.aktif?'Nonaktif':p.sedang_bertugas?'Sedang Bertugas':'Aktif');
     head.append(av,grow,badge);card.append(head);
 
@@ -294,6 +295,17 @@ function renderPartners(){
 
 function renderServices(){
   serviceGrid.replaceChildren();
+  if(!state.catalogReady){
+    saveBtn.disabled=true;
+    saveBtn.textContent='Memuat layanan...';
+    const message=state.catalogError
+      ? 'Layanan belum dapat dimuat. Tutup form lalu refresh halaman.'
+      : 'Memuat daftar layanan...';
+    serviceGrid.append(node('div','empty',message));
+    return;
+  }
+  saveBtn.disabled=false;
+  saveBtn.textContent='Simpan Mitra';
   const list=activeCatalog();
   if(!list.length){
     const e=node('div','empty','Tidak ada layanan aktif yang dapat dipilih.');
@@ -309,6 +321,9 @@ function renderServices(){
 
 async function load(){
   showPageError('');
+  state.catalogReady=false;
+  state.catalogError='';
+  renderServices();
   try{
     const [partners,catalog]=await Promise.all([
       api('/api/ops/admin/partners'),
@@ -316,8 +331,13 @@ async function load(){
     ]);
     state.partners=Array.isArray(partners)?partners:[];
     state.catalog=Array.isArray(catalog)?catalog:[];
+    state.catalogReady=true;
+    state.catalogError='';
     renderServices();renderPartners();
   }catch(err){
+    state.catalogReady=false;
+    state.catalogError=err.message;
+    renderServices();
     showPageError(err.message);
     partnerGrid.replaceChildren();
     partnerGrid.append(node('div','empty','Data mitra belum dapat dimuat.'));
