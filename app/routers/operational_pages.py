@@ -77,3 +77,9 @@ async def admin_catalog_page(request: Request):
     if not _admin(request):
         return RedirectResponse("/masuk")
     return render("admin/operational_layanan.html", user=request.state.user)
+
+@router.get("/admin/readiness")
+async def admin_readiness_page(request: Request):
+    if not _admin(request):
+        return RedirectResponse("/masuk")
+    return render("admin/readiness.html", user=request.state.user)

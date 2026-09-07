@@ -126,10 +126,12 @@ from app.routers import (
     final_pages,
     operational,
     operational_pages,
+    readiness,
 )
 
 app.include_router(operational_pages.router)
 app.include_router(operational.router)
+app.include_router(readiness.router)
 app.include_router(final_pages.router)
 app.include_router(final_api.router)
 app.include_router(auth.router)

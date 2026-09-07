@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BantuDulu — Readiness</title>
+<link rel="icon" type="image/svg+xml" href="/static/bd-favicon.svg">
+<style>
+:root{--brand:#28758b;--deep:#194f60;--ink:#111827;--muted:#6b7280;--line:#e3eaed;--bg:#f4f7f8;--soft:#edf5f7;--green:#23765c;--greenbg:#edf8f3;--red:#a54b4b;--redbg:#fff1f1}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}
+.app{display:grid;grid-template-columns:238px 1fr;min-height:100vh}.side{background:linear-gradient(180deg,#245f70,#194f60);color:#fff;padding:22px 16px}.brand{font-weight:800;font-size:20px;padding:0 8px 24px}.nav{display:grid;gap:7px}.nav a{padding:11px 12px;border-radius:12px;color:rgba(255,255,255,.76);font-size:12px;font-weight:700}.nav a.active,.nav a:hover{background:rgba(255,255,255,.13);color:#fff}
+.main{min-width:0}.top{min-height:70px;background:#fff;border-bottom:1px solid var(--line);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}.top h1{margin:0;font-size:20px}.top p{margin:4px 0 0;color:var(--muted);font-size:10px}
+.content{padding:22px 24px 90px;max-width:1100px;margin:auto}.hero{border:1px solid var(--line);background:#fff;border-radius:20px;padding:18px}.hero strong{display:block;font-size:22px;color:var(--deep)}.hero p{font-size:10px;color:var(--muted);margin:6px 0 0;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}.check{background:#fff;border:1px solid var(--line);border-radius:17px;padding:14px}.check-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.check b{font-size:12px}.badge{padding:6px 9px;border-radius:999px;font-size:8px;font-weight:800}.ok{background:var(--greenbg);color:var(--green)}.bad{background:var(--redbg);color:var(--red)}.check p{font-size:9px;color:var(--muted);line-height:1.5;margin:8px 0 0}
+.blockers{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px}.blockers h2{font-size:13px;margin:0 0 9px}.blockers ul{margin:0;padding-left:18px;color:var(--muted);font-size:10px;line-height:1.6}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btn{height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:10px;font-weight:800;color:var(--deep)}.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}.mobile{display:none}
+@media(max-width:760px){.app{grid-template-columns:1fr}.side{display:none}.top{padding:12px 16px}.content{padding:16px 14px 88px}.grid{grid-template-columns:1fr}.mobile{display:grid;position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);grid-template-columns:repeat(4,1fr);padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:20}.mobile a{text-align:center;font-size:9px;color:#68757c;padding:8px 2px}.mobile a.active{color:var(--deep);font-weight:800}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side"><div class="brand">BantuDulu</div><nav class="nav"><a href="/admin/dashboard">Dashboard</a><a href="/admin/pesanan">Pesanan</a><a href="/admin/mitra">Mitra</a><a href="/admin/layanan">Layanan</a><a class="active" href="/admin/readiness">Readiness</a></nav></aside>
+<main class="main"><header class="top"><div><h1>Operational Readiness</h1><p>Gate sebelum E2E nyata, pilot, audit, dan launch.</p></div><strong id="state">Memuat</strong></header>
+<div class="content">
+<section class="hero"><strong id="headline">Memeriksa kesiapan...</strong><p id="summary">Data dibaca langsung dari backend production. Tidak membuat data dummy.</p></section>
+<section class="grid" id="checks"></section>
+<section class="blockers"><h2>Blocker</h2><ul id="blockers"><li>Memuat...</li></ul></section>
+<div class="actions"><a class="btn primary" href="/admin/mitra">Kelola Mitra</a><a class="btn" href="/admin/pesanan">Pesanan</a><a class="btn" href="/admin/layanan">Layanan</a></div>
+</div></main>
+</div>
+<nav class="mobile"><a href="/admin/dashboard">Dashboard</a><a href="/admin/pesanan">Pesanan</a><a href="/admin/mitra">Mitra</a><a class="active" href="/admin/readiness">Readiness</a></nav>
+<script>
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+async function load(){
+ const r=await fetch('/api/ops/admin/readiness',{cache:'no-store',credentials:'same-origin'});
+ if(r.status===401||r.status===403){location.href='/masuk';return}
+ if(!r.ok){headline.textContent='Readiness tidak dapat dibaca';summary.textContent='Periksa backend dan konfigurasi.';return}
+ const d=await r.json();
+ state.textContent=d.ready_for_pilot?'READY':'BLOCKED';
+ headline.textContent=d.ready_for_pilot?'Siap masuk E2E/pilot':'Belum siap pilot';
+ summary.textContent=`${d.metrics.active_partners} mitra aktif · ${d.metrics.covered_services}/${d.metrics.active_services} layanan tercakup · ${d.metrics.active_orders} order aktif`;
+ checks.replaceChildren();
+ d.checks.forEach(c=>{
+  const card=el('article','check'),top=el('div','check-top');
+  top.append(el('b','',c.label),el('span','badge '+(c.ok?'ok':'bad'),c.ok?'PASS':'BLOCK'));
+  card.append(top,el('p','',c.detail));checks.append(card);
+ });
+ blockers.replaceChildren();
+ if(!d.blockers.length){blockers.append(el('li','','Tidak ada blocker readiness.'))}
+ else d.blockers.forEach(c=>blockers.append(el('li','',`${c.label}: ${c.detail}`)));
+}
+load();
+</script>
+</body>
+</html>
