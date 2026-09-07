@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BantuDulu — Katalog Layanan</title>
+<link rel="icon" type="image/svg+xml" href="/static/bd-favicon.svg">
+<style>
+:root{--brand:#28758b;--deep:#194f60;--ink:#111827;--muted:#6b7280;--line:#e3eaed;--bg:#f4f7f8;--soft:#edf5f7;--green:#23765c;--greenbg:#edf8f3;--red:#a54b4b;--redbg:#fff1f1}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}
+.app{display:grid;grid-template-columns:238px 1fr;min-height:100vh}.side{background:linear-gradient(180deg,#245f70,#194f60);color:#fff;padding:22px 16px}.brand{font-weight:800;font-size:20px;padding:0 8px 24px}.nav{display:grid;gap:7px}.nav a{padding:11px 12px;border-radius:12px;color:rgba(255,255,255,.76);font-size:12px;font-weight:700}.nav a.active,.nav a:hover{background:rgba(255,255,255,.13);color:#fff}.main{min-width:0}.top{min-height:70px;background:#fff;border-bottom:1px solid var(--line);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:10}.top h1{margin:0;font-size:20px}.top p{margin:4px 0 0;color:var(--muted);font-size:10px}.content{padding:20px 24px 90px}.notice{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:15px;font-size:10px;color:#56656d;line-height:1.55}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 7px 18px rgba(25,72,86,.04)}.head{display:flex;align-items:flex-start;gap:9px}.icon{width:42px;height:42px;border-radius:14px;background:var(--soft);color:var(--deep);display:grid;place-items:center;font-weight:800;flex:0 0 auto}.grow{flex:1;min-width:0}.grow b{display:block;font-size:12px}.grow span{display:block;margin-top:3px;color:var(--muted);font-size:9px}.badge{padding:5px 7px;border-radius:999px;font-size:8px;font-weight:800}.badge.on{background:var(--greenbg);color:var(--green)}.badge.off{background:var(--redbg);color:var(--red)}.variants{display:grid;gap:7px;margin-top:12px}.variant{display:flex;justify-content:space-between;gap:10px;background:#fafcfd;border-radius:11px;padding:9px}.variant span{font-size:9px;color:#53636b}.variant b{font-size:9px;color:var(--deep);text-align:right}.empty{padding:38px 20px;text-align:center;background:#fff;border:1px dashed var(--line);border-radius:18px;color:var(--muted);font-size:11px}.mobile{display:none}
+@media(max-width:1050px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.app{grid-template-columns:1fr}.side{display:none}.top{padding:12px 16px}.content{padding:14px 12px 88px}.grid{grid-template-columns:1fr}.mobile{display:grid;position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);grid-template-columns:repeat(4,1fr);padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:20}.mobile a{text-align:center;font-size:9px;color:#68757c;padding:8px 2px}.mobile a.active{color:var(--deep);font-weight:800}}
+@media(max-width:390px){.top h1{font-size:18px}.content{padding-left:10px;padding-right:10px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side"><div class="brand">BantuDulu</div><nav class="nav"><a href="/admin/dashboard">Dashboard</a><a href="/admin/pesanan">Pesanan</a><a href="/admin/mitra">Mitra</a><a class="active" href="/admin/layanan">Layanan</a><a href="/admin/transaksi">Transaksi</a><a href="/admin/laporan">Laporan</a></nav></aside>
+<main class="main"><header class="top"><div><h1>Katalog Layanan</h1><p>Data langsung dari database produksi. Tidak ada kartu contoh atau harga hard-coded.</p></div><strong id="count">0</strong></header>
+<div class="content">
+<div class="notice">Untuk V1 pilot, halaman ini bersifat <b>read-only</b> agar katalog produksi tidak berubah tanpa prosedur. Varian arsip/legacy dengan harga Rp0 otomatis disembunyikan dari katalog live.</div>
+<section class="grid" id="grid"></section>
+</div></main>
+</div>
+<nav class="mobile"><a href="/admin/dashboard">Dashboard</a><a href="/admin/pesanan">Pesanan</a><a href="/admin/mitra">Mitra</a><a class="active" href="/admin/layanan">Layanan</a></nav>
+<script>
+const rupiah=v=>'Rp '+Number(v||0).toLocaleString('id-ID');
+function el(t,c,x){const n=document.createElement(t);if(c)n.className=c;if(x!==undefined)n.textContent=x;return n}
+function render(rows){
+ grid.replaceChildren();count.textContent=rows.length;
+ if(!rows.length){grid.append(el('div','empty','Belum ada layanan pada database.'));return}
+ rows.forEach(s=>{
+  const card=el('article','card'),head=el('div','head'),icon=el('div','icon','≡'),grow=el('div','grow'),badge=el('span','badge '+(s.aktif?'on':'off'),s.aktif?'Aktif':'Nonaktif');
+  grow.append(el('b','',s.nama),el('span','',(s.kategori||'-')+' · '+(s.tipe_hitung||'-')));head.append(icon,grow,badge);card.append(head);
+  const vs=el('div','variants');
+  if(!s.variants.length)vs.append(el('div','variant','Tidak ada varian live'));
+  s.variants.forEach(v=>{const r=el('div','variant');r.append(el('span','',v.nama),el('b','',rupiah(v.harga)));vs.append(r)});
+  card.append(vs);grid.append(card);
+ })
+}
+async function load(){const r=await fetch('/api/ops/admin/catalog',{cache:'no-store',credentials:'same-origin'});if(r.status===401||r.status===403){location.href='/masuk';return}if(!r.ok){grid.append(el('div','empty','Gagal memuat katalog.'));return}render(await r.json())}
+load();
+</script>
+</body>
+</html>

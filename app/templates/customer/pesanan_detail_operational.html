@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#28758b">
+<title>BantuDulu — Detail Pesanan</title>
+<link rel="icon" type="image/svg+xml" href="/static/bd-favicon.svg">
+<style>
+:root{--brand:#28758b;--deep:#194f60;--ink:#111827;--muted:#6b7280;--line:#e4ebee;--bg:#edf2f4;--soft:#eef6f8;--ok:#2f7d64;--warn:#9a6b19;--danger:#a44b4b}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}button{font:inherit}
+.app{width:100%;max-width:480px;min-height:100vh;margin:auto;background:#fff;padding-bottom:40px;box-shadow:0 0 40px rgba(20,65,80,.08)}.head{padding:calc(18px + env(safe-area-inset-top)) 16px 18px;display:flex;align-items:center;gap:10px}.back{width:38px;height:38px;border-radius:13px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;font-size:20px}.head h1{font-size:18px;margin:0}.content{padding:0 16px 24px}.hero{border-radius:22px;padding:20px;background:linear-gradient(135deg,#245f70,#194f60);color:#fff;box-shadow:0 14px 30px rgba(25,79,96,.16)}.hero small{font-size:9px;opacity:.72;text-transform:uppercase;letter-spacing:.6px}.hero h2{margin:7px 0 5px;font-size:21px}.hero p{margin:0;font-size:11px;line-height:1.5;opacity:.88}.badge{display:inline-flex;margin-top:13px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:9px;font-weight:800}
+.card{margin-top:12px;border:1px solid var(--line);border-radius:18px;padding:15px;background:#fff}.card h3{margin:0 0 11px;font-size:12px;color:var(--deep)}.row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid #f0f3f4}.row:last-child{border-bottom:0}.row span{font-size:10px;color:var(--muted)}.row b{font-size:10.5px;text-align:right;max-width:62%;word-break:break-word}.price{font-size:14px!important;color:var(--deep)}
+.actions{display:flex;gap:8px;margin-top:14px}.btn{flex:1;height:44px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--deep);font-size:10px;font-weight:800}.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}.btn.danger{background:#fffafa;border-color:#efdada;color:var(--danger)}.legacy-note{margin-top:12px;border:1px solid #e4e8eb;background:#f7f8f9;color:#68747b;border-radius:16px;padding:12px;font-size:10px;line-height:1.5}.empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:360px){.content{padding-left:12px;padding-right:12px}.hero{padding:17px}.row{gap:8px}.row b{max-width:58%}}
+@media(min-width:700px){body{padding:24px 0}.app{border-radius:28px;min-height:calc(100vh - 48px)}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="head"><a class="back" href="/pesanan">‹</a><h1>Detail Pesanan</h1></header>
+<main class="content" id="content"><div class="empty">Memuat detail pesanan...</div></main>
+</div>
+<script>
+const orderId={{ order_id|tojson }};
+const rupiah=v=>'Rp '+Number(v||0).toLocaleString('id-ID');
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+function addRow(card,label,value,cls=''){const r=el('div','row');r.append(el('span','',label),el('b',cls,value||'-'));card.append(r)}
+async function cancelOrder(id){
+ if(!confirm('Batalkan pesanan ini?'))return;
+ const r=await fetch('/api/final/orders/'+encodeURIComponent(id)+'/cancel',{method:'PUT',credentials:'same-origin'});
+ if(!r.ok){const j=await r.json().catch(()=>({}));alert(j.detail||j.error||'Pesanan tidak dapat dibatalkan.');return}
+ location.href='/pesanan';
+}
+function render(o){
+ const root=document.getElementById('content');root.replaceChildren();
+ const hero=el('section','hero');hero.append(el('small','','Kode Pesanan'),el('h2','',o.kode),el('p','',o.status.description),el('span','badge',o.status.label));root.append(hero);
+ if(o.is_legacy&&o.legacy_note){root.append(el('div','legacy-note',o.legacy_note))}
+ const info=el('section','card');info.append(el('h3','','Informasi Pesanan'));
+ const missing='Tidak tercatat pada data lama';
+ addRow(info,'Layanan',o.layanan_nama);addRow(info,'Varian',o.varian_nama);addRow(info,'Jadwal',o.jadwal?`${o.jadwal}${o.jam?' • '+o.jam:''}`:(o.is_legacy?missing:'-'));addRow(info,'Durasi',String(o.durasi||1));addRow(info,'Total',rupiah(o.total_harga),'price');addRow(info,'Pembayaran',o.metode_pembayaran_label||(o.metode_pembayaran||'cod').toUpperCase());root.append(info);
+ const lokasi=el('section','card');lokasi.append(el('h3','','Lokasi & Catatan'));addRow(lokasi,'Alamat',o.alamat||(o.is_legacy?missing:'-'));addRow(lokasi,'Catatan',o.catatan||(o.is_legacy?'Tidak ada catatan pada data lama':'-'));root.append(lokasi);
+ const actions=el('div','actions');const back=el('button','btn primary','Kembali ke Pesanan');back.onclick=()=>location.href='/pesanan';actions.append(back);
+ if(o.status.code==='diterima'&&!o.is_legacy){const cancel=el('button','btn danger','Batalkan');cancel.onclick=()=>cancelOrder(o.id);actions.append(cancel)}
+ root.append(actions);
+}
+async function load(){
+ const r=await fetch('/api/ops/customer/orders/'+encodeURIComponent(orderId),{cache:'no-store',credentials:'same-origin'});
+ if(r.status===401){location.href='/masuk';return}
+ if(!r.ok){document.getElementById('content').replaceChildren(el('div','empty','Pesanan tidak ditemukan atau tidak dapat dibuka.'));return}
+ render(await r.json());
+}
+load();
+</script>
+</body>
+</html>

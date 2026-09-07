@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BantuDulu — Mitra</title>
+<link rel="icon" type="image/svg+xml" href="/static/bd-favicon.svg">
+<style>
+:root{--brand:#28758b;--deep:#194f60;--ink:#111827;--muted:#6b7280;--line:#e3eaed;--bg:#f4f7f8;--soft:#edf5f7;--green:#23765c;--greenbg:#edf8f3;--warn:#9c6514;--warnbg:#fff5e5;--red:#a54b4b;--redbg:#fff1f1}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}button,input{font:inherit}
+.app{display:grid;grid-template-columns:238px 1fr;min-height:100vh}.side{background:linear-gradient(180deg,#245f70,#194f60);color:#fff;padding:22px 16px}.brand{font-weight:800;font-size:20px;padding:0 8px 24px}.nav{display:grid;gap:7px}.nav a{padding:11px 12px;border-radius:12px;color:rgba(255,255,255,.76);font-size:12px;font-weight:700}.nav a.active,.nav a:hover{background:rgba(255,255,255,.13);color:#fff}.main{min-width:0}.top{min-height:70px;background:#fff;border-bottom:1px solid var(--line);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:10}.top h1{margin:0;font-size:20px}.top p{margin:4px 0 0;color:var(--muted);font-size:10px}.btn{height:40px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--deep);padding:0 13px;font-size:10px;font-weight:800;cursor:pointer}.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}.btn.danger{background:var(--redbg);border-color:#efd5d5;color:var(--red)}.content{padding:20px 24px 90px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}.stat small{font-size:9px;color:var(--muted)}.stat strong{display:block;font-size:23px;color:var(--deep);margin-top:7px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 7px 18px rgba(25,72,86,.04)}.head{display:flex;gap:9px;align-items:center}.avatar{width:42px;height:42px;border-radius:14px;background:var(--soft);color:var(--deep);display:grid;place-items:center;font-weight:800}.grow{flex:1;min-width:0}.grow b{display:block;font-size:12px}.grow span{display:block;font-size:9px;color:var(--muted);margin-top:3px}.badge{padding:5px 7px;border-radius:999px;font-size:8px;font-weight:800}.badge.ok{background:var(--greenbg);color:var(--green)}.badge.busy{background:var(--warnbg);color:var(--warn)}.badge.off{background:var(--redbg);color:var(--red)}.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:11px}.tag{padding:5px 7px;border-radius:999px;background:var(--soft);color:var(--deep);font-size:8px;font-weight:700}.meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:11px}.meta div{background:#fafcfd;border-radius:11px;padding:8px}.meta small{display:block;font-size:8px;color:var(--muted)}.meta b{display:block;margin-top:3px;font-size:9.5px}.actions{display:flex;gap:7px;margin-top:11px}.actions .btn{flex:1}
+.empty{padding:38px 20px;text-align:center;background:#fff;border:1px dashed var(--line);border-radius:18px;color:var(--muted);font-size:11px}.modal{position:fixed;inset:0;background:rgba(10,30,36,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}.modal.show{display:flex}.modal-card{width:min(560px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:20px;border:1px solid var(--line)}.modal-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0;font-size:14px}.modal-body{padding:16px}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:9px;font-weight:800;color:#56656d}.field input{width:100%;border:1px solid var(--line);border-radius:11px;padding:10px 11px;font-size:10px}.services{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:220px;overflow:auto}.svc{display:flex;gap:7px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:9px}.modal-actions{display:flex;gap:8px;margin-top:13px}.modal-actions .btn{flex:1}.mobile{display:none}
+@media(max-width:1050px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.app{grid-template-columns:1fr}.side{display:none}.top{padding:12px 16px}.content{padding:14px 12px 88px}.grid{grid-template-columns:1fr}.mobile{display:grid;position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);grid-template-columns:repeat(4,1fr);padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:20}.mobile a{text-align:center;font-size:9px;color:#68757c;padding:8px 2px}.mobile a.active{color:var(--deep);font-weight:800}}
+@media(max-width:390px){.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1/-1}.form,.services{grid-template-columns:1fr}.field.full{grid-column:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side"><div class="brand">BantuDulu</div><nav class="nav"><a href="/admin/dashboard">Dashboard</a><a href="/admin/pesanan">Pesanan</a><a class="active" href="/admin/mitra">Mitra</a><a href="/admin/layanan">Layanan</a><a href="/admin/transaksi">Transaksi</a><a href="/admin/laporan">Laporan</a></nav></aside>
+<main class="main"><header class="top"><div><h1>Mitra</h1><p>Mitra dimasukkan manual oleh Admin. Tidak ada daftar order terbuka untuk mitra.</p></div><button class="btn primary" id="addBtn">Tambah Mitra</button></header>
+<div class="content">
+<section class="stats"><div class="stat"><small>Total Mitra</small><strong id="total">0</strong></div><div class="stat"><small>Aktif / Tersedia</small><strong id="available">0</strong></div><div class="stat"><small>Sedang Bertugas</small><strong id="busy">0</strong></div></section>
+<section class="grid" id="grid"></section>
+</div></main>
+</div>
+<nav class="mobile"><a href="/admin/dashboard">Dashboard</a><a href="/admin/pesanan">Pesanan</a><a class="active" href="/admin/mitra">Mitra</a><a href="/admin/layanan">Layanan</a></nav>
+
+<div class="modal" id="modal"><div class="modal-card"><div class="modal-head"><h3>Tambah Mitra Manual</h3><button class="btn" id="closeBtn">Tutup</button></div><div class="modal-body">
+<form id="form" class="form">
+<div class="field"><label>Nama Mitra</label><input id="nama" required maxlength="120"></div>
+<div class="field"><label>No. HP / WhatsApp</label><input id="hp" required inputmode="tel"></div>
+<div class="field full"><label>Email (opsional)</label><input id="email" type="email"></div>
+<div class="field full"><label>Layanan yang boleh dikerjakan</label><div class="services" id="services"></div></div>
+<div class="field full"><div class="modal-actions"><button type="button" class="btn" id="cancelBtn">Batal</button><button type="submit" class="btn primary">Simpan Mitra</button></div></div>
+</form>
+</div></div></div>
+
+<script>
+const S={partners:[],catalog:[]};
+function el(t,c,x){const n=document.createElement(t);if(c)n.className=c;if(x!==undefined)n.textContent=x;return n}
+function initials(n){return (n||'?').split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()}
+function render(){
+ grid.replaceChildren();total.textContent=S.partners.length;available.textContent=S.partners.filter(p=>p.aktif&&!p.sedang_bertugas).length;busy.textContent=S.partners.filter(p=>p.sedang_bertugas).length;
+ if(!S.partners.length){grid.append(el('div','empty','Belum ada mitra. Tambahkan mitra asli sebelum pilot customer.'));return}
+ S.partners.forEach(p=>{
+  const card=el('article','card'),head=el('div','head'),av=el('div','avatar',initials(p.nama)),grow=el('div','grow'),badge=el('span','badge '+(!p.aktif?'off':p.sedang_bertugas?'busy':'ok'),!p.aktif?'Nonaktif':p.sedang_bertugas?'Sedang Bertugas':'Aktif');
+  grow.append(el('b','',p.nama),el('span','',p.no_hp+(p.email?' · '+p.email:'')));head.append(av,grow,badge);card.append(head);
+  const tags=el('div','tags');p.services.forEach(s=>tags.append(el('span','tag',s.nama)));if(!p.services.length)tags.append(el('span','tag','Belum ada layanan'));card.append(tags);
+  const meta=el('div','meta'),a=el('div'),b=el('div');a.append(el('small','','Total pekerjaan'),el('b','',String(p.total_jobs||0)));b.append(el('small','','Status'),el('b','',p.status||'-'));meta.append(a,b);card.append(meta);
+  const actions=el('div','actions');actions.append(el('button','btn',p.aktif?'Nonaktifkan':'Aktifkan'));actions.firstChild.onclick=()=>toggle(p);card.append(actions);grid.append(card);
+ })
+}
+async function api(url,opts={}){opts.credentials='same-origin';opts.headers=Object.assign({'Content-Type':'application/json'},opts.headers||{});const r=await fetch(url,opts);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.detail||j.error||'Permintaan gagal');return j}
+async function load(){try{[S.partners,S.catalog]=await Promise.all([api('/api/ops/admin/partners',{cache:'no-store'}),api('/api/ops/admin/catalog',{cache:'no-store'})]);render();renderServices()}catch(e){grid.replaceChildren(el('div','empty',e.message))}}
+function renderServices(){services.replaceChildren();S.catalog.filter(s=>s.aktif&&s.variants.length).forEach(s=>{const lab=el('label','svc'),cb=document.createElement('input');cb.type='checkbox';cb.name='svc';cb.value=s.id;lab.append(cb,el('span','',s.nama));services.append(lab)})}
+async function toggle(p){if(p.sedang_bertugas&&p.aktif)return alert('Mitra yang sedang bertugas tidak dapat dinonaktifkan.');try{await api('/api/ops/admin/partners/'+encodeURIComponent(p.id),{method:'PUT',body:JSON.stringify({aktif:!p.aktif})});await load()}catch(e){alert(e.message)}}
+addBtn.onclick=()=>{modal.classList.add('show');form.reset()};closeBtn.onclick=cancelBtn.onclick=()=>modal.classList.remove('show');
+form.onsubmit=async e=>{e.preventDefault();const ids=[...document.querySelectorAll('input[name=svc]:checked')].map(x=>x.value);try{await api('/api/ops/admin/partners',{method:'POST',body:JSON.stringify({nama:nama.value,no_hp:hp.value,email:email.value,service_ids:ids})});modal.classList.remove('show');await load()}catch(err){alert(err.message)}};
+load();
+</script>
+</body>
+</html>

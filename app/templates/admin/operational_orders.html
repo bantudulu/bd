@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BantuDulu — Operasional Pesanan</title>
+<link rel="icon" type="image/svg+xml" href="/static/bd-favicon.svg">
+<style>
+:root{--brand:#28758b;--deep:#194f60;--ink:#111827;--muted:#6b7280;--line:#e3eaed;--bg:#f4f7f8;--soft:#edf5f7;--green:#23765c;--greenbg:#edf8f3;--warn:#9c6514;--warnbg:#fff5e5;--red:#a54b4b;--redbg:#fff1f1;--blue:#366a91;--bluebg:#eef5fb}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}button,select,input{font:inherit}
+.app{display:grid;grid-template-columns:238px 1fr;min-height:100vh}.side{background:linear-gradient(180deg,#245f70,#194f60);color:#fff;padding:22px 16px}.brand{font-weight:800;font-size:20px;padding:0 8px 24px}.nav{display:grid;gap:7px}.nav a{padding:11px 12px;border-radius:12px;color:rgba(255,255,255,.76);font-size:12px;font-weight:700}.nav a.active,.nav a:hover{background:rgba(255,255,255,.13);color:#fff}.main{min-width:0}.top{min-height:70px;background:#fff;border-bottom:1px solid var(--line);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:10}.top h1{margin:0;font-size:20px}.top p{margin:4px 0 0;color:var(--muted);font-size:10px}.content{padding:20px 24px 90px;max-width:1100px;margin:auto}.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:12px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:10px;font-weight:800;color:#65727a;white-space:nowrap}.tab.active{background:var(--deep);border-color:var(--deep);color:#fff}
+.list{display:grid;gap:12px}.order{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 7px 20px rgba(25,72,86,.04)}.head{padding:13px 15px;border-bottom:1px solid #eef2f3;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.head-left{display:flex;align-items:center;gap:9px}.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f6f7;padding:5px 8px;border-radius:8px;font-size:10px;font-weight:800}.badge{padding:6px 8px;border-radius:999px;font-size:8.5px;font-weight:800}.badge.menunggu,.badge.ditugaskan{background:var(--warnbg);color:var(--warn)}.badge.diproses,.badge.menuju_lokasi{background:var(--bluebg);color:var(--blue)}.badge.dimulai,.badge.menunggu_konfirmasi{background:var(--greenbg);color:var(--green)}.badge.selesai{background:#edf7f2;color:var(--green)}.badge.dibatalkan{background:var(--redbg);color:var(--red)}
+.body{padding:15px;display:grid;grid-template-columns:1.45fr .75fr;gap:18px}.title{font-size:15px;font-weight:800}.sub{font-size:10px;color:var(--muted);margin-top:4px}.info{font-size:10px;color:#46565e;line-height:1.55;margin-top:10px}.price{font-size:18px;color:var(--deep);font-weight:800}.right small{display:block;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:7px}.right b{display:block;font-size:10px;margin-top:3px}.actions{padding:12px 15px;border-top:1px solid #eef2f3;background:#fbfcfd;display:flex;gap:7px;flex-wrap:wrap}.btn{height:38px;border:1px solid var(--line);border-radius:11px;background:#fff;padding:0 12px;font-size:9.5px;font-weight:800;color:var(--deep);cursor:pointer}.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}.btn.success{background:var(--green);border-color:var(--green);color:#fff}.btn.warn{background:var(--warnbg);border-color:#efd9ae;color:var(--warn)}.btn.danger{background:var(--redbg);border-color:#efd4d4;color:var(--red)}.btn:disabled{opacity:.5;cursor:not-allowed}.empty{padding:42px 20px;text-align:center;background:#fff;border:1px dashed var(--line);border-radius:18px;color:var(--muted);font-size:11px}
+.modal{position:fixed;inset:0;background:rgba(10,30,36,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}.modal.show{display:flex}.modal-card{width:min(520px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:20px;border:1px solid var(--line);box-shadow:0 24px 70px rgba(0,0,0,.18)}.modal-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0;font-size:14px}.modal-body{padding:16px}.partner-list{display:grid;gap:8px}.partner{border:1px solid var(--line);border-radius:13px;padding:10px;display:flex;align-items:center;gap:9px}.partner input{margin:0}.partner b{font-size:10.5px}.partner span{display:block;font-size:8.5px;color:var(--muted);margin-top:3px}.check{display:flex;gap:8px;align-items:flex-start;margin:10px 0;font-size:10px;line-height:1.4}.modal-actions{display:flex;gap:8px;margin-top:14px}.modal-actions .btn{flex:1}.mobile{display:none}
+@media(max-width:850px){.body{grid-template-columns:1fr}.right{border-top:1px dashed var(--line);padding-top:10px}}
+@media(max-width:760px){.app{grid-template-columns:1fr}.side{display:none}.top{padding:12px 16px}.content{padding:14px 12px 88px}.mobile{display:grid;position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);grid-template-columns:repeat(4,1fr);padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:20}.mobile a{text-align:center;font-size:9px;color:#68757c;padding:8px 2px}.mobile a.active{color:var(--deep);font-weight:800}}
+@media(max-width:390px){.head{padding:11px 12px}.body{padding:12px}.actions{padding:10px 12px}.btn{flex:1;min-width:42%}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side"><div class="brand">BantuDulu</div><nav class="nav"><a href="/admin/dashboard">Dashboard</a><a class="active" href="/admin/pesanan">Pesanan</a><a href="/admin/mitra">Mitra</a><a href="/admin/layanan">Layanan</a><a href="/admin/transaksi">Transaksi</a><a href="/admin/laporan">Laporan</a></nav></aside>
+<main class="main"><header class="top"><div><h1>Operasional Pesanan</h1><p>Seluruh penugasan mitra dikendalikan Admin. Status selesai hanya dapat dikonfirmasi Admin.</p></div><strong id="count">0</strong></header>
+<div class="content">
+<div class="tabs">
+<button class="tab active" data-f="aktif">Aktif</button><button class="tab" data-f="menunggu">Baru</button><button class="tab" data-f="menunggu_konfirmasi">Konfirmasi</button><button class="tab" data-f="selesai">Selesai</button><button class="tab" data-f="dibatalkan">Batal</button><button class="tab" data-f="all">Semua</button>
+</div>
+<section class="list" id="list"></section>
+</div></main>
+</div>
+<nav class="mobile"><a href="/admin/dashboard">Dashboard</a><a class="active" href="/admin/pesanan">Pesanan</a><a href="/admin/mitra">Mitra</a><a href="/admin/layanan">Layanan</a></nav>
+
+<div class="modal" id="assignModal"><div class="modal-card"><div class="modal-head"><h3>Tugaskan Mitra</h3><button class="btn" id="closeAssign">Tutup</button></div><div class="modal-body"><div class="partner-list" id="partnerList"></div><div class="modal-actions"><button class="btn primary" id="doAssign">Tugaskan Mitra Terpilih</button></div></div></div></div>
+<div class="modal" id="completeModal"><div class="modal-card"><div class="modal-head"><h3>Selesaikan Pesanan</h3><button class="btn" id="closeComplete">Tutup</button></div><div class="modal-body"><p style="font-size:10px;color:#6b7280;line-height:1.5">Pesanan hanya boleh diselesaikan setelah Admin memastikan pekerjaan dan pembayaran COD telah benar-benar selesai.</p><label class="check"><input type="checkbox" id="workCheck"><span>Saya sudah memastikan pekerjaan telah selesai.</span></label><label class="check"><input type="checkbox" id="payCheck"><span>Saya sudah memastikan pembayaran telah diterima/selesai.</span></label><div class="modal-actions"><button class="btn success" id="doComplete">Konfirmasi & Selesaikan</button></div></div></div></div>
+
+<script>
+const S={orders:[],partners:[],filter:'aktif',assignOrder:null,completeOrder:null};
+const labels={menunggu:'Pesanan Baru',diproses:'Diproses Admin',ditugaskan:'Mitra Ditugaskan',menuju_lokasi:'Menuju Lokasi',dimulai:'Pekerjaan Berjalan',menunggu_konfirmasi:'Menunggu Konfirmasi Admin',selesai:'Selesai',dibatalkan:'Dibatalkan'};
+const active=new Set(['menunggu','diproses','ditugaskan','menuju_lokasi','dimulai','menunggu_konfirmasi']);
+const rupiah=v=>'Rp '+Number(v||0).toLocaleString('id-ID');
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+function button(text,cls,fn){const b=el('button','btn '+(cls||''),text);b.onclick=fn;return b}
+function rowActions(o){
+ const a=el('div','actions');
+ a.append(button('Detail','',()=>location.href='/admin/pesanan/'+encodeURIComponent(o.id)));
+ if(o.status==='menunggu')a.append(button('Terima Pesanan','primary',()=>act(o.id,'accept')));
+ if(o.status==='diproses')a.append(button('Tugaskan Mitra','primary',()=>openAssign(o)));
+ if(o.status==='ditugaskan'){
+   if(!o.mitra){a.append(button('Pilih Mitra','primary',()=>openAssign(o)))}
+   else if(o.mitra.assignment_status==='ditugaskan'){
+     a.append(button('Mitra Terima','success',()=>act(o.id,'partner-accept')));
+     a.append(button('Mitra Tolak / Ganti','warn',()=>partnerReject(o.id)));
+   }else{
+     a.append(button('Tim Menuju Lokasi','primary',()=>act(o.id,'on-the-way')));
+     a.append(button('Ganti Mitra','warn',()=>openAssign(o)));
+   }
+ }
+ if(o.status==='menuju_lokasi')a.append(button('Mulai Pekerjaan','primary',()=>act(o.id,'work-started')));
+ if(o.status==='dimulai')a.append(button('Pekerjaan Dilaporkan Selesai','success',()=>act(o.id,'work-reported')));
+ if(o.status==='menunggu_konfirmasi')a.append(button('Selesaikan Pesanan','success',()=>openComplete(o)));
+ if(!['selesai','dibatalkan'].includes(o.status))a.append(button('Batalkan','danger',()=>cancelOrder(o.id)));
+ return a;
+}
+function render(){
+ const list=document.getElementById('list');list.replaceChildren();
+ let rows=S.orders;
+ if(S.filter==='aktif')rows=rows.filter(o=>active.has(o.status));
+ else if(S.filter!=='all')rows=rows.filter(o=>o.status===S.filter);
+ count.textContent=rows.length;
+ if(!rows.length){list.append(el('div','empty','Tidak ada pesanan pada filter ini.'));return}
+ rows.forEach(o=>{
+  const card=el('article','order'),head=el('div','head'),left=el('div','head-left');
+  left.append(el('span','code',o.kode),el('span','badge '+o.status,labels[o.status]||o.status));head.append(left,el('span','sub',o.created_at?new Date(o.created_at).toLocaleString('id-ID'):''));
+  const body=el('div','body'),main=el('div'),right=el('div','right');
+  main.append(el('div','title',o.layanan_nama||'Pesanan'),el('div','sub',o.varian_nama||''));
+  const info=el('div','info');info.append(el('div','',`Pelanggan: ${o.pelanggan_nama||'-'} · ${o.pelanggan_wa||'-'}`),el('div','',`Jadwal: ${o.jadwal||'-'} ${o.jam||''}`),el('div','',`Alamat: ${o.alamat||'-'}`));main.append(info);
+  right.append(el('div','price',rupiah(o.total_harga)),el('small','','Pembayaran'),el('b','',(o.metode_pembayaran||'cod').toUpperCase()+' · '+(o.status_pembayaran||'-')),el('small','','Mitra'),el('b','',o.mitra?`${o.mitra.nama} · ${o.mitra.assignment_status}`:'Belum ditugaskan'));
+  body.append(main,right);card.append(head,body,rowActions(o));list.append(card);
+ });
+}
+async function api(url,opts={}){
+ opts.credentials='same-origin';opts.headers=Object.assign({'Content-Type':'application/json'},opts.headers||{});
+ const r=await fetch(url,opts);const j=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(j.detail||j.error||'Permintaan gagal');
+ return j;
+}
+async function act(id,name){try{await api('/api/ops/admin/orders/'+encodeURIComponent(id)+'/'+name,{method:'POST',body:'{}'});await load()}catch(e){alert(e.message)}}
+async function cancelOrder(id){const reason=prompt('Alasan pembatalan:');if(!reason)return;try{await api('/api/ops/admin/orders/'+encodeURIComponent(id)+'/cancel',{method:'POST',body:JSON.stringify({reason})});await load()}catch(e){alert(e.message)}}
+async function partnerReject(id){const reason=prompt('Alasan mitra menolak / diganti:','Mitra tidak tersedia');if(!reason)return;try{await api('/api/ops/admin/orders/'+encodeURIComponent(id)+'/partner-reject',{method:'POST',body:JSON.stringify({reason})});await load()}catch(e){alert(e.message)}}
+async function openAssign(o){
+ S.assignOrder=o;assignModal.classList.add('show');partnerList.replaceChildren();
+ if(!S.partners.length){try{S.partners=await api('/api/ops/admin/partners',{cache:'no-store'})}catch(e){partnerList.append(el('div','empty',e.message));return}}
+ const eligible=S.partners.filter(p=>p.aktif&&p.status!=='nonaktif'&&!p.sedang_bertugas&&p.services.some(s=>s.id===o.layanan_id));
+ if(!eligible.length){const m=el('div','empty');m.append(document.createTextNode('Belum ada mitra tersedia untuk layanan ini. '));const a=el('a','','Buka halaman Mitra');a.href='/admin/mitra';a.style.color='#194f60';a.style.fontWeight='800';m.append(a);partnerList.append(m);return}
+ eligible.forEach(p=>{const lab=el('label','partner'),radio=document.createElement('input');radio.type='radio';radio.name='partner';radio.value=p.id;const text=el('div');text.append(el('b','',p.nama),el('span','',p.services.map(s=>s.nama).join(', ')+' · '+p.no_hp));lab.append(radio,text);partnerList.append(lab)})
+}
+closeAssign.onclick=()=>assignModal.classList.remove('show');
+doAssign.onclick=async()=>{const pick=document.querySelector('input[name=partner]:checked');if(!pick||!S.assignOrder)return alert('Pilih mitra.');try{await api('/api/ops/admin/orders/'+encodeURIComponent(S.assignOrder.id)+'/assign',{method:'POST',body:JSON.stringify({mitra_id:pick.value})});assignModal.classList.remove('show');S.partners=[];await load()}catch(e){alert(e.message)}};
+function openComplete(o){S.completeOrder=o;workCheck.checked=false;payCheck.checked=false;completeModal.classList.add('show')}
+closeComplete.onclick=()=>completeModal.classList.remove('show');
+doComplete.onclick=async()=>{if(!S.completeOrder)return;if(!workCheck.checked||!payCheck.checked)return alert('Kedua konfirmasi wajib dicentang.');try{await api('/api/ops/admin/orders/'+encodeURIComponent(S.completeOrder.id)+'/complete',{method:'POST',body:JSON.stringify({work_confirmed:true,payment_confirmed:true})});completeModal.classList.remove('show');await load()}catch(e){alert(e.message)}};
+async function load(){try{S.orders=await api('/api/ops/admin/orders',{cache:'no-store'});render()}catch(e){if(e.message.includes('login'))location.href='/masuk';else list.replaceChildren(el('div','empty',e.message))}}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');S.filter=b.dataset.f;render()});
+load();
+</script>
+</body>
+</html>

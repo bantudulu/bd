@@ -124,8 +124,12 @@ from app.routers import (
     customer,
     final_api,
     final_pages,
+    operational,
+    operational_pages,
 )
 
+app.include_router(operational_pages.router)
+app.include_router(operational.router)
 app.include_router(final_pages.router)
 app.include_router(final_api.router)
 app.include_router(auth.router)

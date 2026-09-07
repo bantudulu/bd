@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#28758b">
+<title>BantuDulu — Pesanan</title>
+<link rel="icon" type="image/svg+xml" href="/static/bd-favicon.svg">
+<style>
+:root{--brand:#28758b;--deep:#194f60;--ink:#111827;--muted:#6b7280;--line:#e4ebee;--bg:#edf2f4;--soft:#eef6f8;--ok:#2f7d64;--warn:#9a6b19;--danger:#a44b4b}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+button{font:inherit}.app{width:100%;max-width:480px;min-height:100vh;margin:auto;background:#fff;padding-bottom:88px;box-shadow:0 0 40px rgba(20,65,80,.08)}
+.hero{padding:calc(22px + env(safe-area-inset-top)) 18px 58px;background:linear-gradient(135deg,#2d7186,#28758b 55%,#246b82);color:#fff;border-radius:0 0 30px 30px}
+.hero h1{margin:0;font-size:26px}.hero p{margin:6px 0 0;font-size:12px;opacity:.86}.content{padding:0 16px 24px}.summary{margin-top:-34px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:0 14px 32px rgba(24,68,82,.11);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.summary small{display:block;color:var(--brand);font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.5px}.summary strong{display:block;font-size:18px;margin-top:5px}.count{width:54px;height:54px;border-radius:18px;background:var(--soft);display:grid;place-items:center;color:var(--deep);font-size:21px;font-weight:800}
+.tabs{display:flex;gap:8px;overflow:auto;padding:20px 0 12px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;font-size:10px;font-weight:800;color:#607078;white-space:nowrap}.tab.active{background:var(--deep);border-color:var(--deep);color:#fff}
+.list{display:grid;gap:12px}.card{border:1px solid var(--line);border-radius:20px;padding:14px;background:#fff;box-shadow:0 6px 18px rgba(25,72,86,.05)}.top{display:flex;gap:10px;align-items:flex-start}.icon{width:46px;height:46px;border-radius:15px;background:var(--soft);display:grid;place-items:center;color:var(--brand);font-size:20px;flex:0 0 auto}.grow{flex:1;min-width:0}.code{font-size:9px;color:#879198}.title{font-size:13px;font-weight:800;margin-top:4px}.sub{font-size:9.5px;color:var(--muted);margin-top:3px}.badge{padding:6px 9px;border-radius:999px;font-size:8.5px;font-weight:800;white-space:nowrap}.badge.diterima{background:#fff5df;color:var(--warn)}.badge.menuju_lokasi{background:#eaf4ff;color:#35668b}.badge.selesai{background:#edf7f2;color:var(--ok)}.badge.dibatalkan{background:#fff0f0;color:var(--danger)}.badge.arsip{background:#f1f3f5;color:#68747b}
+.status{margin-top:12px;padding:12px;border-radius:15px;background:#f8fafb;border:1px solid #edf1f3}.status b{display:block;font-size:10.5px}.status span{display:block;font-size:9px;color:var(--muted);margin-top:4px;line-height:1.45}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}.meta div{background:#fbfcfd;border:1px solid #eef1f3;border-radius:12px;padding:9px}.meta small{display:block;font-size:8px;color:#8b9499}.meta b{display:block;font-size:9.5px;margin-top:3px}.total{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--line);padding-top:11px;margin-top:11px}.total span{font-size:9px;color:var(--muted)}.total strong{font-size:13px;color:var(--deep)}.actions{display:flex;gap:8px;margin-top:11px}.btn{flex:1;height:40px;border-radius:13px;border:1px solid var(--line);background:#fff;color:var(--deep);font-size:10px;font-weight:800}.btn.primary{background:var(--soft);border-color:#d6e8ed}.btn.danger{color:var(--danger);background:#fffafa;border-color:#f0d9d9}
+.empty{padding:38px 20px;text-align:center;border:1px dashed var(--line);border-radius:20px;color:var(--muted);font-size:12px}.bottom{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(480px,100%);height:76px;background:rgba(255,255,255,.98);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom));z-index:20}.bottom a{text-decoration:none;color:#6b7378;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;gap:4px}.bottom a.active{color:var(--deep);font-weight:800}
+@media(max-width:360px){.content{padding-left:12px;padding-right:12px}.meta{grid-template-columns:1fr}.badge{font-size:8px}.title{font-size:12.5px}}
+@media(min-width:700px){body{padding:24px 0}.app{border-radius:28px;min-height:calc(100vh - 48px)}.bottom{bottom:24px;border-radius:0 0 28px 28px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="hero"><h1>Pesanan</h1><p>Pantau pesanan Anda melalui BantuDulu.</p></header>
+<main class="content">
+<section class="summary"><div><small>Pesanan aktif</small><strong id="activeText">Memuat pesanan...</strong></div><div class="count" id="activeCount">0</div></section>
+<div class="tabs">
+<button class="tab active" data-filter="active">Aktif</button>
+<button class="tab" data-filter="selesai">Selesai</button>
+<button class="tab" data-filter="dibatalkan">Dibatalkan</button>
+<button class="tab" data-filter="all">Semua</button>
+</div>
+<section class="list" id="list"></section>
+</main>
+</div>
+<nav class="bottom">
+<a href="/beranda"><span>⌂</span><span>Beranda</span></a>
+<a href="/layanan"><span>⌕</span><span>Layanan</span></a>
+<a class="active" href="/pesanan"><span>▤</span><span>Pesanan</span></a>
+<a href="/profil"><span>◉</span><span>Profil</span></a>
+</nav>
+<script>
+const state={orders:[],filter:'active'};
+const rupiah=v=>'Rp '+Number(v||0).toLocaleString('id-ID');
+const fmt=d=>{if(!d)return '-';try{return new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}catch{return d}};
+function isActive(o){return ['diterima','menuju_lokasi'].includes(o.status.code)}
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+function render(){
+ const list=document.getElementById('list');list.replaceChildren();
+ const active=state.orders.filter(isActive).length;
+ document.getElementById('activeCount').textContent=active;
+ document.getElementById('activeText').textContent=active?`${active} pesanan sedang berjalan`:'Tidak ada pesanan aktif';
+ let rows=state.orders;
+ if(state.filter==='active')rows=rows.filter(isActive);
+ if(state.filter==='selesai')rows=rows.filter(o=>o.status.code==='selesai');
+ if(state.filter==='dibatalkan')rows=rows.filter(o=>o.status.code==='dibatalkan');
+ if(!rows.length){list.append(el('div','empty','Belum ada pesanan pada bagian ini.'));return}
+ rows.forEach(o=>{
+  const card=el('article','card');
+  const top=el('div','top'),icon=el('div','icon','✓'),grow=el('div','grow'),badge=el('span','badge '+o.status.code,o.status.label);
+  grow.append(el('div','code','#'+o.kode),el('div','title',o.layanan_nama||'Pesanan'),el('div','sub',o.varian_nama||''));
+  top.append(icon,grow,badge);
+  const status=el('div','status');status.append(el('b','',o.status.label),el('span','',o.status.description));
+  const meta=el('div','meta');
+  const m1=el('div');m1.append(el('small','','Jadwal'),el('b','',o.is_legacy&&!o.jadwal?'Data lama tidak tercatat':`${fmt(o.jadwal)}${o.jam?' • '+o.jam:''}`));
+  const m2=el('div');m2.append(el('small','','Total'),el('b','',rupiah(o.total_harga)));meta.append(m1,m2);
+  const actions=el('div','actions');
+  const detail=el('button','btn primary','Lihat detail');detail.onclick=()=>location.href='/pesanan/'+encodeURIComponent(o.id);actions.append(detail);
+  if(o.status.code==='diterima'&&!o.is_legacy){
+   const cancel=el('button','btn danger','Batalkan');cancel.onclick=()=>cancelOrder(o.id);actions.append(cancel);
+  }
+  card.append(top,status,meta,actions);list.append(card);
+ });
+}
+async function cancelOrder(id){
+ if(!confirm('Batalkan pesanan ini?'))return;
+ const r=await fetch('/api/final/orders/'+encodeURIComponent(id)+'/cancel',{method:'PUT',credentials:'same-origin'});
+ if(!r.ok){const j=await r.json().catch(()=>({}));alert(j.detail||j.error||'Pesanan tidak dapat dibatalkan.');return}
+ await load();
+}
+async function load(){
+ try{
+  const r=await fetch('/api/ops/customer/orders',{cache:'no-store',credentials:'same-origin'});
+  if(r.status===401){location.href='/masuk';return}
+  if(!r.ok)throw new Error('Gagal memuat pesanan');
+  state.orders=await r.json();render();
+ }catch(e){document.getElementById('list').replaceChildren(el('div','empty','Gagal memuat pesanan. Silakan coba lagi.'))}
+}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.filter=b.dataset.filter;render()});
+load();
+</script>
+</body>
+</html>

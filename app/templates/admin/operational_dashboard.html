@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BantuDulu — Dashboard Admin</title>
+<link rel="icon" type="image/svg+xml" href="/static/bd-favicon.svg">
+<style>
+:root{--brand:#28758b;--deep:#194f60;--ink:#111827;--muted:#6b7280;--line:#e3eaed;--bg:#f4f7f8;--soft:#edf5f7;--green:#23765c;--warn:#9c6514;--red:#a54b4b}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}
+.app{display:grid;grid-template-columns:238px 1fr;min-height:100vh}.side{background:linear-gradient(180deg,#245f70,#194f60);color:#fff;padding:22px 16px;display:flex;flex-direction:column}.brand{font-weight:800;font-size:20px;padding:0 8px 24px}.nav{display:grid;gap:7px}.nav a{padding:11px 12px;border-radius:12px;color:rgba(255,255,255,.76);font-size:12px;font-weight:700}.nav a.active,.nav a:hover{background:rgba(255,255,255,.13);color:#fff}.main{min-width:0}.top{min-height:70px;background:#fff;border-bottom:1px solid var(--line);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:10}.top h1{margin:0;font-size:20px}.top p{margin:4px 0 0;color:var(--muted);font-size:10px}.content{padding:22px 24px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.stat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 8px 20px rgba(25,72,86,.04)}.stat small{font-size:9px;color:var(--muted);font-weight:700}.stat strong{display:block;margin-top:8px;font-size:26px;color:var(--deep)}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px}.card h2{font-size:14px;margin:0 0 6px}.card p{font-size:10px;color:var(--muted);line-height:1.5;margin:0 0 14px}.btn{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 14px;border-radius:12px;background:var(--brand);color:#fff;font-size:10px;font-weight:800}.mobile{display:none}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.app{grid-template-columns:1fr}.side{display:none}.top{padding:12px 16px}.content{padding:16px 14px 88px}.grid{grid-template-columns:1fr}.mobile{display:grid;position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);grid-template-columns:repeat(4,1fr);padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:20}.mobile a{text-align:center;font-size:9px;color:#68757c;padding:8px 2px}.mobile a.active{color:var(--deep);font-weight:800}}
+@media(max-width:390px){.stats{gap:9px}.stat{padding:13px}.stat strong{font-size:22px}.content{padding-left:12px;padding-right:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side"><div class="brand">BantuDulu</div><nav class="nav"><a class="active" href="/admin/dashboard">Dashboard</a><a href="/admin/pesanan">Pesanan</a><a href="/admin/mitra">Mitra</a><a href="/admin/layanan">Layanan</a><a href="/admin/transaksi">Transaksi</a><a href="/admin/laporan">Laporan</a></nav></aside>
+<main class="main"><header class="top"><div><h1>Dashboard Admin</h1><p>Operasional BantuDulu V1 — data langsung dari backend produksi.</p></div><strong>Admin</strong></header>
+<div class="content">
+<section class="stats">
+<div class="stat"><small>Pesanan Baru</small><strong id="baru">0</strong></div>
+<div class="stat"><small>Sedang Diproses</small><strong id="proses">0</strong></div>
+<div class="stat"><small>Menunggu Konfirmasi</small><strong id="konfirmasi">0</strong></div>
+<div class="stat"><small>Selesai</small><strong id="selesai">0</strong></div>
+</section>
+<section class="grid">
+<div class="card"><h2>Kelola Pesanan</h2><p>Terima pesanan, tugaskan mitra manual, pantau pekerjaan, dan selesaikan pesanan hanya setelah verifikasi Admin.</p><a class="btn" href="/admin/pesanan">Buka Pesanan</a></div>
+<div class="card"><h2>Mitra</h2><p>Mitra dimasukkan manual oleh Admin dan hanya dapat ditugaskan pada layanan yang sudah ditentukan.</p><a class="btn" href="/admin/mitra">Kelola Mitra</a></div>
+<div class="card"><h2>Katalog Produksi</h2><p>Lihat layanan dan harga yang dibaca langsung dari database. Varian arsip Rp0 tidak ditampilkan.</p><a class="btn" href="/admin/layanan">Lihat Layanan</a></div>
+</section>
+</div></main>
+</div>
+<nav class="mobile"><a class="active" href="/admin/dashboard">Dashboard</a><a href="/admin/pesanan">Pesanan</a><a href="/admin/mitra">Mitra</a><a href="/admin/layanan">Layanan</a></nav>
+<script>
+async function load(){
+ const r=await fetch('/api/ops/admin/summary',{cache:'no-store',credentials:'same-origin'});
+ if(r.status===401||r.status===403){location.href='/masuk';return}
+ if(!r.ok)return;
+ const d=await r.json();
+ baru.textContent=d.pesanan_baru;proses.textContent=d.sedang_diproses;konfirmasi.textContent=d.menunggu_konfirmasi;selesai.textContent=d.selesai;
+}
+load();
+</script>
+</body>
+</html>
