@@ -5,12 +5,13 @@ import re
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from sqlalchemy import case, func, or_, select
+from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import get_user_from_request
 from app.config import MARKETPLACE_SCHEMA_ENABLED
 from app.database import get_db
+from app.operational_policy import OPERATIONAL_V1_CUTOFF_DB, is_pre_operational_v1
 from app.models import (
     FormField,
     Kategori,
@@ -152,9 +153,11 @@ def _payment_method(order: Pesanan) -> str:
 
 
 def _is_legacy_order(order: Pesanan) -> bool:
-    # Imported/legacy rows can miss fields that current V1 requires.
+    # Explicit migration boundary prevents pre-Operational-V1 rows from being
+    # treated as live work merely because an old status is still non-terminal.
     return (
-        not str(order.alamat or "").strip()
+        is_pre_operational_v1(order.created_at)
+        or not str(order.alamat or "").strip()
         or not str(order.jadwal or "").strip()
         or not str(order.jam or "").strip()
         or _payment_method(order) != "cod"
@@ -184,6 +187,8 @@ def _customer_payment_label(order: Pesanan) -> str:
 
 
 def _assert_status(order: Pesanan, allowed: set[str], action: str) -> None:
+    if _is_legacy_order(order):
+        raise HTTPException(409, "Pesanan aktif lama/arsip tidak dapat diubah melalui flow Operational V1.")
     if order.status not in allowed:
         raise HTTPException(
             409,
@@ -264,6 +269,7 @@ def _admin_payload_from_parts(
             if partner and assignment
             else None
         ),
+        "is_legacy": _is_legacy_order(order),
         "created_at": order.created_at.isoformat(),
     }
 
@@ -279,6 +285,15 @@ def _page_values(page: int, page_size: int, default_size: int) -> tuple[int, int
     safe_size = int(page_size or default_size)
     safe_size = max(1, min(safe_size, 50))
     return safe_page, safe_size
+
+
+def _current_order_conditions():
+    return (
+        Pesanan.created_at >= OPERATIONAL_V1_CUTOFF_DB,
+        func.length(func.trim(func.coalesce(Pesanan.alamat, ""))) > 0,
+        func.length(func.trim(func.coalesce(Pesanan.jadwal, ""))) > 0,
+        func.length(func.trim(func.coalesce(Pesanan.jam, ""))) > 0,
+    )
 
 # ── Customer-safe order tracking ──────────────────────────────────────────────
 
@@ -301,11 +316,13 @@ async def customer_orders(
     conditions = [Pesanan.user_id == user.id]
     if view == "active":
         conditions.append(Pesanan.status.in_(tuple(INTERNAL_ACTIVE)))
+        conditions.extend(_current_order_conditions())
     elif view in {"selesai", "dibatalkan"}:
         conditions.append(Pesanan.status == view)
     elif view != "all":
         view = "active"
         conditions.append(Pesanan.status.in_(tuple(INTERNAL_ACTIVE)))
+        conditions.extend(_current_order_conditions())
 
     total = (
         await db.execute(select(func.count(Pesanan.id)).where(*conditions))
@@ -434,21 +451,23 @@ async def admin_summary(
         .where(Layanan.aktif == True)  # noqa: E712
         .scalar_subquery()
     )
+    current_scope = and_(*_current_order_conditions())
 
     row = (
         await db.execute(
             select(
                 func.count(Pesanan.id).label("total_order"),
                 func.coalesce(
-                    func.sum(case((Pesanan.status == "menunggu", 1), else_=0)),
+                    func.sum(case((and_(current_scope, Pesanan.status == "menunggu"), 1), else_=0)),
                     0,
                 ).label("pesanan_baru"),
                 func.coalesce(
                     func.sum(
                         case(
                             (
-                                Pesanan.status.in_(
-                                    ("diproses", "ditugaskan", "menuju_lokasi", "dimulai")
+                                and_(
+                                    current_scope,
+                                    Pesanan.status.in_(("diproses", "ditugaskan", "menuju_lokasi", "dimulai")),
                                 ),
                                 1,
                             ),
@@ -458,9 +477,7 @@ async def admin_summary(
                     0,
                 ).label("sedang_diproses"),
                 func.coalesce(
-                    func.sum(
-                        case((Pesanan.status == "menunggu_konfirmasi", 1), else_=0)
-                    ),
+                    func.sum(case((and_(current_scope, Pesanan.status == "menunggu_konfirmasi"), 1), else_=0)),
                     0,
                 ).label("menunggu_konfirmasi"),
                 func.coalesce(
@@ -511,6 +528,7 @@ async def admin_orders(
     conditions = []
     if view == "aktif":
         conditions.append(Pesanan.status.in_(tuple(INTERNAL_ACTIVE)))
+        conditions.extend(_current_order_conditions())
     elif view in {
         "menunggu",
         "diproses",
@@ -522,9 +540,12 @@ async def admin_orders(
         "dibatalkan",
     }:
         conditions.append(Pesanan.status == view)
+        if view in INTERNAL_ACTIVE:
+            conditions.extend(_current_order_conditions())
     elif view != "all":
         view = "aktif"
         conditions.append(Pesanan.status.in_(tuple(INTERNAL_ACTIVE)))
+        conditions.extend(_current_order_conditions())
 
     count_stmt = select(func.count(Pesanan.id))
     if conditions:
@@ -574,10 +595,7 @@ async def admin_orders(
             )
         ).all()
         for assignment, partner in assignment_rows:
-            assignment_map.setdefault(
-                assignment.pesanan_id,
-                (assignment, partner),
-            )
+            assignment_map.setdefault(assignment.pesanan_id, (assignment, partner))
 
         payment_rows = (
             await db.execute(
@@ -994,6 +1012,8 @@ async def admin_cancel_order(
 ):
     admin = await _admin(request, db)
     order = await _find_order(db, order_id)
+    if _is_legacy_order(order):
+        raise HTTPException(409, "Pesanan aktif lama/arsip tidak dapat diubah melalui flow Operational V1.")
     if order.status in TERMINAL:
         raise HTTPException(409, "Pesanan yang sudah final tidak dapat dibatalkan")
 

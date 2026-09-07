@@ -48,6 +48,7 @@ function matchesFilter(o){
 function rowActions(o){
  const a=el('div','actions');
  a.append(button('Detail','',()=>location.href='/admin/pesanan/'+encodeURIComponent(o.id)));
+ if(o.is_legacy){const x=button('Arsip — tidak dapat diubah','',()=>{});x.disabled=true;a.append(x);return a}
  if(o.status==='menunggu')a.append(button('Terima Pesanan','primary',()=>act(o.id,'accept')));
  if(o.status==='diproses')a.append(button('Tugaskan Mitra','primary',()=>openAssign(o)));
  if(o.status==='ditugaskan'){
@@ -79,7 +80,7 @@ function render(){
  if(!rows.length){list.append(el('div','empty',S.loading?'Memuat pesanan...':'Tidak ada pesanan pada filter ini.'));updateMore();return}
  rows.forEach(o=>{
   const card=el('article','order'),head=el('div','head'),left=el('div','head-left');
-  left.append(el('span','code',o.kode),el('span','badge '+o.status,labels[o.status]||o.status));
+  left.append(el('span','code',o.kode),el('span','badge '+o.status,o.is_legacy?'Arsip':(labels[o.status]||o.status)));
   head.append(left,el('span','sub',o.created_at?new Date(o.created_at).toLocaleString('id-ID'):''));
   const body=el('div','body'),main=el('div'),right=el('div','right');
   main.append(el('div','title',o.layanan_nama||'Pesanan'),el('div','sub',o.varian_nama||''));

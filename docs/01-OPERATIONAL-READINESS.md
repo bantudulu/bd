@@ -16,4 +16,4 @@ Tujuan: memastikan BantuDulu siap menjalankan order nyata tanpa data palsu.
 2. Masukkan mitra nyata.
 3. Hubungkan mitra ke layanan yang benar.
 4. Buka `/admin/readiness`.
-5. Pilot hanya dimulai ketika gate readiness hijau.
+5. Pilot hanya dimulai ketika gate readiness hijau.\n\n## Koreksi legacy\nOrder sebelum Operational V1 (2026-09-07T06:29:07Z) adalah arsip dan tidak dihitung sebagai pekerjaan aktif. Varian bernama arsip dengan harga Rp0 tetap dipertahankan untuk histori dan tidak menjadi blocker readiness.\n
