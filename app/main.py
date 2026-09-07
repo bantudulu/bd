@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from dotenv import load_dotenv
 
 # Load .env file (jika ada)
@@ -28,6 +29,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="BantuDulu", lifespan=lifespan)
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
+app.add_middleware(GZipMiddleware, minimum_size=500, compresslevel=6)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 @app.middleware("http")
@@ -35,6 +37,8 @@ async def add_user_context(request: Request, call_next):
     user = get_user_from_request(request)
     request.state.user = user
     response = await call_next(request)
+    if request.url.path.startswith("/static/perf/"):
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
     return response
 
 # Import routes AFTER app creation
