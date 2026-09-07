@@ -4,8 +4,8 @@ import json
 import re
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy import func, or_, select
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from sqlalchemy import case, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import get_user_from_request
@@ -226,22 +226,25 @@ async def _customer_notification(
     )
 
 
-async def _order_admin_payload(db: AsyncSession, order: Pesanan) -> dict:
-    owner = await db.get(User, order.user_id)
-    service = await db.get(Layanan, order.layanan_id)
-    variant = await db.get(LayananVarian, order.varian_id)
-    assignment = await _active_assignment(db, order.id)
-    partner = await db.get(Mitra, assignment.mitra_id) if assignment else None
-    payment = await _latest_payment(db, order.id)
+def _admin_payload_from_parts(
+    order: Pesanan,
+    customer_name: str | None,
+    customer_phone: str | None,
+    service_name: str | None,
+    variant_name: str | None,
+    assignment: PenugasanMitra | None = None,
+    partner: Mitra | None = None,
+    payment: PaymentTransaction | None = None,
+) -> dict:
     return {
         "id": order.id,
         "kode": order.kode,
         "status": order.status,
-        "pelanggan_nama": owner.nama if owner else "-",
-        "pelanggan_wa": owner.no_hp if owner else "",
+        "pelanggan_nama": customer_name or "-",
+        "pelanggan_wa": customer_phone or "",
         "layanan_id": order.layanan_id,
-        "layanan_nama": service.nama if service else "Pesanan",
-        "varian_nama": variant.nama if variant else "",
+        "layanan_nama": service_name or "Pesanan",
+        "varian_nama": variant_name or "",
         "alamat": order.alamat,
         "jadwal": order.jadwal,
         "jam": order.jam,
@@ -265,33 +268,74 @@ async def _order_admin_payload(db: AsyncSession, order: Pesanan) -> dict:
     }
 
 
+def _private_no_store(response: Response) -> None:
+    response.headers["Cache-Control"] = "private, no-store, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Vary"] = "Cookie"
+
+
+def _page_values(page: int, page_size: int, default_size: int) -> tuple[int, int]:
+    safe_page = max(int(page or 1), 1)
+    safe_size = int(page_size or default_size)
+    safe_size = max(1, min(safe_size, 50))
+    return safe_page, safe_size
+
+# ── Customer-safe order tracking ──────────────────────────────────────────────
+
 # ── Customer-safe order tracking ──────────────────────────────────────────────
 
 @router.get("/api/ops/customer/orders")
 async def customer_orders(
     request: Request,
+    response: Response,
+    page: int = 1,
+    page_size: int = 12,
+    view: str = "active",
     db: AsyncSession = Depends(get_db),
 ):
     user = await _current_user(request, db)
+    _private_no_store(response)
+    page, page_size = _page_values(page, page_size, 12)
+
+    view = _norm(view)
+    conditions = [Pesanan.user_id == user.id]
+    if view == "active":
+        conditions.append(Pesanan.status.in_(tuple(INTERNAL_ACTIVE)))
+    elif view in {"selesai", "dibatalkan"}:
+        conditions.append(Pesanan.status == view)
+    elif view != "all":
+        view = "active"
+        conditions.append(Pesanan.status.in_(tuple(INTERNAL_ACTIVE)))
+
+    total = (
+        await db.execute(select(func.count(Pesanan.id)).where(*conditions))
+    ).scalar_one()
+
     rows = (
         await db.execute(
-            select(Pesanan)
-            .where(Pesanan.user_id == user.id)
+            select(
+                Pesanan,
+                Layanan.nama.label("layanan_nama"),
+                LayananVarian.nama.label("varian_nama"),
+            )
+            .outerjoin(Layanan, Layanan.id == Pesanan.layanan_id)
+            .outerjoin(LayananVarian, LayananVarian.id == Pesanan.varian_id)
+            .where(*conditions)
             .order_by(Pesanan.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
         )
-    ).scalars().all()
+    ).all()
 
-    out = []
-    for order in rows:
-        service = await db.get(Layanan, order.layanan_id)
-        variant = await db.get(LayananVarian, order.varian_id)
-        out.append(
+    items = []
+    for order, service_name, variant_name in rows:
+        items.append(
             {
                 "id": order.id,
                 "kode": order.kode,
                 "status": _customer_public_status(order),
-                "layanan_nama": service.nama if service else "Pesanan",
-                "varian_nama": variant.nama if variant else "",
+                "layanan_nama": service_name or "Pesanan",
+                "varian_nama": variant_name or "",
                 "jadwal": order.jadwal,
                 "jam": order.jam,
                 "total_harga": order.total_harga,
@@ -299,28 +343,52 @@ async def customer_orders(
                 "created_at": order.created_at.isoformat(),
             }
         )
-    return out
 
+    return {
+        "items": items,
+        "page": page,
+        "page_size": page_size,
+        "total": int(total or 0),
+        "has_more": page * page_size < int(total or 0),
+        "view": view,
+    }
 
 @router.get("/api/ops/customer/orders/{order_id}")
 async def customer_order_detail(
     order_id: str,
     request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ):
     user = await _current_user(request, db)
-    order = await _find_order(db, order_id)
-    if order.user_id != user.id:
+    _private_no_store(response)
+
+    row = (
+        await db.execute(
+            select(
+                Pesanan,
+                Layanan.nama.label("layanan_nama"),
+                LayananVarian.nama.label("varian_nama"),
+            )
+            .outerjoin(Layanan, Layanan.id == Pesanan.layanan_id)
+            .outerjoin(LayananVarian, LayananVarian.id == Pesanan.varian_id)
+            .where(
+                Pesanan.user_id == user.id,
+                or_(Pesanan.id == order_id, Pesanan.kode == order_id),
+            )
+            .limit(1)
+        )
+    ).first()
+    if not row:
         raise HTTPException(404, "Pesanan tidak ditemukan")
 
-    service = await db.get(Layanan, order.layanan_id)
-    variant = await db.get(LayananVarian, order.varian_id)
+    order, service_name, variant_name = row
     return {
         "id": order.id,
         "kode": order.kode,
         "status": _customer_public_status(order),
-        "layanan_nama": service.nama if service else "Pesanan",
-        "varian_nama": variant.nama if variant else "",
+        "layanan_nama": service_name or "Pesanan",
+        "varian_nama": variant_name or "",
         "alamat": order.alamat,
         "jadwal": order.jadwal,
         "jam": order.jam,
@@ -338,66 +406,282 @@ async def customer_order_detail(
         "created_at": order.created_at.isoformat(),
     }
 
+# ── Admin dashboard / orders ──────────────────────────────────────────────────
 
 # ── Admin dashboard / orders ──────────────────────────────────────────────────
 
 @router.get("/api/ops/admin/summary")
 async def admin_summary(
     request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ):
     await _admin(request, db)
+    _private_no_store(response)
 
-    orders = (await db.execute(select(Pesanan))).scalars().all()
-    customers = (
-        await db.execute(select(func.count(User.id)).where(User.role == "CUSTOMER"))
-    ).scalar_one()
-    active_partners = (
-        await db.execute(
-            select(func.count(Mitra.id)).where(Mitra.aktif == True)  # noqa: E712
-        )
-    ).scalar_one()
-    active_services = (
-        await db.execute(
-            select(func.count(Layanan.id)).where(Layanan.aktif == True)  # noqa: E712
-        )
-    ).scalar_one()
+    customer_count = (
+        select(func.count(User.id))
+        .where(User.role == "CUSTOMER")
+        .scalar_subquery()
+    )
+    active_partner_count = (
+        select(func.count(Mitra.id))
+        .where(Mitra.aktif == True)  # noqa: E712
+        .scalar_subquery()
+    )
+    active_service_count = (
+        select(func.count(Layanan.id))
+        .where(Layanan.aktif == True)  # noqa: E712
+        .scalar_subquery()
+    )
 
+    row = (
+        await db.execute(
+            select(
+                func.count(Pesanan.id).label("total_order"),
+                func.coalesce(
+                    func.sum(case((Pesanan.status == "menunggu", 1), else_=0)),
+                    0,
+                ).label("pesanan_baru"),
+                func.coalesce(
+                    func.sum(
+                        case(
+                            (
+                                Pesanan.status.in_(
+                                    ("diproses", "ditugaskan", "menuju_lokasi", "dimulai")
+                                ),
+                                1,
+                            ),
+                            else_=0,
+                        )
+                    ),
+                    0,
+                ).label("sedang_diproses"),
+                func.coalesce(
+                    func.sum(
+                        case((Pesanan.status == "menunggu_konfirmasi", 1), else_=0)
+                    ),
+                    0,
+                ).label("menunggu_konfirmasi"),
+                func.coalesce(
+                    func.sum(case((Pesanan.status == "selesai", 1), else_=0)),
+                    0,
+                ).label("selesai"),
+                func.coalesce(
+                    func.sum(case((Pesanan.status == "dibatalkan", 1), else_=0)),
+                    0,
+                ).label("dibatalkan"),
+                customer_count.label("total_customer"),
+                active_partner_count.label("mitra_aktif"),
+                active_service_count.label("layanan_aktif"),
+            )
+        )
+    ).one()
+
+    m = row._mapping
     return {
-        "total_order": len(orders),
-        "pesanan_baru": sum(o.status == "menunggu" for o in orders),
-        "sedang_diproses": sum(o.status in {"diproses", "ditugaskan", "menuju_lokasi", "dimulai"} for o in orders),
-        "menunggu_konfirmasi": sum(o.status == "menunggu_konfirmasi" for o in orders),
-        "selesai": sum(o.status == "selesai" for o in orders),
-        "dibatalkan": sum(o.status == "dibatalkan" for o in orders),
-        "total_customer": int(customers or 0),
-        "mitra_aktif": int(active_partners or 0),
-        "layanan_aktif": int(active_services or 0),
+        key: int(m[key] or 0)
+        for key in (
+            "total_order",
+            "pesanan_baru",
+            "sedang_diproses",
+            "menunggu_konfirmasi",
+            "selesai",
+            "dibatalkan",
+            "total_customer",
+            "mitra_aktif",
+            "layanan_aktif",
+        )
     }
-
 
 @router.get("/api/ops/admin/orders")
 async def admin_orders(
     request: Request,
+    response: Response,
+    page: int = 1,
+    page_size: int = 20,
+    view: str = "aktif",
     db: AsyncSession = Depends(get_db),
 ):
     await _admin(request, db)
-    rows = (
-        await db.execute(select(Pesanan).order_by(Pesanan.created_at.desc()))
-    ).scalars().all()
-    return [await _order_admin_payload(db, row) for row in rows]
+    _private_no_store(response)
+    page, page_size = _page_values(page, page_size, 20)
 
+    view = _norm(view)
+    conditions = []
+    if view == "aktif":
+        conditions.append(Pesanan.status.in_(tuple(INTERNAL_ACTIVE)))
+    elif view in {
+        "menunggu",
+        "diproses",
+        "ditugaskan",
+        "menuju_lokasi",
+        "dimulai",
+        "menunggu_konfirmasi",
+        "selesai",
+        "dibatalkan",
+    }:
+        conditions.append(Pesanan.status == view)
+    elif view != "all":
+        view = "aktif"
+        conditions.append(Pesanan.status.in_(tuple(INTERNAL_ACTIVE)))
+
+    count_stmt = select(func.count(Pesanan.id))
+    if conditions:
+        count_stmt = count_stmt.where(*conditions)
+    total = (await db.execute(count_stmt)).scalar_one()
+
+    stmt = (
+        select(
+            Pesanan,
+            User.nama.label("pelanggan_nama"),
+            User.no_hp.label("pelanggan_wa"),
+            Layanan.nama.label("layanan_nama"),
+            LayananVarian.nama.label("varian_nama"),
+        )
+        .join(User, User.id == Pesanan.user_id)
+        .outerjoin(Layanan, Layanan.id == Pesanan.layanan_id)
+        .outerjoin(LayananVarian, LayananVarian.id == Pesanan.varian_id)
+    )
+    if conditions:
+        stmt = stmt.where(*conditions)
+
+    rows = (
+        await db.execute(
+            stmt.order_by(Pesanan.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+    ).all()
+
+    order_ids = [row[0].id for row in rows]
+    assignment_map: dict[str, tuple[PenugasanMitra, Mitra | None]] = {}
+    payment_map: dict[str, PaymentTransaction] = {}
+
+    if order_ids:
+        assignment_rows = (
+            await db.execute(
+                select(PenugasanMitra, Mitra)
+                .outerjoin(Mitra, Mitra.id == PenugasanMitra.mitra_id)
+                .where(
+                    PenugasanMitra.pesanan_id.in_(order_ids),
+                    PenugasanMitra.aktif == True,  # noqa: E712
+                )
+                .order_by(
+                    PenugasanMitra.pesanan_id,
+                    PenugasanMitra.assigned_at.desc(),
+                )
+            )
+        ).all()
+        for assignment, partner in assignment_rows:
+            assignment_map.setdefault(
+                assignment.pesanan_id,
+                (assignment, partner),
+            )
+
+        payment_rows = (
+            await db.execute(
+                select(PaymentTransaction)
+                .where(PaymentTransaction.pesanan_id.in_(order_ids))
+                .order_by(
+                    PaymentTransaction.pesanan_id,
+                    PaymentTransaction.created_at.desc(),
+                )
+            )
+        ).scalars().all()
+        for payment in payment_rows:
+            payment_map.setdefault(payment.pesanan_id, payment)
+
+    items = []
+    for order, customer_name, customer_phone, service_name, variant_name in rows:
+        assignment, partner = assignment_map.get(order.id, (None, None))
+        items.append(
+            _admin_payload_from_parts(
+                order,
+                customer_name,
+                customer_phone,
+                service_name,
+                variant_name,
+                assignment,
+                partner,
+                payment_map.get(order.id),
+            )
+        )
+
+    return {
+        "items": items,
+        "page": page,
+        "page_size": page_size,
+        "total": int(total or 0),
+        "has_more": page * page_size < int(total or 0),
+        "view": view,
+    }
 
 @router.get("/api/ops/admin/orders/{order_id}")
 async def admin_order_detail(
     order_id: str,
     request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ):
     await _admin(request, db)
-    order = await _find_order(db, order_id)
-    return await _order_admin_payload(db, order)
+    _private_no_store(response)
 
+    row = (
+        await db.execute(
+            select(
+                Pesanan,
+                User.nama.label("pelanggan_nama"),
+                User.no_hp.label("pelanggan_wa"),
+                Layanan.nama.label("layanan_nama"),
+                LayananVarian.nama.label("varian_nama"),
+            )
+            .join(User, User.id == Pesanan.user_id)
+            .outerjoin(Layanan, Layanan.id == Pesanan.layanan_id)
+            .outerjoin(LayananVarian, LayananVarian.id == Pesanan.varian_id)
+            .where(or_(Pesanan.id == order_id, Pesanan.kode == order_id))
+            .limit(1)
+        )
+    ).first()
+    if not row:
+        raise HTTPException(404, "Pesanan tidak ditemukan")
+
+    order, customer_name, customer_phone, service_name, variant_name = row
+    assignment_row = (
+        await db.execute(
+            select(PenugasanMitra, Mitra)
+            .outerjoin(Mitra, Mitra.id == PenugasanMitra.mitra_id)
+            .where(
+                PenugasanMitra.pesanan_id == order.id,
+                PenugasanMitra.aktif == True,  # noqa: E712
+            )
+            .order_by(PenugasanMitra.assigned_at.desc())
+            .limit(1)
+        )
+    ).first()
+    assignment, partner = assignment_row if assignment_row else (None, None)
+
+    payment = (
+        await db.execute(
+            select(PaymentTransaction)
+            .where(PaymentTransaction.pesanan_id == order.id)
+            .order_by(PaymentTransaction.created_at.desc())
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+
+    return _admin_payload_from_parts(
+        order,
+        customer_name,
+        customer_phone,
+        service_name,
+        variant_name,
+        assignment,
+        partner,
+        payment,
+    )
+
+# Legacy arbitrary status mutation is intentionally shadowed by this router.
 
 # Legacy arbitrary status mutation is intentionally shadowed by this router.
 @router.put("/api/admin/pesanan/{order_id}/status")

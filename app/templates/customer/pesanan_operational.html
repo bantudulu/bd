@@ -17,7 +17,7 @@ button{font:inherit}.app{width:100%;max-width:480px;min-height:100vh;margin:auto
 .list{display:grid;gap:12px}.card{border:1px solid var(--line);border-radius:20px;padding:14px;background:#fff;box-shadow:0 6px 18px rgba(25,72,86,.05)}.top{display:flex;gap:10px;align-items:flex-start}.icon{width:46px;height:46px;border-radius:15px;background:var(--soft);display:grid;place-items:center;color:var(--brand);font-size:20px;flex:0 0 auto}.grow{flex:1;min-width:0}.code{font-size:9px;color:#879198}.title{font-size:13px;font-weight:800;margin-top:4px}.sub{font-size:9.5px;color:var(--muted);margin-top:3px}.badge{padding:6px 9px;border-radius:999px;font-size:8.5px;font-weight:800;white-space:nowrap}.badge.diterima{background:#fff5df;color:var(--warn)}.badge.menuju_lokasi{background:#eaf4ff;color:#35668b}.badge.selesai{background:#edf7f2;color:var(--ok)}.badge.dibatalkan{background:#fff0f0;color:var(--danger)}.badge.arsip{background:#f1f3f5;color:#68747b}
 .status{margin-top:12px;padding:12px;border-radius:15px;background:#f8fafb;border:1px solid #edf1f3}.status b{display:block;font-size:10.5px}.status span{display:block;font-size:9px;color:var(--muted);margin-top:4px;line-height:1.45}
 .meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}.meta div{background:#fbfcfd;border:1px solid #eef1f3;border-radius:12px;padding:9px}.meta small{display:block;font-size:8px;color:#8b9499}.meta b{display:block;font-size:9.5px;margin-top:3px}.total{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--line);padding-top:11px;margin-top:11px}.total span{font-size:9px;color:var(--muted)}.total strong{font-size:13px;color:var(--deep)}.actions{display:flex;gap:8px;margin-top:11px}.btn{flex:1;height:40px;border-radius:13px;border:1px solid var(--line);background:#fff;color:var(--deep);font-size:10px;font-weight:800}.btn.primary{background:var(--soft);border-color:#d6e8ed}.btn.danger{color:var(--danger);background:#fffafa;border-color:#f0d9d9}
-.empty{padding:38px 20px;text-align:center;border:1px dashed var(--line);border-radius:20px;color:var(--muted);font-size:12px}.bottom{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(480px,100%);height:76px;background:rgba(255,255,255,.98);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom));z-index:20}.bottom a{text-decoration:none;color:#6b7378;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;gap:4px}.bottom a.active{color:var(--deep);font-weight:800}
+.empty{padding:38px 20px;text-align:center;border:1px dashed var(--line);border-radius:20px;color:var(--muted);font-size:12px}.more-wrap{padding:14px 0 4px;text-align:center}.more{height:40px;padding:0 18px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--deep);font-size:10px;font-weight:800}.more[hidden]{display:none}.bottom{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(480px,100%);height:76px;background:rgba(255,255,255,.98);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom));z-index:20}.bottom a{text-decoration:none;color:#6b7378;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;gap:4px}.bottom a.active{color:var(--deep);font-weight:800}
 @media(max-width:360px){.content{padding-left:12px;padding-right:12px}.meta{grid-template-columns:1fr}.badge{font-size:8px}.title{font-size:12.5px}}
 @media(min-width:700px){body{padding:24px 0}.app{border-radius:28px;min-height:calc(100vh - 48px)}.bottom{bottom:24px;border-radius:0 0 28px 28px}}
 </style>
@@ -33,7 +33,7 @@ button{font:inherit}.app{width:100%;max-width:480px;min-height:100vh;margin:auto
 <button class="tab" data-filter="dibatalkan">Dibatalkan</button>
 <button class="tab" data-filter="all">Semua</button>
 </div>
-<section class="list" id="list"></section>
+<section class="list" id="list"></section><div class="more-wrap"><button class="more" id="loadMore" hidden>Muat lebih</button></div>
 </main>
 </div>
 <nav class="bottom">
@@ -43,21 +43,31 @@ button{font:inherit}.app{width:100%;max-width:480px;min-height:100vh;margin:auto
 <a href="/profil"><span>◉</span><span>Profil</span></a>
 </nav>
 <script>
-const state={orders:[],filter:'active'};
+const state={orders:[],filter:'active',page:1,pageSize:12,hasMore:false,total:0,loading:false};
 const rupiah=v=>'Rp '+Number(v||0).toLocaleString('id-ID');
 const fmt=d=>{if(!d)return '-';try{return new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}catch{return d}};
 function isActive(o){return ['diterima','menuju_lokasi'].includes(o.status.code)}
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
-function render(){
- const list=document.getElementById('list');list.replaceChildren();
- const active=state.orders.filter(isActive).length;
- document.getElementById('activeCount').textContent=active;
- document.getElementById('activeText').textContent=active?`${active} pesanan sedang berjalan`:'Tidak ada pesanan aktif';
+function currentRows(){
  let rows=state.orders;
  if(state.filter==='active')rows=rows.filter(isActive);
  if(state.filter==='selesai')rows=rows.filter(o=>o.status.code==='selesai');
  if(state.filter==='dibatalkan')rows=rows.filter(o=>o.status.code==='dibatalkan');
- if(!rows.length){list.append(el('div','empty','Belum ada pesanan pada bagian ini.'));return}
+ return rows;
+}
+function updateMore(){
+ const b=document.getElementById('loadMore');
+ b.hidden=!state.hasMore;
+ b.disabled=state.loading;
+ b.textContent=state.loading?'Memuat...':'Muat lebih';
+}
+function render(){
+ const list=document.getElementById('list');list.replaceChildren();
+ const rows=currentRows();
+ const active=state.filter==='active'?rows.length:state.orders.filter(isActive).length;
+ document.getElementById('activeCount').textContent=active;
+ document.getElementById('activeText').textContent=active?(state.hasMore?`${active}+ pesanan aktif dimuat`:`${active} pesanan sedang berjalan`):'Tidak ada pesanan aktif';
+ if(!rows.length){list.append(el('div','empty',state.loading?'Memuat pesanan...':'Belum ada pesanan pada bagian ini.'));return}
  rows.forEach(o=>{
   const card=el('article','card');
   const top=el('div','top'),icon=el('div','icon','✓'),grow=el('div','grow'),badge=el('span','badge '+o.status.code,o.status.label);
@@ -77,20 +87,40 @@ function render(){
 }
 async function cancelOrder(id){
  if(!confirm('Batalkan pesanan ini?'))return;
- const r=await fetch('/api/final/orders/'+encodeURIComponent(id)+'/cancel',{method:'PUT',credentials:'same-origin'});
+ const r=await fetch('/api/final/orders/'+encodeURIComponent(id)+'/cancel',{method:'PUT',cache:'no-store',credentials:'same-origin'});
  if(!r.ok){const j=await r.json().catch(()=>({}));alert(j.detail||j.error||'Pesanan tidak dapat dibatalkan.');return}
- await load();
+ await load(true);
 }
-async function load(){
+async function load(reset=false){
+ if(state.loading)return;
+ state.loading=true;
+ if(reset){state.page=1;state.orders=[];state.hasMore=false}
+ updateMore();render();
  try{
-  const r=await fetch('/api/ops/customer/orders',{cache:'no-store',credentials:'same-origin'});
+  const view=encodeURIComponent(state.filter);
+  const url=`/api/ops/customer/orders?view=${view}&page=${state.page}&page_size=${state.pageSize}`;
+  const r=await fetch(url,{cache:'no-store',credentials:'same-origin'});
   if(r.status===401){location.href='/masuk';return}
   if(!r.ok)throw new Error('Gagal memuat pesanan');
-  state.orders=await r.json();render();
- }catch(e){document.getElementById('list').replaceChildren(el('div','empty','Gagal memuat pesanan. Silakan coba lagi.'))}
+  const d=await r.json();
+  const incoming=Array.isArray(d.items)?d.items:[];
+  const seen=new Set(state.orders.map(o=>o.id));
+  state.orders.push(...incoming.filter(o=>!seen.has(o.id)));
+  state.total=Number(d.total||0);
+  state.hasMore=Boolean(d.has_more);
+  state.page=Number(d.page||state.page)+1;
+ }catch(e){
+  document.getElementById('list').replaceChildren(el('div','empty','Gagal memuat pesanan. Silakan coba lagi.'));
+ }finally{
+  state.loading=false;render();updateMore();
+ }
 }
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.filter=b.dataset.filter;render()});
-load();
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+ b.classList.add('active');state.filter=b.dataset.filter;load(true);
+});
+document.getElementById('loadMore').onclick=()=>load(false);
+load(true);
 </script>
 </body>
 </html>
