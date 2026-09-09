@@ -17,3 +17,13 @@ Customer buat pesanan → Admin terima → Admin pilih mitra → Mitra konfirmas
 - Order legacy tetap tampil sebagai riwayat lama.
 - Hanya Admin yang dapat menentukan status final `selesai`.
 - COD harus diverifikasi Admin.
+
+
+## Pricing scenarios before pilot
+- Tukang Ringan: Rp70.000/jam, server ignores client price hints.
+- Tukang Berat: Rp100.000/jam, server reads severity price from DB.
+- Pijat: 5 km first free; confirmed excess km is rounded up and charged Rp10.000/km by Admin only.
+- Reconfirming Pijat distance must be idempotent: old surcharge is replaced, not stacked.
+- Paid order must reject distance-price changes.
+- Cuci Tandon lantai 2 remains +Rp50.000.
+- Bank/QRIS remain disabled for pilot; COD completion requires Admin confirmation.

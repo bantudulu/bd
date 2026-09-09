@@ -26,6 +26,7 @@ from app.models import (
     LayananVarian,
     Mitra,
     MitraLayanan,
+    Notifikasi,
     OrderStatusHistory,
     PaymentTransaction,
     PenugasanMitra,
@@ -388,6 +389,27 @@ async def _find_service(db: AsyncSession, name: str) -> Layanan | None:
     return None
 
 
+async def _tukang_unit_price(db: AsyncSession, level: str) -> int:
+    normalized = _norm(level)
+    if normalized not in {"ringan", "berat"}:
+        raise HTTPException(400, "Tingkat pekerjaan Tukang tidak valid")
+
+    # Severity pricing is already stored in the active Jasa Perbaikan catalog
+    # under service Umum. Read it from DB so customer price hints never win.
+    severity_service = await _find_service(db, "Umum")
+    if not severity_service:
+        raise HTTPException(503, "Harga tingkat pekerjaan Tukang belum tersedia")
+    variants = (
+        await db.execute(
+            select(LayananVarian).where(LayananVarian.layanan_id == severity_service.id)
+        )
+    ).scalars().all()
+    chosen = next((v for v in variants if _norm(v.nama) == normalized), None)
+    if not chosen or int(chosen.harga or 0) <= 0:
+        raise HTTPException(503, f"Harga pekerjaan {level} belum tersedia")
+    return int(chosen.harga)
+
+
 @router.post("/orders")
 async def create_order(data: dict, request: Request, db: AsyncSession = Depends(get_db)):
     user = await _current_user(request, db)
@@ -432,7 +454,18 @@ async def create_order(data: dict, request: Request, db: AsyncSession = Depends(
     if not _allowed_payment(payment):
         raise HTTPException(400, "Metode pembayaran belum tersedia")
 
-    extras = data.get("extras") if isinstance(data.get("extras"), dict) else {}
+    extras = dict(data.get("extras")) if isinstance(data.get("extras"), dict) else {}
+    if _norm(service.nama) in {"trapis", "pijat & relaksasi"}:
+        # Distance pricing is reserved server state. Customer payload may carry
+        # policy hints for display, but can never set a confirmed distance/fee.
+        extras.pop("distance_km", None)
+        extras.pop("distance_surcharge", None)
+        extras["distance_policy"] = {
+            "free_km": 5,
+            "rate_per_km": 10000,
+            "rounding": "ceil_excess",
+            "confirmed_by_admin": False,
+        }
     selected_addons_raw = extras.get("addons") if isinstance(extras.get("addons"), list) else []
     selected_addons = []
     for item in selected_addons_raw[:20]:
@@ -459,7 +492,14 @@ async def create_order(data: dict, request: Request, db: AsyncSession = Depends(
     if extras.get("floor2") and _norm(service.nama) == _norm("Cuci Tandon Air"):
         addon_total += 50000
 
-    total = int(variant.harga) * duration + addon_total
+    unit_price = int(variant.harga)
+    if _norm(service.nama) in {"tukang", "pipa & listrik"}:
+        work_level = str(extras.get("work_level") or "Ringan").strip().title()
+        unit_price = await _tukang_unit_price(db, work_level)
+        extras["work_level"] = work_level
+        extras["specialty"] = variant.nama
+
+    total = unit_price * duration + addon_total
     if total <= 0 or total > 100_000_000:
         raise HTTPException(400, "Total pesanan tidak valid")
 
@@ -503,6 +543,18 @@ async def create_order(data: dict, request: Request, db: AsyncSession = Depends(
                 provider="manual" if payment != "cod" else None,
             )
         )
+        admins = (
+            await db.execute(select(User).where(User.role == "ADMIN"))
+        ).scalars().all()
+        for admin_user in admins:
+            db.add(
+                Notifikasi(
+                    user_id=admin_user.id,
+                    pesanan_id=order.id,
+                    judul="Pesanan baru BantuDulu",
+                    pesan=f"{order.kode} menunggu diproses Admin BantuDulu.",
+                )
+            )
 
     await db.commit()
     await db.refresh(order)

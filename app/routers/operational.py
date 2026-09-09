@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from datetime import datetime, timezone
 
@@ -149,12 +150,29 @@ async def _latest_payment(
     ).scalar_one_or_none()
 
 
-def _payment_method(order: Pesanan) -> str:
+def _order_form_data(order: Pesanan) -> dict:
     try:
         data = json.loads(order.form_data or "{}") or {}
-        return str(data.get("metode_pembayaran") or "cod").strip().lower()
+        return data if isinstance(data, dict) else {}
     except Exception:
-        return "cod"
+        return {}
+
+
+def _payment_method(order: Pesanan) -> str:
+    data = _order_form_data(order)
+    return str(data.get("metode_pembayaran") or "cod").strip().lower()
+
+
+def _distance_surcharge(distance_km: float) -> int:
+    excess_km = max(0.0, float(distance_km) - 5.0)
+    return int(math.ceil(excess_km)) * 10000
+
+
+def _safe_nonnegative_int(value: object) -> int:
+    try:
+        return max(0, int(value or 0))
+    except (TypeError, ValueError):
+        return 0
 
 
 def _is_legacy_order(order: Pesanan) -> bool:
@@ -246,6 +264,15 @@ def _admin_payload_from_parts(
     partner: Mitra | None = None,
     payment: PaymentTransaction | None = None,
 ) -> dict:
+    form_data = _order_form_data(order)
+    extras = form_data.get("extras") if isinstance(form_data.get("extras"), dict) else {}
+    distance_eligible = _norm(service_name) in {"trapis", "pijat & relaksasi"}
+    distance_policy = (
+        extras.get("distance_policy")
+        if isinstance(extras.get("distance_policy"), dict)
+        else {}
+    )
+    distance_confirmed = distance_policy.get("confirmed_by_admin") is True
     return {
         "id": order.id,
         "kode": order.kode,
@@ -263,6 +290,18 @@ def _admin_payload_from_parts(
         "total_harga": order.total_harga,
         "metode_pembayaran": payment.method if payment else _payment_method(order),
         "status_pembayaran": payment.status if payment else "belum_tercatat",
+        "extras": extras,
+        "distance_pricing": {
+            "eligible": distance_eligible,
+            "distance_km": extras.get("distance_km") if distance_confirmed else None,
+            "surcharge": (
+                _safe_nonnegative_int(extras.get("distance_surcharge"))
+                if distance_confirmed
+                else 0
+            ),
+            "free_km": 5,
+            "rate_per_km": 10000,
+        },
         "mitra": (
             {
                 "id": partner.id,
@@ -703,6 +742,91 @@ async def admin_order_detail(
         partner,
         payment,
     )
+
+
+@router.post("/api/ops/admin/orders/{order_id}/distance")
+async def admin_confirm_distance(
+    order_id: str,
+    data: dict,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    admin = await _admin(request, db)
+    order = await _find_order(db, order_id)
+    _assert_status(
+        order,
+        {"menunggu", "diproses", "ditugaskan", "menuju_lokasi"},
+        "Mengonfirmasi ongkos jarak",
+    )
+
+    service = await db.get(Layanan, order.layanan_id)
+    if not service or _norm(service.nama) not in {"trapis", "pijat & relaksasi"}:
+        raise HTTPException(409, "Ongkos jarak hanya berlaku untuk layanan Pijat & Relaksasi")
+
+    try:
+        distance_km = float(data.get("distance_km"))
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(400, "Jarak layanan tidak valid") from exc
+    if not math.isfinite(distance_km) or distance_km < 0 or distance_km > 100:
+        raise HTTPException(400, "Jarak layanan harus antara 0 dan 100 km")
+
+    payment = await _latest_payment(db, order.id)
+    if payment and _norm(payment.status) == "paid":
+        raise HTTPException(409, "Ongkos jarak tidak dapat diubah setelah pembayaran selesai")
+
+    form_data = _order_form_data(order)
+    extras = form_data.get("extras") if isinstance(form_data.get("extras"), dict) else {}
+    previous_policy = (
+        extras.get("distance_policy")
+        if isinstance(extras.get("distance_policy"), dict)
+        else {}
+    )
+    old_surcharge = (
+        _safe_nonnegative_int(extras.get("distance_surcharge"))
+        if previous_policy.get("confirmed_by_admin") is True
+        else 0
+    )
+    base_total = int(order.total_harga or 0) - old_surcharge
+    if base_total <= 0:
+        raise HTTPException(409, "Total dasar pesanan tidak valid")
+
+    surcharge = _distance_surcharge(distance_km)
+    order.total_harga = base_total + surcharge
+    extras["distance_km"] = round(distance_km, 2)
+    extras["distance_surcharge"] = surcharge
+    extras["distance_policy"] = {
+        "free_km": 5,
+        "rate_per_km": 10000,
+        "rounding": "ceil_excess",
+        "confirmed_by_admin": True,
+    }
+    form_data["extras"] = extras
+    order.form_data = json.dumps(form_data, ensure_ascii=False)
+    if payment:
+        payment.amount = order.total_harga
+
+    await _history(
+        db,
+        order,
+        admin.id,
+        order.status,
+        order.status,
+        f"Ongkos jarak dikonfirmasi: {distance_km:.2f} km, tambahan Rp{surcharge:,}",
+    )
+    await _customer_notification(
+        db,
+        order,
+        "Ongkos jarak dikonfirmasi",
+        f"Jarak layanan {distance_km:.2f} km. Tambahan ongkos jarak Rp{surcharge:,}. Total pesanan telah diperbarui.",
+    )
+    await db.commit()
+    return {
+        "success": True,
+        "distance_km": round(distance_km, 2),
+        "distance_surcharge": surcharge,
+        "total_harga": order.total_harga,
+    }
+
 
 # Legacy arbitrary status mutation is intentionally shadowed by this router.
 

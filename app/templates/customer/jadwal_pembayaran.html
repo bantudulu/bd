@@ -172,11 +172,12 @@ let extras={};
 if(rawService==='jasa-antar'){serviceName='Jasa Antar';variantName=qs.get('vehicle_label')||'Motor';extras.destination=qs.get('destination')||'';extras.note=qs.get('note')||'';}
 if(rawService==='Jasa MUA'){serviceName=qs.get('category')||'Makeup Reguler';variantName=qs.get('package')||'';extras.note=qs.get('notes')||'';duration=1;}
 if(rawService==='Helper'){serviceName='Helper';variantName=qs.get('level')||'Ringan';extras.note=qs.get('notes')||'';}
-if(rawService==='pijat-relaksasi'){serviceName='Pijat & Relaksasi';variantName=qs.get('massage_label')||'Pijat Biasa';extras.note=qs.get('note')||'';extras.addons=JSON.parse(qs.get('addons')||'[]');}
+if(rawService==='pijat-relaksasi'){serviceName='Pijat & Relaksasi';variantName=qs.get('massage_label')||'Pijat Biasa';extras.note=qs.get('note')||'';extras.addons=JSON.parse(qs.get('addons')||'[]');extras.distance_policy={free_km:5,rate_per_km:10000,rounding:'ceil_excess'};}
+if(serviceName==='Tukang'){extras.work_level=qs.get('work_level')||'Ringan';extras.specialty=variantName;}
 if(rawService==='Dekor'){serviceName=qs.get('package')||'Dekorasi Aqiqah';variantName=serviceName==='Paket Ulang Tahun'?'Paket Lengkap':'Standar';duration=1;extras.note=qs.get('notes')||'';}
 if(rawService==='cleaning-home'){serviceName='Bersih Rumah';variantName=qs.get('variant')||'Bersih Ringan';}
 if(rawService==='cleaning-tank'){serviceName='Cuci Tandon Air';variantName=qs.get('variant')||'225–500 Liter';duration=1;extras.floor2=qs.get('floor2')==='1';}
-const desc=[variantName,duration>1?duration+' jam':''].filter(Boolean).join(' · ');
+const desc=[variantName,serviceName==='Tukang'&&extras.work_level?extras.work_level:'',duration>1?duration+' jam':''].filter(Boolean).join(' · ');
 $('serviceName').textContent=serviceName;$('serviceDesc').textContent=desc||'Layanan BantuDulu';$('servicePrice').textContent=rupiah(total);
 $('orderService').textContent=serviceName+(variantName?' — '+variantName:'');$('orderPrice').textContent=rupiah(total);$('orderTotal').textContent=rupiah(total);$('stickyTotal').textContent=rupiah(total);
 const dayNames=['Min','Sen','Sel','Rab','Kam','Jum','Sab']; const dayLong=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu']; const monthNames=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];

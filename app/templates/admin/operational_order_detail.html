@@ -28,7 +28,22 @@ function render(o){
  const grid=el('div','grid'),a=el('section','card'),b=el('section','card');a.append(el('h3','','Pesanan'));add(a,'Layanan',o.layanan_nama);add(a,'Varian',o.varian_nama);add(a,'Jadwal',`${o.jadwal||'-'} ${o.jam||''}`);add(a,'Durasi',String(o.durasi||1));add(a,'Total',rupiah(o.total_harga));add(a,'Pembayaran',`${(o.metode_pembayaran||'cod').toUpperCase()} · ${o.status_pembayaran||'-'}`);
  b.append(el('h3','','Pelanggan & Penugasan'));add(b,'Pelanggan',o.pelanggan_nama);add(b,'WhatsApp',o.pelanggan_wa);add(b,'Alamat',o.alamat);add(b,'Mitra',o.mitra?o.mitra.nama:'Belum ditugaskan');add(b,'Status Mitra',o.mitra?o.mitra.assignment_status:'-');grid.append(a,b);root.append(grid);
  const note=el('div','notice','Perubahan status bebas dinonaktifkan. Gunakan panel Operasional Pesanan agar alur penugasan, pembayaran COD, dan penyelesaian Admin tetap aman.');root.append(note);
+ if(o.distance_pricing?.eligible&&!['selesai','dibatalkan'].includes(o.status)){
+   const current=o.distance_pricing.distance_km;
+   const surcharge=rupiah(o.distance_pricing.surcharge||0);
+   const box=el('div','notice',`Pijat: 5 km pertama gratis, selebihnya Rp10.000/km (dibulatkan ke atas). Jarak terkonfirmasi: ${current??'belum'} km · ongkos: ${surcharge}.`);
+   const set=el('button','btn','Konfirmasi / Ubah Jarak');set.type='button';set.onclick=()=>setDistance(o);box.append(document.createElement('br'),set);root.append(box);
+ }
  const back=el('a','btn','Kembali ke Operasional Pesanan');back.href='/admin/pesanan';root.append(back);
+}
+async function setDistance(o){
+ const initial=o.distance_pricing?.distance_km??'';
+ const value=prompt('Masukkan jarak layanan yang sudah dikonfirmasi Admin (km). 5 km pertama gratis:',String(initial));
+ if(value===null)return;
+ const km=Number(String(value).replace(',','.'));
+ if(!Number.isFinite(km)||km<0||km>100){alert('Jarak harus angka 0–100 km.');return}
+ const r=await fetch('/api/ops/admin/orders/'+encodeURIComponent(o.id)+'/distance',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({distance_km:km})});
+ const d=await r.json().catch(()=>({}));if(!r.ok){alert(d.detail||d.error||'Gagal mengonfirmasi ongkos jarak.');return}alert('Ongkos jarak tersimpan. Total baru: '+rupiah(d.total_harga));load();
 }
 async function load(){const r=await fetch('/api/ops/admin/orders/'+encodeURIComponent(orderId),{cache:'no-store',credentials:'same-origin'});if(r.status===401||r.status===403){location.href='/masuk';return}if(!r.ok){root.textContent='Pesanan tidak ditemukan.';return}render(await r.json())}
 load();
