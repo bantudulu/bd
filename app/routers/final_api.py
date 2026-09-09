@@ -45,7 +45,11 @@ router = APIRouter(prefix="/api/final", tags=["final"])
 
 
 def _norm(v: str | None) -> str:
-    return re.sub(r"\s+", " ", (v or "").strip()).casefold()
+    text = re.sub(r"\s+", " ", (v or "").strip()).casefold()
+    # FINAL UI uses "Di atas 2.000 liter"; production catalog can store
+    # the equivalent variant as "> 2.000 Liter".
+    text = re.sub(r"^>\s*", "di atas ", text)
+    return text
 
 
 def _phone(v: str) -> str:
@@ -370,7 +374,12 @@ async def _find_service(db: AsyncSession, name: str) -> Layanan | None:
         if _norm(service.nama) == _norm(name):
             return service
 
-    aliases = {"pijat & relaksasi": {"trapis", "pijat & relaksasi"}}
+    aliases = {
+        "pijat & relaksasi": {"trapis", "pijat & relaksasi"},
+        # FINAL UI calls this category "Tukang"; production can store
+        # the operational service as "Pipa & Listrik".
+        "tukang": {"tukang", "pipa & listrik"},
+    }
     wanted = _norm(name)
     for names in aliases.values():
         normalized = {_norm(x) for x in names}
@@ -424,8 +433,16 @@ async def create_order(data: dict, request: Request, db: AsyncSession = Depends(
         raise HTTPException(400, "Metode pembayaran belum tersedia")
 
     extras = data.get("extras") if isinstance(data.get("extras"), dict) else {}
-    selected_addons = extras.get("addons") if isinstance(extras.get("addons"), list) else []
-    selected_addons = [str(x)[:100] for x in selected_addons[:20]]
+    selected_addons_raw = extras.get("addons") if isinstance(extras.get("addons"), list) else []
+    selected_addons = []
+    for item in selected_addons_raw[:20]:
+        if isinstance(item, dict):
+            value = item.get("label") or item.get("key") or ""
+        else:
+            value = item
+        value = str(value).strip()
+        if value:
+            selected_addons.append(value[:100])
 
     addon_total = 0
     fields = (

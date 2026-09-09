@@ -130,9 +130,13 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:poi
 const rupiah=n=>'Rp'+new Intl.NumberFormat('id-ID').format(n);
 let active='home', homePrice=60000, tankPrice=100000, hours=1;
 const totalEl=document.getElementById('total');
+function currentTotal(){
+  return active==='home'
+    ? homePrice*hours
+    : tankPrice+(document.getElementById('floor2').checked?50000:0);
+}
 function updateTotal(){
-  let total=active==='home'?homePrice*hours:tankPrice+(document.getElementById('floor2').checked?50000:0);
-  totalEl.textContent=rupiah(total);
+  totalEl.textContent=rupiah(currentTotal());
 }
 document.querySelectorAll('.service-tab').forEach(tab=>tab.addEventListener('click',()=>{
   document.querySelectorAll('.service-tab').forEach(x=>x.classList.remove('active'));tab.classList.add('active');
