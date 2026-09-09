@@ -35,6 +35,13 @@ async def pesan_final(request: Request):
     )
 
 
+@router.get("/pesan/{layanan_id}")
+async def legacy_pesan_redirect(layanan_id: str):
+    # Legacy generic order page is retired. Keep old links safe and route
+    # customers to the FINAL service chooser instead of reviving api_pesanan.
+    return RedirectResponse("/layanan", status_code=302)
+
+
 @router.get("/loading")
 async def loading():
     return render("customer/loading.html")
@@ -66,6 +73,20 @@ async def kategori_final(request: Request, slug: str):
             description="Pilih jenis perbaikan, tentukan durasi, lalu atur jadwal dan pembayaran.",
             section_title="Pilih jenis perbaikan",
             section_copy="Harga jasa dihitung per jam. Material atau onderdil tidak termasuk.",
+            levels=[
+                {
+                    "key": "Ringan",
+                    "label": "Pekerjaan Ringan",
+                    "description": "Perbaikan ringan dengan tarif jasa Rp70.000 per jam.",
+                    "price": 70000,
+                },
+                {
+                    "key": "Berat",
+                    "label": "Pekerjaan Berat",
+                    "description": "Perbaikan berat dengan tarif jasa Rp100.000 per jam.",
+                    "price": 100000,
+                },
+            ],
             options=[
                 {
                     "service": "Tukang",

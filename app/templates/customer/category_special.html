@@ -44,10 +44,18 @@ a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}svg{disp
 <div class="section-head"><h3>{{ section_title }}</h3><p>{{ section_copy }}</p></div>
 <section class="options">
 {% for item in options %}
-<button class="option{% if loop.first %} active{% endif %}" type="button" data-service="{{ item.service }}" data-variant="{{ item.variant }}" data-price="{{ item.price }}"><span class="radio"></span><span class="option-copy"><b>{{ item.label }}</b><span>{{ item.description }}</span></span><span class="price">Rp{{ item.price|formatrupiah }}</span></button>
+<button class="option service-option{% if loop.first %} active{% endif %}" type="button" data-service="{{ item.service }}" data-variant="{{ item.variant }}" data-price="{{ item.price }}"><span class="radio"></span><span class="option-copy"><b>{{ item.label }}</b><span>{{ item.description }}</span></span><span class="price">Rp{{ item.price|formatrupiah }}</span></button>
 {% endfor %}
 </section>
-{% if category_key == 'tukang' %}<section class="duration"><div><b>Durasi pekerjaan</b><span>Perhitungan layanan per jam.</span></div><div class="stepper"><button id="minus" type="button">-</button><strong id="hours">1</strong><button id="plus" type="button">+</button></div></section>{% endif %}
+{% if category_key == 'tukang' %}
+<div class="section-head"><h3>Pilih tingkat pekerjaan</h3><p>Tarif final mengikuti tingkat pekerjaan dan tetap dihitung ulang dari katalog server.</p></div>
+<section class="options">
+{% for level in levels %}
+<button class="option level-option{% if loop.first %} active{% endif %}" type="button" data-level="{{ level.key }}" data-level-price="{{ level.price }}"><span class="radio"></span><span class="option-copy"><b>{{ level.label }}</b><span>{{ level.description }}</span></span><span class="price">Rp{{ level.price|formatrupiah }}/jam</span></button>
+{% endfor %}
+</section>
+<section class="duration"><div><b>Durasi pekerjaan</b><span>Perhitungan layanan per jam.</span></div><div class="stepper"><button id="minus" type="button">-</button><strong id="hours">1</strong><button id="plus" type="button">+</button></div></section>
+{% endif %}
 <div class="note">Setelah memilih layanan, Anda akan masuk ke halaman jadwal dan pembayaran FINAL BantuDulu.</div>
 </main>
 <div class="sticky"><div class="sticky-in"><div class="total"><span>Total sementara</span><strong id="total">Rp0</strong></div><button class="cta" id="continueBtn" type="button">Atur Jadwal & Pembayaran</button></div></div>
@@ -55,12 +63,16 @@ a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}svg{disp
 </div>
 <script>
 const rupiah=n=>'Rp'+new Intl.NumberFormat('id-ID').format(Number(n||0));
-const options=[...document.querySelectorAll('.option')];let selected=options[0];let hours=1;
-function refresh(){const base=Number(selected?.dataset.price||0);document.getElementById('total').textContent=rupiah(base*hours);const h=document.getElementById('hours');if(h)h.textContent=hours;}
+const options=[...document.querySelectorAll('.service-option')];
+const levels=[...document.querySelectorAll('.level-option')];
+let selected=options[0], selectedLevel=levels[0]||null, hours=1;
+function currentRate(){return selectedLevel?Number(selectedLevel.dataset.levelPrice||0):Number(selected?.dataset.price||0)}
+function refresh(){const base=currentRate();document.getElementById('total').textContent=rupiah(base*hours);const h=document.getElementById('hours');if(h)h.textContent=hours;}
 options.forEach(btn=>btn.addEventListener('click',()=>{options.forEach(x=>x.classList.remove('active'));btn.classList.add('active');selected=btn;refresh()}));
+levels.forEach(btn=>btn.addEventListener('click',()=>{levels.forEach(x=>x.classList.remove('active'));btn.classList.add('active');selectedLevel=btn;refresh()}));
 document.getElementById('minus')?.addEventListener('click',()=>{hours=Math.max(1,hours-1);refresh()});
 document.getElementById('plus')?.addEventListener('click',()=>{hours=Math.min(8,hours+1);refresh()});
-document.getElementById('continueBtn').addEventListener('click',()=>{if(!selected)return;const base=Number(selected.dataset.price||0);const p=new URLSearchParams({service_label:selected.dataset.service,variant:selected.dataset.variant,price:String(base),total:String(base*hours),duration:String(hours)});location.href='/pesan-final?'+p.toString()});
+document.getElementById('continueBtn').addEventListener('click',()=>{if(!selected)return;const base=currentRate();const p=new URLSearchParams({service_label:selected.dataset.service,variant:selected.dataset.variant,work_level:selectedLevel?.dataset.level||'',price:String(base),total:String(base*hours),duration:String(hours)});location.href='/pesan-final?'+p.toString()});
 refresh();
 </script>
 </body>
