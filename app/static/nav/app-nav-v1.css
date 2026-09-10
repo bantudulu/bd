@@ -1,0 +1,5 @@
+/* BantuDulu App Navigation V1
+   Progressive enhancement only: approved page layout, colors, and spacing stay untouched. */
+html.bd-nav-loading [data-bd-bottom-nav] a {
+  cursor: progress;
+}
