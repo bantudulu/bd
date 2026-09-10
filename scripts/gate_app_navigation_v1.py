@@ -47,13 +47,17 @@ for token in (
 for token in (
     'path.startswith("/static/nav/")',
     '"public, max-age=31536000, immutable"',
-    'response.headers.pop("Pragma", None)',
+    'if "Pragma" in response.headers:',
+    'del response.headers["Pragma"]',
 ):
     if token not in main_py:
         fail(f"static navigation cache contract missing: {token}")
 
 if 'path.startswith("/api/")' not in main_py or '"no-store, max-age=0"' not in main_py:
     fail("private/API no-store contract changed")
+
+if 'response.headers.pop(' in main_py:
+    fail("MutableHeaders.pop is unsupported; use explicit del")
 
 required_js = (
     "const SAFE_PATHS = new Set(['/beranda', '/cari', '/layanan', '/pesanan', '/profil'])",
