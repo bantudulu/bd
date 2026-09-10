@@ -114,7 +114,8 @@ async def security_and_user_context(
         response.headers[
             "Cache-Control"
         ] = "public, max-age=31536000, immutable"
-        response.headers.pop("Pragma", None)
+        if "Pragma" in response.headers:
+            del response.headers["Pragma"]
 
     if IS_PRODUCTION:
         response.headers.setdefault(
