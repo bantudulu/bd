@@ -107,6 +107,15 @@ async def security_and_user_context(
             "Cache-Control"
         ] = "public, max-age=31536000, immutable"
 
+
+    # Versioned app-navigation assets contain no private data and can be reused
+    # across authenticated page transitions. Private HTML/API stays no-store.
+    if path.startswith("/static/nav/"):
+        response.headers[
+            "Cache-Control"
+        ] = "public, max-age=31536000, immutable"
+        response.headers.pop("Pragma", None)
+
     if IS_PRODUCTION:
         response.headers.setdefault(
             "Strict-Transport-Security",
